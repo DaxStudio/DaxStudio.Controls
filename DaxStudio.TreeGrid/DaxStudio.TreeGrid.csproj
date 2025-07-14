@@ -80,6 +80,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="HierarchicalDataGrid.cs" />
+    <Compile Include="HierarchicalDataGridRow.cs" />
     <Compile Include="Resources\Styles\HierarchicalDataGrid.xaml.cs">
       <DependentUpon>HierarchicalDataGrid.xaml</DependentUpon>
     </Compile>

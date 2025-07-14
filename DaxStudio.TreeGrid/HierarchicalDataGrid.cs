@@ -1,14 +1,12 @@
-﻿using System;
+﻿using DaxStudio.TreeGrid;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Data;
-using System.Windows.Input;
 using System.Windows.Media;
 
 namespace DaxStudio.UI.Controls
@@ -39,8 +37,6 @@ namespace DaxStudio.UI.Controls
 
             Loaded += OnLoaded;
         }
-
-        #region Dependency Properties
 
         /// <summary>
         /// The property path for child items in the hierarchy
@@ -94,17 +90,9 @@ namespace DaxStudio.UI.Controls
             set => SetValue(RootItemsProperty, value);
         }
 
-        #endregion
-
-        #region Private Fields
-
         private readonly Dictionary<object, HierarchicalDataGridRow> _itemToRowMap = new Dictionary<object, HierarchicalDataGridRow>();
         //private readonly List<HierarchicalDataGridRow> _flattenedRows = new List<HierarchicalDataGridRow>();
         private readonly ObservableCollection<HierarchicalDataGridRow> _flattenedRows = new ObservableCollection<HierarchicalDataGridRow>();
-
-        #endregion
-
-        #region Event Handlers
 
         private static void OnChildrenBindingPathChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
@@ -131,10 +119,6 @@ namespace DaxStudio.UI.Controls
             //RefreshData();
             ItemsSource = _flattenedRows;
         }
-
-        #endregion
-
-        #region Public Methods
 
         /// <summary>
         /// Expands the specified item
@@ -195,10 +179,6 @@ namespace DaxStudio.UI.Controls
             }
             RefreshData();
         }
-
-        #endregion
-
-        #region Private Methods
 
         private void CreateDefaultExpanderColumn()
         {
@@ -379,62 +359,6 @@ namespace DaxStudio.UI.Controls
                     _flattenedRows.Move(currentIndex, newIndex);
                 }
             }
-        }
-
-        #endregion
-    }
-
-    /// <summary>
-    /// Represents a row in the hierarchical data grid
-    /// </summary>
-    public class HierarchicalDataGridRow : INotifyPropertyChanged
-    {
-        private bool _isExpanded;
-
-        public object Data { get; set; }
-        public int Level { get; set; }
-        public HierarchicalDataGridRow Parent { get; set; }
-        public List<HierarchicalDataGridRow> Children { get; set; } = new List<HierarchicalDataGridRow>();
-        private bool _hasChildren;
-        public bool HasChildren { 
-            get => _hasChildren; 
-            set {
-                _hasChildren = value;
-                OnPropertyChanged(nameof(HasChildren));
-            } 
-        }
-
-        public bool IsExpanded
-        {
-            get => _isExpanded;
-            set
-            {
-                if (_isExpanded != value)
-                {
-                    _isExpanded = value;
-                    OnPropertyChanged(nameof(IsExpanded));
-                }
-            }
-        }
-
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        protected virtual void OnPropertyChanged(string propertyName)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
-
-        protected virtual void OnPropertyChanged<T>(System.Linq.Expressions.Expression<Func<T>> propertyExpression)
-        {
-            if (propertyExpression.Body is System.Linq.Expressions.MemberExpression memberExpression)
-            {
-                OnPropertyChanged(memberExpression.Member.Name);
-            }
-        }
-
-        protected virtual void NotifyOfPropertyChange([System.Runtime.CompilerServices.CallerMemberName] string propertyName = null)
-        {
-            OnPropertyChanged(propertyName);
         }
     }
 

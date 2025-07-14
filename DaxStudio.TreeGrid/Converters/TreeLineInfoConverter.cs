@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Windows.Data;
-using DaxStudio.UI.Controls;
+using DaxStudio.TreeGrid;
+
 
 namespace DaxStudio.UI.Converters
 {

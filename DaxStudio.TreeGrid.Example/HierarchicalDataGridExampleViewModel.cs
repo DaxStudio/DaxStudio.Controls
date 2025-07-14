@@ -142,8 +142,7 @@ namespace DaxStudio.UI.ViewModels
                 _children = value;
                 Count = _children.Count;
                 NotifyOfPropertyChange(nameof(Children));
-                NotifyOfPropertyChange(nameof(HasChildren));
-                NotifyOfPropertyChange(nameof(Children));
+
             }
         }
 
