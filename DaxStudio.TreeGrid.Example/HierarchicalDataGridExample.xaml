@@ -1,0 +1,109 @@
+﻿<UserControl x:Class="DaxStudio.UI.Views.HierarchicalDataGridExample"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:ctrl="clr-namespace:DaxStudio.UI.Controls;assembly=DaxStudio.TreeGrid"
+             xmlns:conv="clr-namespace:DaxStudio.UI.Converters;assembly=DaxStudio.TreeGrid">
+
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="pack://application:,,,/DaxStudio.TreeGrid;Component/Resources/Styles/HierarchicalDataGrid.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+            <conv:BooleanToHiddenConverter x:Key="BooleanToHiddenConverter" />
+            <conv:NullToVisibilityConverter x:Key="NullToVisibilityConverter"/>
+            <conv:VisibilityToForegroundConverter x:Key="VisibilityToForegroundConverter"/>
+            <conv:TreeLineInfoConverter x:Key="TreeLineInfoConverter"/>
+            <conv:IsLastChildConverter x:Key="IsLastChildConverter"/>
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Toolbar -->
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="5">
+            <Button Content="Expand All" Click="ExpandAll_Click" Margin="0,0,5,0"/>
+            <Button Content="Collapse All" Click="CollapseAll_Click" Margin="0,0,5,0"/>
+        </StackPanel>
+
+        <!-- Hierarchical Data Grid -->
+        <ctrl:HierarchicalDataGrid x:Name="HierarchicalGrid" 
+                                   Grid.Row="1"
+                                   RootItems="{Binding RootItems}"
+                                   ChildrenBindingPath="Children"
+                                   IndentWidth="20"
+                                   Margin="5">
+
+            <!-- Define columns -->
+            <ctrl:HierarchicalDataGrid.Columns>
+
+                <!-- Tree Column with expander and lines -->
+                <DataGridTemplateColumn Header="Name" Width="300">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Grid>
+                                <!-- Tree Lines -->
+                                <ctrl:TreeLineControl Level="{Binding Level}"
+                                                     IndentWidth="20"
+                                                     IsLastChild="{Binding Converter={StaticResource IsLastChildConverter}}"
+                                                     HasChildren="{Binding HasChildren}"
+                                                     AncestorLevels="{Binding Converter={StaticResource TreeLineInfoConverter}}"
+                                                     LineStroke="#FF0000"
+                                                     LineThickness="1"/>
+                                
+                                <!-- Content -->
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <!-- Indentation -->
+                                    <Border Width="{Binding Level, Converter={StaticResource IndentConverter}, ConverterParameter=20}"/>
+
+                                    <!-- Expander -->
+                                    <ToggleButton x:Name="Expander"
+                                                Width="16" Height="16"
+                                                Style="{StaticResource ExpanderToggleStyle}"
+                                                IsChecked="{Binding IsExpanded, Mode=OneWay}"
+                                                Foreground="Black"
+                                                Visibility="{Binding HasChildren, Converter={StaticResource BooleanToHiddenConverter}}"
+                                                Click="Expander_Click"/>
+
+                                    <!-- Icon (optional) -->
+                                    <Image Width="16" Height="16" 
+                                           Source="{Binding Data.Icon}" 
+                                           Margin="2,0,4,0"
+                                           Visibility="{Binding Data.Icon, Converter={StaticResource NullToVisibilityConverter}}"/>
+
+                                    <!-- Text -->
+                                    <TextBlock Text="{Binding Data.Name}" 
+                                              VerticalAlignment="Center"
+                                              Foreground="{Binding Data.IsVisible, Converter={StaticResource VisibilityToForegroundConverter}}"/>
+                                </StackPanel>
+                            </Grid>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
+                <!-- Additional columns -->
+                <DataGridTextColumn Header="Type" 
+                                   Binding="{Binding Data.Type}" 
+                                   Width="100"/>
+
+                <DataGridTextColumn Header="Description" 
+                                   Binding="{Binding Data.Description}" 
+                                   Width="*"/>
+
+                <DataGridTextColumn Header="Count" 
+                                   Binding="{Binding Data.Count, StringFormat='#,0'}" 
+                                   Width="80">
+                    <DataGridTextColumn.ElementStyle>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="HorizontalAlignment" Value="Right"/>
+                        </Style>
+                    </DataGridTextColumn.ElementStyle>
+                </DataGridTextColumn>
+
+            </ctrl:HierarchicalDataGrid.Columns>
+        </ctrl:HierarchicalDataGrid>
+    </Grid>
+</UserControl>
