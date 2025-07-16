@@ -1,0 +1,245 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:ctrl="clr-namespace:DaxStudio.Controls"
+                    xmlns:conv="clr-namespace:DaxStudio.Controls.Converters">
+
+    <!-- Converters -->
+    <conv:IndentConverter x:Key="IndentConverter"/>
+    <conv:IsLastChildConverter x:Key="IsLastChildConverter"/>
+    <conv:BooleanToHiddenConverter x:Key="BooleanToHiddenConverter"/>
+    <conv:MultiplyValueConverter x:Key="MultiplyValueConverter" />
+    <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+    <conv:NullToVisibilityConverter x:Key="NullToVisibilityConverter"/>
+    
+    <!-- Tree Line Drawing Control -->
+    <Style x:Key="TreeLineStyle" TargetType="Border">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="IsHitTestVisible" Value="False"/>
+    </Style>
+
+    <ControlTemplate x:Key="ExpanderControlTemplate" TargetType="ToggleButton">
+        <Border Background="Transparent" 
+            BorderBrush="Transparent" 
+            BorderThickness="0"
+            Width="16" 
+            Height="16">
+            <Grid>
+                <!--Fill="{DynamicResource Theme.Brush.Default.Fore}"-->
+                <Path x:Name="ExpanderArrow"
+                  Data="M 4 2 L 8 6 L 4 10 Z"
+                  Fill="Black"
+                  Stretch="Uniform"
+                  Width="8"
+                  Height="8"
+                  Stroke="Black"
+                  StrokeThickness="1"
+                  RenderTransformOrigin="0.5,0.5">
+                    <Path.RenderTransform>
+                        <RotateTransform Angle="0"/>
+                    </Path.RenderTransform>
+                </Path>
+            </Grid>
+        </Border>
+        <ControlTemplate.Triggers>
+            <Trigger Property="IsChecked" Value="True">
+                <Setter Property="Fill" TargetName="ExpanderArrow" Value="Black"/>
+                <Trigger.EnterActions>
+
+                    <BeginStoryboard>
+                        <Storyboard>
+                            <DoubleAnimation Storyboard.TargetName="ExpanderArrow"
+                                       Storyboard.TargetProperty="(Path.RenderTransform).(RotateTransform.Angle)"
+                                       To="45" Duration="0:0:0.0"/>
+                        </Storyboard>
+                    </BeginStoryboard>
+                </Trigger.EnterActions>
+                <Trigger.ExitActions>
+                    <BeginStoryboard>
+                        <Storyboard>
+                            <DoubleAnimation Storyboard.TargetName="ExpanderArrow"
+                                       Storyboard.TargetProperty="(Path.RenderTransform).(RotateTransform.Angle)"
+                                       To="0" Duration="0:0:0.0"/>
+                        </Storyboard>
+                    </BeginStoryboard>
+                </Trigger.ExitActions>
+            </Trigger>
+
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter TargetName="ExpanderArrow" Property="Fill" Value="{DynamicResource Theme.Brush.Accent}"/>
+            </Trigger>
+
+            <Trigger Property="IsChecked" Value="False">
+                <Setter Property="Fill" TargetName="ExpanderArrow" Value="Transparent"/>
+            </Trigger>
+        </ControlTemplate.Triggers>
+    </ControlTemplate>
+
+    <!-- Expander Toggle Button Style -->
+    <Style x:Key="ExpanderToggleStyle" TargetType="ToggleButton">
+        <Setter Property="Template" Value="{StaticResource ExpanderControlTemplate}"/>
+    </Style>
+
+     <!--TreeGrid Style--> 
+    <Style TargetType="ctrl:TreeGrid" BasedOn="{StaticResource {x:Type DataGrid}}">
+        <Setter Property="Background" Value="{DynamicResource Theme.Brush.Content.Back}"/>
+        <Setter Property="Foreground" Value="{DynamicResource Theme.Brush.Default.Fore}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource Theme.Brush.Control.Border}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="GridLinesVisibility" Value="None"/>
+        <Setter Property="AlternatingRowBackground" Value="{DynamicResource Theme.Brush.Table.Alternate}"/>
+        <Setter Property="RowBackground" Value="Transparent"/>
+        <Setter Property="HeadersVisibility" Value="Column"/>
+        <Setter Property="SelectionMode" Value="Single"/>
+        <Setter Property="SelectionUnit" Value="FullRow"/>
+        <Setter Property="CanUserAddRows" Value="False"/>
+        <Setter Property="CanUserDeleteRows" Value="False"/>
+        <Setter Property="CanUserReorderColumns" Value="False"/>
+        <Setter Property="CanUserSortColumns" Value="False"/>
+        <Setter Property="IndentWidth" Value="20"/>
+    </Style>
+
+     <!--Row Style--> 
+    <Style TargetType="DataGridRow" x:Key="TreeGridRowStyle">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Foreground" Value="{DynamicResource Theme.Brush.Default.Fore}"/>
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="{DynamicResource Theme.Brush.Table.Hover}"/>
+            </Trigger>
+            <Trigger Property="IsSelected" Value="True">
+                <Setter Property="Background" Value="{DynamicResource Theme.Brush.Table.Selected}"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+     <!--Cell Style-->
+    <Style TargetType="DataGridCell" x:Key="TreeGridCellStyle">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Padding" Value="6,3"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="DataGridCell">
+                    <Border Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            Padding="{TemplateBinding Padding}">
+                        <ContentPresenter VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                        HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"/>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+
+    <!-- TreeGridNameCell Style -->
+    <Style TargetType="ctrl:TreeGridTreeCell">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ctrl:TreeGridTreeCell">
+                    <Grid>
+                        <!-- Tree Lines -->
+                        <ctrl:TreeLineControl Level="{Binding RowData.Level, RelativeSource={RelativeSource TemplatedParent}}"
+                                         IndentWidth="{Binding IndentWidth, RelativeSource={RelativeSource TemplatedParent}}"
+                                         IsLastChild="{Binding RowData, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource IsLastChildConverter}}"
+                                         HasChildren="{Binding RowData.HasChildren, RelativeSource={RelativeSource TemplatedParent}}"
+                                         AncestorLevels="{Binding RowData.Ancestors, RelativeSource={RelativeSource TemplatedParent}}"
+                                         LineStroke="{Binding LineStroke, RelativeSource={RelativeSource TemplatedParent}}"
+                                         LineThickness="{Binding LineThickness, RelativeSource={RelativeSource TemplatedParent}}"
+                                         Visibility="{Binding ShowTreeLines, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+
+                        <!-- Content -->
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <!-- Indentation -->
+                            <Border >
+                                <!-- Width="{Binding RowData.Level, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource IndentConverter}, ConverterParameter={Binding IndentWidth, RelativeSource={RelativeSource TemplatedParent}}}"-->
+                                <Border.Width>
+                                    <MultiBinding Converter="{StaticResource MultiplyValueConverter}">
+                                        <Binding Path="RowData.Level" RelativeSource="{RelativeSource TemplatedParent}"/>
+                                        <Binding Path="IndentWidth" RelativeSource="{RelativeSource TemplatedParent}"/>
+                                    </MultiBinding>
+                                </Border.Width>
+                            </Border>
+
+                            <!-- Expander -->
+                            <ToggleButton x:Name="PART_Expander"
+                                    Width="16" Height="16"
+                                    IsChecked="{Binding RowData.IsExpanded, RelativeSource={RelativeSource TemplatedParent}, Mode=OneWay}"
+                                    Foreground="Black"
+                                    Visibility="{Binding RowData.HasChildren, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource BooleanToHiddenConverter}}">
+                                <ToggleButton.Style>
+                                    <Style TargetType="ToggleButton" BasedOn="{StaticResource ExpanderToggleStyle}">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding ExpanderTemplate, RelativeSource={RelativeSource TemplatedParent}}" Value="{x:Null}">
+                                                <!-- Use default template when ExpanderTemplate is null -->
+                                                <Setter Property="Template" Value="{StaticResource ExpanderControlTemplate}"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                        <Style.Setters>
+                                            <!-- Set the template when ExpanderTemplate is provided -->
+                                            <Setter Property="Template" Value="{Binding ExpanderTemplate, RelativeSource={RelativeSource TemplatedParent}}"/>
+                                        </Style.Setters>
+                                    </Style>
+                                </ToggleButton.Style>
+                            </ToggleButton>
+                            
+                            <!-- Icon -->
+                            <ContentControl 
+                                  x:Name="PART_Icon"
+                                  Content="{Binding Icon, RelativeSource={RelativeSource TemplatedParent}}"
+                                  
+                                  Margin="2,0,0,0"
+                                  VerticalAlignment="Center">
+                                <ContentControl.Style>
+                                    <Style TargetType="ContentControl">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IconTemplate, RelativeSource={RelativeSource TemplatedParent}}" Value="{x:Null}">
+                                                <Setter Property="ContentTemplate">
+                                                    <Setter.Value>
+                                                        <DataTemplate>
+                                                            <Image Width="16" Height="16" 
+                                                               Source="{Binding Icon, RelativeSource={RelativeSource AncestorType=ctrl:TreeGridTreeCell}}" 
+                                                               Margin="2,0,4,0"
+                                                               Visibility="{Binding Icon, Converter={StaticResource NullToVisibilityConverter}, RelativeSource={RelativeSource AncestorType=ctrl:TreeGridTreeCell}}"/>
+                                                        </DataTemplate>
+                                                    </Setter.Value>
+                                                </Setter>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </ContentControl.Style>
+                            </ContentControl>
+                            
+                            <!-- Text -->
+                            <ContentControl x:Name="PART_Text"
+                                          Content="{Binding Text, RelativeSource={RelativeSource TemplatedParent}}"
+                                          ContentTemplate="{Binding TextTemplate, RelativeSource={RelativeSource TemplatedParent}}"
+                                          Margin="2,0,0,0"
+                                          VerticalAlignment="Center">
+                                <ContentControl.Style>
+                                    <Style TargetType="ContentControl">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding TextTemplate, RelativeSource={RelativeSource TemplatedParent}}" Value="{x:Null}">
+                                                <Setter Property="ContentTemplate">
+                                                    <Setter.Value>
+                                                        <DataTemplate>
+                                                            <TextBlock Text="{Binding Text, RelativeSource={RelativeSource AncestorType=ctrl:TreeGridTreeCell}}" 
+                                                                     Foreground="{Binding TextForeground, RelativeSource={RelativeSource AncestorType=ctrl:TreeGridTreeCell}}"/>
+                                                        </DataTemplate>
+                                                    </Setter.Value>
+                                                </Setter>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </ContentControl.Style>
+                            </ContentControl>
+                        </StackPanel>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+</ResourceDictionary>

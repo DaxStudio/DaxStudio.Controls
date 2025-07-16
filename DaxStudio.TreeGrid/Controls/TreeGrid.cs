@@ -1,5 +1,4 @@
 ﻿using DaxStudio.Controls.Model;
-using DaxStudio.TreeGrid;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;

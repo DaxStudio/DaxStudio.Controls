@@ -13,14 +13,14 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace DaxStudio.TreeGrid
+namespace DaxStudio.Controls
 {
     /// <summary>
     /// Interaction logic for TreeGrid.xaml
     /// </summary>
-    public partial class TreeGrid : UserControl
+    public partial class TreeGridStyle : UserControl
     {
-        public  TreeGrid()
+        public  TreeGridStyle()
         {
             //InitializeComponent();
         }

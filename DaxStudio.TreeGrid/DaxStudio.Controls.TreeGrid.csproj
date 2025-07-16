@@ -6,8 +6,8 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{906D4137-00DF-4C8F-8561-25FB474D9C7A}</ProjectGuid>
     <OutputType>library</OutputType>
-    <RootNamespace>DaxStudio.TreeGrid</RootNamespace>
-    <AssemblyName>DaxStudio.TreeGrid</AssemblyName>
+    <RootNamespace>DaxStudio.Controls</RootNamespace>
+    <AssemblyName>DaxStudio.Controls.TreeGrid</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -60,7 +60,7 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
-    <Page Include="Resources\Styles\TreeGrid.xaml">
+    <Page Include="Resources\Styles\TreeGridStyle.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -68,21 +68,21 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Compile Include="Controls\TreeGridTreeCell.cs" />
+    <Compile Include="Controls\TreeGridTreeColumn.cs" />
     <Compile Include="Controls\TreeLineControl.cs" />
     <Compile Include="Converters\IndentConverter.cs" />
     <Compile Include="Converters\BooleanToHiddenConverter.cs" />
     <Compile Include="Converters\IsLastChildConverter.cs" />
+    <Compile Include="Converters\MultiplyValueConverter.cs" />
     <Compile Include="Converters\NullToVisibilityConverter.cs" />
     <Compile Include="Converters\VisibilityToForegroundConverter.cs" />
-    <Compile Include="CustomControl1.cs">
-      <SubType>Code</SubType>
-    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Controls\TreeGrid.cs" />
     <Compile Include="Model\TreeGridRow.cs" />
-    <Compile Include="Resources\Styles\TreeGrid.xaml.cs">
-      <DependentUpon>TreeGrid.xaml</DependentUpon>
+    <Compile Include="Resources\Styles\TreeGridStyle.xaml.cs">
+      <DependentUpon>TreeGridStyle.xaml</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>

@@ -1,18 +1,68 @@
 ﻿<UserControl x:Class="DaxStudio.UI.Views.HierarchicalDataGridExample"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:ctrl="clr-namespace:DaxStudio.Controls;assembly=DaxStudio.TreeGrid"
-             xmlns:conv="clr-namespace:DaxStudio.Controls.Converters;assembly=DaxStudio.TreeGrid">
+             xmlns:ctrl="clr-namespace:DaxStudio.Controls;assembly=DaxStudio.Controls.TreeGrid"
+             xmlns:conv="clr-namespace:DaxStudio.Controls.Converters;assembly=DaxStudio.Controls.TreeGrid">
 
     <UserControl.Resources>
         <ResourceDictionary>
-            <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="pack://application:,,,/DaxStudio.TreeGrid;Component/Resources/Styles/TreeGrid.xaml" />
-            </ResourceDictionary.MergedDictionaries>
-            <conv:BooleanToHiddenConverter x:Key="BooleanToHiddenConverter" />
-            <conv:NullToVisibilityConverter x:Key="NullToVisibilityConverter"/>
-            <conv:VisibilityToForegroundConverter x:Key="VisibilityToForegroundConverter"/>
-            <conv:IsLastChildConverter x:Key="IsLastChildConverter"/>
+            <ControlTemplate x:Key="Expander2" TargetType="ToggleButton">
+                <Border Background="Transparent" 
+        BorderBrush="Transparent" 
+        BorderThickness="0"
+        Width="16" 
+        Height="16">
+                    <Grid>
+                        <!--Fill="{DynamicResource Theme.Brush.Default.Fore}"-->
+                        <Path x:Name="ExpanderArrow"
+              Data="M 4 2 L 8 6 L 4 10 Z"
+              Fill="Black"
+              Stretch="Uniform"
+              Width="8"
+              Height="8"
+              Stroke="Black"
+              StrokeThickness="1"
+              RenderTransformOrigin="0.5,0.5">
+                            <Path.RenderTransform>
+                                <RotateTransform Angle="0"/>
+                            </Path.RenderTransform>
+                        </Path>
+                    </Grid>
+                </Border>
+                <ControlTemplate.Triggers>
+                    <Trigger Property="IsChecked" Value="True">
+                        <Setter Property="Fill" TargetName="ExpanderArrow" Value="Red"/>
+                        <Trigger.EnterActions>
+
+                            <BeginStoryboard>
+                                <Storyboard>
+                                    <DoubleAnimation Storyboard.TargetName="ExpanderArrow"
+                                   Storyboard.TargetProperty="(Path.RenderTransform).(RotateTransform.Angle)"
+                                   To="90" Duration="0:0:0.0"/>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </Trigger.EnterActions>
+                        <Trigger.ExitActions>
+                            <BeginStoryboard>
+                                <Storyboard>
+                                    <DoubleAnimation Storyboard.TargetName="ExpanderArrow"
+                                   Storyboard.TargetProperty="(Path.RenderTransform).(RotateTransform.Angle)"
+                                   To="0" Duration="0:0:0.0"/>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </Trigger.ExitActions>
+                    </Trigger>
+
+                    <Trigger Property="IsMouseOver" Value="True">
+                        <Setter TargetName="ExpanderArrow" Property="Fill" Value="{DynamicResource Theme.Brush.Accent}"/>
+                    </Trigger>
+
+                    <Trigger Property="IsChecked" Value="False">
+                        <Setter Property="Fill" TargetName="ExpanderArrow" Value="Transparent"/>
+                    </Trigger>
+                </ControlTemplate.Triggers>
+            </ControlTemplate>
+
         </ResourceDictionary>
     </UserControl.Resources>
 
@@ -46,54 +96,30 @@
                                    Binding="{Binding Data.Type}" 
                                    Width="100"/>
 
+                <!-- Tree Column using custom control -->
+                <ctrl:TreeGridTreeColumn Header="Name" 
+                                        Width="300"
+                                        Text ="{Binding Data.Name}"
+                                        IndentWidth="16"
+                                        LineStroke="#AAAAAA"
+                                        LineThickness="1">
+                    <!-- ExpanderTemplate="{StaticResource Expander2}"-->
+                    
+                    <!--<ctrl:TreeGridTreeColumn.TextTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding}" 
+                                       Margin="2 0 0 0"
+                                       VerticalAlignment="Center"
+                                       Foreground="Red"/>
+                        </DataTemplate>
+                    </ctrl:TreeGridTreeColumn.TextTemplate>-->
+                    
+                    
+                </ctrl:TreeGridTreeColumn>
+
                 <DataGridTextColumn Header="Description" 
                                    Binding="{Binding Data.Description}" 
                                    Width="*"/>
-
-                <!-- Tree Column with expander and lines -->
-                <DataGridTemplateColumn Header="Name" Width="300">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <Grid>
-                                <!-- Tree Lines -->
-                                <ctrl:TreeLineControl Level="{Binding Level}"
-                                                     IndentWidth="16"
-                                                     IsLastChild="{Binding Converter={StaticResource IsLastChildConverter}}"
-                                                     HasChildren="{Binding HasChildren}"
-                                                     AncestorLevels="{Binding Ancestors}"
-                                                     LineStroke="#AAAAAA"
-                                                     LineThickness="1"/>
-
-                                 <!--Content--> 
-                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                    <!-- Indentation -->
-                                    <Border Width="{Binding Level, Converter={StaticResource IndentConverter}, ConverterParameter=16}"/>
-
-                                    <!-- Expander -->
-                                    <ToggleButton x:Name="Expander"
-                                                Width="16" Height="16"
-                                                Style="{StaticResource ExpanderToggleStyle}"
-                                                IsChecked="{Binding IsExpanded, Mode=OneWay}"
-                                                Foreground="Black"
-                                                Visibility="{Binding HasChildren, Converter={StaticResource BooleanToHiddenConverter}}"
-                                                Click="Expander_Click"/>
-
-                                    <!-- Icon (optional) -->
-                                    <!--<Image Width="16" Height="16" 
-                                           Source="{Binding Data.Icon}" 
-                                           Margin="2,0,4,0"
-                                           Visibility="{Binding Data.Icon, Converter={StaticResource NullToVisibilityConverter}}"/>-->
-
-                                    <!-- Text -->
-                                    <TextBlock Text="{Binding Data.Name}" 
-                                               Margin="2 0 0 0"
-                                              VerticalAlignment="Center"
-                                              Foreground="{Binding Data.IsVisible, Converter={StaticResource VisibilityToForegroundConverter}}"/>
-                                </StackPanel>
-                            </Grid>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
 
                 <DataGridTextColumn Header="Count" 
                                    Binding="{Binding Data.Count, StringFormat='#,0'}" 
