@@ -1,5 +1,7 @@
-﻿using System.Collections.ObjectModel;
+﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using Caliburn.Micro;
+using DaxStudio.TreeGrid;
 using DaxStudio.UI.Controls;
 
 namespace DaxStudio.UI.ViewModels
@@ -15,7 +17,6 @@ namespace DaxStudio.UI.ViewModels
                     Name = "Tables",
                     Type = "Folder",
                     Description = "All tables in the model",
-                    Count = 5,
                     Children = new ObservableCollection<HierarchicalItem>
                     {
                         new HierarchicalItem
@@ -23,12 +24,11 @@ namespace DaxStudio.UI.ViewModels
                             Name = "Customer",
                             Type = "Table",
                             Description = "Customer information",
-                            Count = 100,
                             Children = new ObservableCollection<HierarchicalItem>
                             {
-                                new HierarchicalItem { Name = "CustomerID", Type = "Column", Description = "Unique identifier", Count = 0 },
-                                new HierarchicalItem { Name = "CustomerName", Type = "Column", Description = "Customer name", Count = 0 },
-                                new HierarchicalItem { Name = "Revenue", Type = "Measure", Description = "Total revenue", Count = 0 }
+                                new HierarchicalItem { Name = "CustomerID", Type = "Column", Description = "Unique identifier" },
+                                new HierarchicalItem { Name = "CustomerName", Type = "Column", Description = "Customer name" },
+                                new HierarchicalItem { Name = "Revenue", Type = "Measure", Description = "Total revenue" }
                             }
                         },
                         new HierarchicalItem
@@ -36,11 +36,10 @@ namespace DaxStudio.UI.ViewModels
                             Name = "Product",
                             Type = "Table",
                             Description = "Product catalog",
-                            Count = 50,
                             Children = new ObservableCollection<HierarchicalItem>
                             {
-                                new HierarchicalItem { Name = "ProductID", Type = "Column", Description = "Product identifier", Count = 0 },
-                                new HierarchicalItem { Name = "ProductName", Type = "Column", Description = "Product name", Count = 0 }
+                                new HierarchicalItem { Name = "ProductID", Type = "Column", Description = "Product identifier" },
+                                new HierarchicalItem { Name = "ProductName", Type = "Column", Description = "Product name" }
                             }
                         }
                     }
@@ -50,11 +49,10 @@ namespace DaxStudio.UI.ViewModels
                     Name = "Measures",
                     Type = "Folder",
                     Description = "All measures in the model",
-                    Count = 10,
                     Children = new ObservableCollection<HierarchicalItem>
                     {
-                        new HierarchicalItem { Name = "Total Sales", Type = "Measure", Description = "Sum of all sales", Count = 0 },
-                        new HierarchicalItem { Name = "Average Price", Type = "Measure", Description = "Average selling price", Count = 0 }
+                        new HierarchicalItem { Name = "Total Sales", Type = "Measure", Description = "Sum of all sales" },
+                        new HierarchicalItem { Name = "Average Price", Type = "Measure", Description = "Average selling price" }
                     }
                 }
             };
@@ -63,14 +61,11 @@ namespace DaxStudio.UI.ViewModels
         public ObservableCollection<HierarchicalItem> RootItems { get; }
     }
 
-
-
     public class HierarchicalItem : PropertyChangedBase
     {
         private string _name;
         private string _type;
         private string _description;
-        private int _count;
         private bool _isVisible = true;
         private ObservableCollection<HierarchicalItem> _children;
 
@@ -81,7 +76,6 @@ namespace DaxStudio.UI.ViewModels
             {
                 _name = value;
                 NotifyOfPropertyChange();
-                
             }
         }
 
@@ -105,16 +99,6 @@ namespace DaxStudio.UI.ViewModels
             }
         }
 
-        public int Count
-        {
-            get => _count;
-            set
-            {
-                _count = value;
-                NotifyOfPropertyChange();
-            }
-        }
-
         public bool IsVisible
         {
             get => _isVisible;
@@ -126,23 +110,23 @@ namespace DaxStudio.UI.ViewModels
         }
 
         private HierarchicalItem _parent;
-        public HierarchicalItem Parent { 
-            get => _parent; 
-            set {                 
+        public HierarchicalItem Parent
+        {
+            get => _parent;
+            set
+            {
                 _parent = value;
                 NotifyOfPropertyChange();
             }
         }
 
-        public new ObservableCollection<HierarchicalItem> Children
+        public ObservableCollection<HierarchicalItem> Children
         {
             get => _children;
             set
             {
                 _children = value;
-                Count = _children.Count;
-                NotifyOfPropertyChange(nameof(Children));
-
+                NotifyOfPropertyChange();
             }
         }
 
@@ -154,7 +138,5 @@ namespace DaxStudio.UI.ViewModels
             "Folder" => "folderDrawingImage",
             _ => null
         };
-
-
     }
 }

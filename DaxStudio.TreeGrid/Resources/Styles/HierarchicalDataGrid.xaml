@@ -29,6 +29,8 @@
                                   Stretch="Uniform"
                                   Width="8"
                                   Height="8"
+                                  Stroke="Black"
+                                  StrokeThickness="1"
                                   RenderTransformOrigin="0.5,0.5">
                                 <Path.RenderTransform>
                                     <RotateTransform Angle="0"/>
@@ -38,12 +40,14 @@
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsChecked" Value="True">
+                            <Setter Property="Fill" TargetName="ExpanderArrow" Value="Black"/>
                             <Trigger.EnterActions>
+                                
                                 <BeginStoryboard>
                                     <Storyboard>
                                         <DoubleAnimation Storyboard.TargetName="ExpanderArrow"
                                                        Storyboard.TargetProperty="(Path.RenderTransform).(RotateTransform.Angle)"
-                                                       To="90" Duration="0:0:0.2"/>
+                                                       To="45" Duration="0:0:0.0"/>
                                     </Storyboard>
                                 </BeginStoryboard>
                             </Trigger.EnterActions>
@@ -52,13 +56,18 @@
                                     <Storyboard>
                                         <DoubleAnimation Storyboard.TargetName="ExpanderArrow"
                                                        Storyboard.TargetProperty="(Path.RenderTransform).(RotateTransform.Angle)"
-                                                       To="0" Duration="0:0:0.2"/>
+                                                       To="0" Duration="0:0:0.0"/>
                                     </Storyboard>
                                 </BeginStoryboard>
                             </Trigger.ExitActions>
                         </Trigger>
+                        
                         <Trigger Property="IsMouseOver" Value="True">
                             <Setter TargetName="ExpanderArrow" Property="Fill" Value="{DynamicResource Theme.Brush.Accent}"/>
+                        </Trigger>
+
+                        <Trigger Property="IsChecked" Value="False">
+                            <Setter Property="Fill" TargetName="ExpanderArrow" Value="Transparent"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>

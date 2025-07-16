@@ -1,4 +1,5 @@
-﻿using DaxStudio.UI.Controls;
+﻿using DaxStudio.TreeGrid;
+using DaxStudio.UI.Controls;
 using DaxStudio.UI.ViewModels;
 using System.Windows;
 using System.Windows.Controls;

@@ -90,9 +90,9 @@ namespace DaxStudio.UI.Controls
             set => SetValue(RootItemsProperty, value);
         }
 
-        private readonly Dictionary<object, HierarchicalDataGridRow> _itemToRowMap = new Dictionary<object, HierarchicalDataGridRow>();
+        private readonly Dictionary<object, HierarchicalDataGridRow<object>> _itemToRowMap = new Dictionary<object, HierarchicalDataGridRow<object>>();
         //private readonly List<HierarchicalDataGridRow> _flattenedRows = new List<HierarchicalDataGridRow>();
-        private readonly ObservableCollection<HierarchicalDataGridRow> _flattenedRows = new ObservableCollection<HierarchicalDataGridRow>();
+        private readonly ObservableCollection<HierarchicalDataGridRow<object>> _flattenedRows = new ObservableCollection<HierarchicalDataGridRow<object>>();
 
         private static void OnChildrenBindingPathChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
@@ -229,7 +229,7 @@ namespace DaxStudio.UI.Controls
             var textBlockFactory = new FrameworkElementFactory(typeof(TextBlock));
             textBlockFactory.SetValue(TextBlock.VerticalAlignmentProperty, VerticalAlignment.Center);
             textBlockFactory.SetValue(TextBlock.MarginProperty, new Thickness(4, 0, 0, 0));
-            textBlockFactory.SetBinding(TextBlock.TextProperty, new Binding("Data.Name")); // Adjust based on your data structure
+            textBlockFactory.SetBinding(TextBlock.TextProperty, new Binding("Data.Name"));
 
             stackPanelFactory.AppendChild(expanderFactory);
             stackPanelFactory.AppendChild(textBlockFactory);
@@ -241,7 +241,7 @@ namespace DaxStudio.UI.Controls
 
         private void OnExpanderClick(object sender, RoutedEventArgs e)
         {
-            if (sender is ToggleButton toggleButton && toggleButton.DataContext is HierarchicalDataGridRow row)
+            if (sender is ToggleButton toggleButton && toggleButton.DataContext is HierarchicalDataGridRow<object> row)
             {
                 row.IsExpanded = toggleButton.IsChecked ?? false;
                 RefreshData();
@@ -255,8 +255,8 @@ namespace DaxStudio.UI.Controls
 
             if (refreshItemMap) _itemToRowMap.Clear();
 
-            // Build hierarchy (this part remains the same as we need the complete structure)
-            var rootRows = new List<HierarchicalDataGridRow>();
+            // Build hierarchy (this part remains the same as we need the complete structure)  
+            var rootRows = new List<HierarchicalDataGridRow<object>>();
             foreach (var rootItem in RootItems)
             {
                 BuildHierarchy(rootItem, 0, null, refreshItemMap);
@@ -266,14 +266,17 @@ namespace DaxStudio.UI.Controls
                 }
             }
 
-            // Build the new flattened structure
-            var newFlattenedRows = new List<HierarchicalDataGridRow>();
+            // After building the complete hierarchy, update the ancestors for all rows
+            UpdateAncestorsForAllRows(rootRows);
+
+            // Build the new flattened structure  
+            var newFlattenedRows = new List<HierarchicalDataGridRow<object>>();
             foreach (var row in rootRows)
             {
                 BuildVisibleRowsList(row, newFlattenedRows);
             }
 
-            // Perform incremental updates to _flattenedRows
+            // Perform incremental updates to _flattenedRows  
             UpdateFlattenedRowsCollection(newFlattenedRows);
         }
 
@@ -295,7 +298,6 @@ namespace DaxStudio.UI.Controls
 
             // Get children using reflection or property path
             var children = GetChildren(item);
-            row.HasChildren = children?.Cast<object>().Any() ?? false;
 
             if (children != null)
             {
@@ -303,6 +305,39 @@ namespace DaxStudio.UI.Controls
                 {
                     BuildHierarchy(child, level + 1, row, rebuildItemMap);
                 }
+            }
+        }
+
+        private void UpdateAncestorsForAllRows(List<HierarchicalDataGridRow<object>> rootRows)
+        {
+            foreach (var rootRow in rootRows)
+            {
+                UpdateAncestorsRecursive(rootRow);
+            }
+        }
+
+        private void UpdateAncestorsRecursive(HierarchicalDataGridRow<object> row)
+        {
+            // Update ancestors for this row based on its position among siblings
+            if (row.Parent != null)
+            {
+                var siblings = row.Parent.Children;
+                var isLastChild = siblings.LastOrDefault() == row;
+
+                // Copy parent's ancestors and add this row's position
+                row.Ancestors = new List<bool>(row.Parent.Ancestors);
+                row.Ancestors.Add(isLastChild);
+            }
+            else
+            {
+                // Root level - no ancestors
+                row.Ancestors = new List<bool>();
+            }
+
+            // Recursively update children
+            foreach (var child in row.Children)
+            {
+                UpdateAncestorsRecursive(child);
             }
         }
 
@@ -315,7 +350,7 @@ namespace DaxStudio.UI.Controls
             return property?.GetValue(item) as IEnumerable;
         }
 
-        private void BuildVisibleRowsList(HierarchicalDataGridRow row, List<HierarchicalDataGridRow> visibleRows)
+        private void BuildVisibleRowsList(HierarchicalDataGridRow<object> row, List<HierarchicalDataGridRow<object>> visibleRows)
         {
             visibleRows.Add(row);
 
@@ -328,11 +363,13 @@ namespace DaxStudio.UI.Controls
             }
         }
 
-        private void UpdateFlattenedRowsCollection(List<HierarchicalDataGridRow> newRows)
+        
+
+void UpdateFlattenedRowsCollection(List<HierarchicalDataGridRow<object>> newRows)
         {
             // Convert current collection to list for easier manipulation
             var currentRows = _flattenedRows.ToList();
-            
+
             // Find rows to remove (exist in current but not in new)
             for (int i = currentRows.Count - 1; i >= 0; i--)
             {
@@ -347,7 +384,7 @@ namespace DaxStudio.UI.Controls
             {
                 var newRow = newRows[newIndex];
                 var currentIndex = _flattenedRows.IndexOf(newRow);
-                
+
                 if (currentIndex == -1)
                 {
                     // Row doesn't exist, insert it at the correct position

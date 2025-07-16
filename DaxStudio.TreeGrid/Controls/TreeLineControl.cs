@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -15,8 +14,6 @@ namespace DaxStudio.UI.Controls
             DefaultStyleKeyProperty.OverrideMetadata(typeof(TreeLineControl), 
                 new FrameworkPropertyMetadata(typeof(TreeLineControl)));
         }
-
-        #region Dependency Properties
 
         public static readonly DependencyProperty LevelProperty =
             DependencyProperty.Register(nameof(Level), typeof(int), typeof(TreeLineControl),
@@ -88,8 +85,6 @@ namespace DaxStudio.UI.Controls
             set => SetValue(LineThicknessProperty, value);
         }
 
-        #endregion
-
         private static void OnLevelChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             ((TreeLineControl)d).InvalidateVisual();
@@ -125,6 +120,9 @@ namespace DaxStudio.UI.Controls
             ((TreeLineControl)d).InvalidateVisual();
         }
 
+        const int topOffset = -2;
+        const int bottomOffset = 2;
+
         protected override void OnRender(DrawingContext drawingContext)
         {
             base.OnRender(drawingContext);
@@ -144,9 +142,9 @@ namespace DaxStudio.UI.Controls
                     var x = (i + 1) * IndentWidth - IndentWidth / 2;
                     
                     // Draw vertical line only if this ancestor has more siblings
-                    if (ancestors[i])
+                    if (!ancestors[i])
                     {
-                        drawingContext.DrawLine(pen, new Point(x, -2), new Point(x, ActualHeight+2));
+                        drawingContext.DrawLine(pen, new Point(x, 0 + topOffset), new Point(x, ActualHeight + bottomOffset));
                     }
                 }
                 Debug.WriteLine($"Rendering TreeLineControl at Level {Level}, LastChild: {IsLastChild}, HasChildren: {HasChildren}, Ancestors: {ancestors.Count()} ");
@@ -164,7 +162,7 @@ namespace DaxStudio.UI.Controls
             if (!IsLastChild)
             {
                 // Draw full vertical line if not last child
-                drawingContext.DrawLine(pen, new Point(currentX, 0), new Point(currentX, ActualHeight));
+                drawingContext.DrawLine(pen, new Point(currentX, 0 + topOffset), new Point(currentX, ActualHeight + bottomOffset));
             }
             else
             {
@@ -174,7 +172,7 @@ namespace DaxStudio.UI.Controls
 
             // Horizontal line to the expander/content
             //var expanderX = Level * IndentWidth - 8; // 8 is half the expander width
-            var expanderX = currentX + 16;
+            var expanderX = currentX + IndentWidth / 2;
             drawingContext.DrawLine(pen, new Point(currentX, centerY), new Point(expanderX, centerY));
         }
     }

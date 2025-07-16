@@ -12,7 +12,6 @@
             <conv:BooleanToHiddenConverter x:Key="BooleanToHiddenConverter" />
             <conv:NullToVisibilityConverter x:Key="NullToVisibilityConverter"/>
             <conv:VisibilityToForegroundConverter x:Key="VisibilityToForegroundConverter"/>
-            <conv:TreeLineInfoConverter x:Key="TreeLineInfoConverter"/>
             <conv:IsLastChildConverter x:Key="IsLastChildConverter"/>
         </ResourceDictionary>
     </UserControl.Resources>
@@ -40,6 +39,17 @@
             <!-- Define columns -->
             <ctrl:HierarchicalDataGrid.Columns>
 
+
+
+                <!-- Additional columns -->
+                <DataGridTextColumn Header="Type" 
+                                   Binding="{Binding Data.Type}" 
+                                   Width="100"/>
+
+                <DataGridTextColumn Header="Description" 
+                                   Binding="{Binding Data.Description}" 
+                                   Width="*"/>
+
                 <!-- Tree Column with expander and lines -->
                 <DataGridTemplateColumn Header="Name" Width="300">
                     <DataGridTemplateColumn.CellTemplate>
@@ -47,17 +57,17 @@
                             <Grid>
                                 <!-- Tree Lines -->
                                 <ctrl:TreeLineControl Level="{Binding Level}"
-                                                     IndentWidth="20"
+                                                     IndentWidth="16"
                                                      IsLastChild="{Binding Converter={StaticResource IsLastChildConverter}}"
                                                      HasChildren="{Binding HasChildren}"
-                                                     AncestorLevels="{Binding Converter={StaticResource TreeLineInfoConverter}}"
-                                                     LineStroke="#FF0000"
+                                                     AncestorLevels="{Binding Ancestors}"
+                                                     LineStroke="#AAAAAA"
                                                      LineThickness="1"/>
-                                
-                                <!-- Content -->
+
+                                 <!--Content--> 
                                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                     <!-- Indentation -->
-                                    <Border Width="{Binding Level, Converter={StaticResource IndentConverter}, ConverterParameter=20}"/>
+                                    <Border Width="{Binding Level, Converter={StaticResource IndentConverter}, ConverterParameter=16}"/>
 
                                     <!-- Expander -->
                                     <ToggleButton x:Name="Expander"
@@ -69,13 +79,14 @@
                                                 Click="Expander_Click"/>
 
                                     <!-- Icon (optional) -->
-                                    <Image Width="16" Height="16" 
+                                    <!--<Image Width="16" Height="16" 
                                            Source="{Binding Data.Icon}" 
                                            Margin="2,0,4,0"
-                                           Visibility="{Binding Data.Icon, Converter={StaticResource NullToVisibilityConverter}}"/>
+                                           Visibility="{Binding Data.Icon, Converter={StaticResource NullToVisibilityConverter}}"/>-->
 
                                     <!-- Text -->
                                     <TextBlock Text="{Binding Data.Name}" 
+                                               Margin="2 0 0 0"
                                               VerticalAlignment="Center"
                                               Foreground="{Binding Data.IsVisible, Converter={StaticResource VisibilityToForegroundConverter}}"/>
                                 </StackPanel>
@@ -83,15 +94,6 @@
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-
-                <!-- Additional columns -->
-                <DataGridTextColumn Header="Type" 
-                                   Binding="{Binding Data.Type}" 
-                                   Width="100"/>
-
-                <DataGridTextColumn Header="Description" 
-                                   Binding="{Binding Data.Description}" 
-                                   Width="*"/>
 
                 <DataGridTextColumn Header="Count" 
                                    Binding="{Binding Data.Count, StringFormat='#,0'}" 
