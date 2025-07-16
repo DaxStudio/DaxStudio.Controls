@@ -1,4 +1,5 @@
-﻿using DaxStudio.TreeGrid;
+﻿using DaxStudio.Controls.Model;
+using DaxStudio.TreeGrid;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -9,22 +10,23 @@ using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Media;
 
-namespace DaxStudio.UI.Controls
+namespace DaxStudio.Controls
 {
     /// <summary>
-    /// A hierarchical data grid that displays data in a tree-like structure with expandable/collapsible nodes
+    /// A tree grid that displays data in a tree-like structure with expandable/collapsible nodes
+    /// A tree grid that displays data in a tree-like structure with expandable/collapsible nodes
     /// </summary>
-    public class HierarchicalDataGrid : DataGrid
+    public class TreeGrid : DataGrid
     {
         private const string ExpanderColumnName = "TreeColumn";
 
-        static HierarchicalDataGrid()
+        static TreeGrid()
         {
-            DefaultStyleKeyProperty.OverrideMetadata(typeof(HierarchicalDataGrid),
-                new FrameworkPropertyMetadata(typeof(HierarchicalDataGrid)));
+            DefaultStyleKeyProperty.OverrideMetadata(typeof(TreeGrid),
+                new FrameworkPropertyMetadata(typeof(TreeGrid)));
         }
 
-        public HierarchicalDataGrid()
+        public TreeGrid()
         {
             this.AutoGenerateColumns = false;
             this.CanUserAddRows = false;
@@ -42,7 +44,7 @@ namespace DaxStudio.UI.Controls
         /// The property path for child items in the hierarchy
         /// </summary>
         public static readonly DependencyProperty ChildrenBindingPathProperty =
-            DependencyProperty.Register(nameof(ChildrenBindingPath), typeof(string), typeof(HierarchicalDataGrid),
+            DependencyProperty.Register(nameof(ChildrenBindingPath), typeof(string), typeof(TreeGrid),
                 new PropertyMetadata(string.Empty, OnChildrenBindingPathChanged));
 
         public string ChildrenBindingPath
@@ -55,7 +57,7 @@ namespace DaxStudio.UI.Controls
         /// Template for the expander column
         /// </summary>
         public static readonly DependencyProperty ExpanderTemplateProperty =
-            DependencyProperty.Register(nameof(ExpanderTemplate), typeof(DataTemplate), typeof(HierarchicalDataGrid),
+            DependencyProperty.Register(nameof(ExpanderTemplate), typeof(DataTemplate), typeof(TreeGrid),
                 new PropertyMetadata(null));
 
         public DataTemplate ExpanderTemplate
@@ -68,7 +70,7 @@ namespace DaxStudio.UI.Controls
         /// Indent width for each level of hierarchy
         /// </summary>
         public static readonly DependencyProperty IndentWidthProperty =
-            DependencyProperty.Register(nameof(IndentWidth), typeof(double), typeof(HierarchicalDataGrid),
+            DependencyProperty.Register(nameof(IndentWidth), typeof(double), typeof(TreeGrid),
                 new PropertyMetadata(20.0));
 
         public double IndentWidth
@@ -81,7 +83,7 @@ namespace DaxStudio.UI.Controls
         /// The root items collection for the hierarchy
         /// </summary>
         public static readonly DependencyProperty RootItemsProperty =
-            DependencyProperty.Register(nameof(RootItems), typeof(IEnumerable), typeof(HierarchicalDataGrid),
+            DependencyProperty.Register(nameof(RootItems), typeof(IEnumerable), typeof(TreeGrid),
                 new PropertyMetadata(null, OnRootItemsChanged));
 
         public IEnumerable RootItems
@@ -90,13 +92,13 @@ namespace DaxStudio.UI.Controls
             set => SetValue(RootItemsProperty, value);
         }
 
-        private readonly Dictionary<object, HierarchicalDataGridRow<object>> _itemToRowMap = new Dictionary<object, HierarchicalDataGridRow<object>>();
+        private readonly Dictionary<object, TreeGridRow<object>> _itemToRowMap = new Dictionary<object, TreeGridRow<object>>();
         //private readonly List<HierarchicalDataGridRow> _flattenedRows = new List<HierarchicalDataGridRow>();
-        private readonly ObservableCollection<HierarchicalDataGridRow<object>> _flattenedRows = new ObservableCollection<HierarchicalDataGridRow<object>>();
+        private readonly ObservableCollection<TreeGridRow<object>> _flattenedRows = new ObservableCollection<TreeGridRow<object>>();
 
         private static void OnChildrenBindingPathChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            if (d is HierarchicalDataGrid grid)
+            if (d is TreeGrid grid)
             {
                 grid.RefreshData(true);
             }
@@ -104,7 +106,7 @@ namespace DaxStudio.UI.Controls
 
         private static void OnRootItemsChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            if (d is HierarchicalDataGrid grid)
+            if (d is TreeGrid grid)
             {
                 grid.RefreshData(true);
             }
@@ -241,7 +243,7 @@ namespace DaxStudio.UI.Controls
 
         private void OnExpanderClick(object sender, RoutedEventArgs e)
         {
-            if (sender is ToggleButton toggleButton && toggleButton.DataContext is HierarchicalDataGridRow<object> row)
+            if (sender is ToggleButton toggleButton && toggleButton.DataContext is TreeGridRow<object> row)
             {
                 row.IsExpanded = toggleButton.IsChecked ?? false;
                 RefreshData();
@@ -256,7 +258,7 @@ namespace DaxStudio.UI.Controls
             if (refreshItemMap) _itemToRowMap.Clear();
 
             // Build hierarchy (this part remains the same as we need the complete structure)  
-            var rootRows = new List<HierarchicalDataGridRow<object>>();
+            var rootRows = new List<TreeGridRow<object>>();
             foreach (var rootItem in RootItems)
             {
                 BuildHierarchy(rootItem, 0, null, refreshItemMap);
@@ -270,7 +272,7 @@ namespace DaxStudio.UI.Controls
             UpdateAncestorsForAllRows(rootRows);
 
             // Build the new flattened structure  
-            var newFlattenedRows = new List<HierarchicalDataGridRow<object>>();
+            var newFlattenedRows = new List<TreeGridRow<object>>();
             foreach (var row in rootRows)
             {
                 BuildVisibleRowsList(row, newFlattenedRows);
@@ -308,7 +310,7 @@ namespace DaxStudio.UI.Controls
             }
         }
 
-        private void UpdateAncestorsForAllRows(List<HierarchicalDataGridRow<object>> rootRows)
+        private void UpdateAncestorsForAllRows(List<TreeGridRow<object>> rootRows)
         {
             foreach (var rootRow in rootRows)
             {
@@ -316,7 +318,7 @@ namespace DaxStudio.UI.Controls
             }
         }
 
-        private void UpdateAncestorsRecursive(HierarchicalDataGridRow<object> row)
+        private void UpdateAncestorsRecursive(TreeGridRow<object> row)
         {
             // Update ancestors for this row based on its position among siblings
             if (row.Parent != null)
@@ -350,7 +352,7 @@ namespace DaxStudio.UI.Controls
             return property?.GetValue(item) as IEnumerable;
         }
 
-        private void BuildVisibleRowsList(HierarchicalDataGridRow<object> row, List<HierarchicalDataGridRow<object>> visibleRows)
+        private void BuildVisibleRowsList(TreeGridRow<object> row, List<TreeGridRow<object>> visibleRows)
         {
             visibleRows.Add(row);
 
@@ -365,7 +367,7 @@ namespace DaxStudio.UI.Controls
 
         
 
-void UpdateFlattenedRowsCollection(List<HierarchicalDataGridRow<object>> newRows)
+void UpdateFlattenedRowsCollection(List<TreeGridRow<object>> newRows)
         {
             // Convert current collection to list for easier manipulation
             var currentRows = _flattenedRows.ToList();

@@ -3,7 +3,7 @@ using System.Windows;
 using System.Windows.Data;
 using System.Windows.Media;
 
-namespace DaxStudio.UI.Converters
+namespace DaxStudio.Controls.Converters
 {
     /// <summary>
     /// Converter that converts null values to Visibility.Collapsed and non-null values to Visibility.Visible

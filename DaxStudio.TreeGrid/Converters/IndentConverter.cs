@@ -2,7 +2,7 @@
 using System.Globalization;
 using System.Windows.Data;
 
-namespace DaxStudio.UI.Converters
+namespace DaxStudio.Controls.Converters
 {
     /// <summary>
     /// Converter for calculating indentation based on hierarchy level

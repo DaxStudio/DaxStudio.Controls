@@ -16,11 +16,11 @@ using System.Windows.Shapes;
 namespace DaxStudio.TreeGrid
 {
     /// <summary>
-    /// Interaction logic for HierarchicalDataGrid.xaml
+    /// Interaction logic for TreeGrid.xaml
     /// </summary>
-    public partial class HierarchicalDataGrid : UserControl
+    public partial class TreeGrid : UserControl
     {
-        public HierarchicalDataGrid()
+        public  TreeGrid()
         {
             //InitializeComponent();
         }

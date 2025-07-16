@@ -1,7 +1,7 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:ctrl="clr-namespace:DaxStudio.UI.Controls"
-                    xmlns:conv="clr-namespace:DaxStudio.UI.Converters">
+                    xmlns:ctrl="clr-namespace:DaxStudio.Controls"
+                    xmlns:conv="clr-namespace:DaxStudio.Controls.Converters">
 
     <conv:IndentConverter x:Key="IndentConverter"/>
     
@@ -75,8 +75,8 @@
         </Setter>
     </Style>
 
-     <!--Hierarchical DataGrid Style--> 
-    <Style TargetType="ctrl:HierarchicalDataGrid" BasedOn="{StaticResource {x:Type DataGrid}}">
+     <!--TreeGrid Style--> 
+    <Style TargetType="ctrl:TreeGrid" BasedOn="{StaticResource {x:Type DataGrid}}">
         <Setter Property="Background" Value="{DynamicResource Theme.Brush.Content.Back}"/>
         <Setter Property="Foreground" Value="{DynamicResource Theme.Brush.Default.Fore}"/>
         <Setter Property="BorderBrush" Value="{DynamicResource Theme.Brush.Control.Border}"/>
@@ -95,7 +95,7 @@
     </Style>
 
      <!--Row Style--> 
-    <Style TargetType="DataGridRow" x:Key="HierarchicalDataGridRowStyle">
+    <Style TargetType="DataGridRow" x:Key="TreeGridRowStyle">
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="Foreground" Value="{DynamicResource Theme.Brush.Default.Fore}"/>
         <Style.Triggers>
@@ -109,7 +109,7 @@
     </Style>
 
      <!--Cell Style--> 
-    <Style TargetType="DataGridCell" x:Key="HierarchicalDataGridCellStyle">
+    <Style TargetType="DataGridCell" x:Key="TreeGridCellStyle">
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="BorderThickness" Value="0"/>
         <Setter Property="Padding" Value="6,3"/>

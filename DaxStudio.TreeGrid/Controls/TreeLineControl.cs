@@ -5,7 +5,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 
-namespace DaxStudio.UI.Controls
+namespace DaxStudio.Controls
 {
     public class TreeLineControl : Control
     {

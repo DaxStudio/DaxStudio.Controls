@@ -3,19 +3,19 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 
-namespace DaxStudio.TreeGrid
+namespace DaxStudio.Controls.Model
 {
     /// <summary>
     /// Represents a row in the hierarchical data grid
     /// </summary>
-    public class HierarchicalDataGridRow<T> : INotifyPropertyChanged
+    public class TreeGridRow<T> : INotifyPropertyChanged
     {
         private bool _isExpanded;
 
         public T Data { get; set; }
         public int Level { get; set; }
-        public HierarchicalDataGridRow<T> Parent { get; set; }
-        public List<HierarchicalDataGridRow<T>> Children { get; set; } = new List<HierarchicalDataGridRow<T>>();
+        public TreeGridRow<T> Parent { get; set; }
+        public List<TreeGridRow<T>> Children { get; set; } = new List<TreeGridRow<T>>();
         
         /// <summary>
         /// Array indicating whether each ancestor level is the last child of its parent
@@ -67,7 +67,7 @@ namespace DaxStudio.TreeGrid
     /// <summary>
     /// Non-generic version for backward compatibility
     /// </summary>
-    public class HierarchicalDataGridRow : HierarchicalDataGridRow<object>
+    public class HierarchicalDataGridRow : TreeGridRow<object>
     {
     }
 }

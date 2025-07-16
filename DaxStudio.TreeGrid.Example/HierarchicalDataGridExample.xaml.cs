@@ -1,5 +1,4 @@
-﻿using DaxStudio.TreeGrid;
-using DaxStudio.UI.Controls;
+﻿using DaxStudio.Controls.Model;
 using DaxStudio.UI.ViewModels;
 using System.Windows;
 using System.Windows.Controls;
@@ -13,7 +12,7 @@ namespace DaxStudio.UI.Views
         {
             InitializeComponent();
             // Set the DataContext to the ViewModel
-            DataContext = new HierarchicalDataGridExampleViewModel();
+            DataContext = new TreeGridExampleViewModel();
         }
 
         private void ExpandAll_Click(object sender, RoutedEventArgs e)
@@ -28,7 +27,7 @@ namespace DaxStudio.UI.Views
 
         private void Expander_Click(object sender, RoutedEventArgs e)
         {
-            if (sender is ToggleButton toggleButton && toggleButton.DataContext is HierarchicalDataGridRow row)
+            if (sender is ToggleButton toggleButton && toggleButton.DataContext is TreeGridRow<object> row)
             {
                 HierarchicalGrid.ToggleItem(row.Data);
             }

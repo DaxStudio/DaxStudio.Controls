@@ -60,7 +60,7 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
-    <Page Include="Resources\Styles\HierarchicalDataGrid.xaml">
+    <Page Include="Resources\Styles\TreeGrid.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -79,10 +79,10 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="HierarchicalDataGrid.cs" />
-    <Compile Include="Model\HierarchicalDataGridRow.cs" />
-    <Compile Include="Resources\Styles\HierarchicalDataGrid.xaml.cs">
-      <DependentUpon>HierarchicalDataGrid.xaml</DependentUpon>
+    <Compile Include="Controls\TreeGrid.cs" />
+    <Compile Include="Model\TreeGridRow.cs" />
+    <Compile Include="Resources\Styles\TreeGrid.xaml.cs">
+      <DependentUpon>TreeGrid.xaml</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>

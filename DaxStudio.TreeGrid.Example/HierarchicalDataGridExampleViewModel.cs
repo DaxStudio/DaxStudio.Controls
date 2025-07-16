@@ -1,73 +1,70 @@
-﻿using System.Collections.Generic;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using Caliburn.Micro;
-using DaxStudio.TreeGrid;
-using DaxStudio.UI.Controls;
 
 namespace DaxStudio.UI.ViewModels
 {
-    public class HierarchicalDataGridExampleViewModel : PropertyChangedBase
+    public class TreeGridExampleViewModel : PropertyChangedBase
     {
-        public HierarchicalDataGridExampleViewModel()
+        public TreeGridExampleViewModel()
         {
-            RootItems = new ObservableCollection<HierarchicalItem>
+            RootItems = new ObservableCollection<TreeItem>
             {
-                new HierarchicalItem
+                new TreeItem
                 {
                     Name = "Tables",
                     Type = "Folder",
                     Description = "All tables in the model",
-                    Children = new ObservableCollection<HierarchicalItem>
+                    Children = new ObservableCollection<TreeItem>
                     {
-                        new HierarchicalItem
+                        new TreeItem
                         {
                             Name = "Customer",
                             Type = "Table",
                             Description = "Customer information",
-                            Children = new ObservableCollection<HierarchicalItem>
+                            Children = new ObservableCollection<TreeItem>
                             {
-                                new HierarchicalItem { Name = "CustomerID", Type = "Column", Description = "Unique identifier" },
-                                new HierarchicalItem { Name = "CustomerName", Type = "Column", Description = "Customer name" },
-                                new HierarchicalItem { Name = "Revenue", Type = "Measure", Description = "Total revenue" }
+                                new TreeItem { Name = "CustomerID", Type = "Column", Description = "Unique identifier" },
+                                new TreeItem { Name = "CustomerName", Type = "Column", Description = "Customer name" },
+                                new TreeItem { Name = "Revenue", Type = "Measure", Description = "Total revenue" }
                             }
                         },
-                        new HierarchicalItem
+                        new TreeItem
                         {
                             Name = "Product",
                             Type = "Table",
                             Description = "Product catalog",
-                            Children = new ObservableCollection<HierarchicalItem>
+                            Children = new ObservableCollection<TreeItem>
                             {
-                                new HierarchicalItem { Name = "ProductID", Type = "Column", Description = "Product identifier" },
-                                new HierarchicalItem { Name = "ProductName", Type = "Column", Description = "Product name" }
+                                new TreeItem { Name = "ProductID", Type = "Column", Description = "Product identifier" },
+                                new TreeItem { Name = "ProductName", Type = "Column", Description = "Product name" }
                             }
                         }
                     }
                 },
-                new HierarchicalItem
+                new TreeItem
                 {
                     Name = "Measures",
                     Type = "Folder",
                     Description = "All measures in the model",
-                    Children = new ObservableCollection<HierarchicalItem>
+                    Children = new ObservableCollection<TreeItem>
                     {
-                        new HierarchicalItem { Name = "Total Sales", Type = "Measure", Description = "Sum of all sales" },
-                        new HierarchicalItem { Name = "Average Price", Type = "Measure", Description = "Average selling price" }
+                        new TreeItem { Name = "Total Sales", Type = "Measure", Description = "Sum of all sales" },
+                        new TreeItem { Name = "Average Price", Type = "Measure", Description = "Average selling price" }
                     }
                 }
             };
         }
 
-        public ObservableCollection<HierarchicalItem> RootItems { get; }
+        public ObservableCollection<TreeItem> RootItems { get; }
     }
 
-    public class HierarchicalItem : PropertyChangedBase
+    public class TreeItem : PropertyChangedBase
     {
         private string _name;
         private string _type;
         private string _description;
         private bool _isVisible = true;
-        private ObservableCollection<HierarchicalItem> _children;
+        private ObservableCollection<TreeItem> _children;
 
         public string Name
         {
@@ -109,8 +106,8 @@ namespace DaxStudio.UI.ViewModels
             }
         }
 
-        private HierarchicalItem _parent;
-        public HierarchicalItem Parent
+        private TreeItem _parent;
+        public TreeItem Parent
         {
             get => _parent;
             set
@@ -120,7 +117,7 @@ namespace DaxStudio.UI.ViewModels
             }
         }
 
-        public ObservableCollection<HierarchicalItem> Children
+        public ObservableCollection<TreeItem> Children
         {
             get => _children;
             set
