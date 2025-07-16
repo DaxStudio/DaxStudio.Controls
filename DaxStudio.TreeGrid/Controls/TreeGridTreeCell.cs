@@ -209,17 +209,24 @@ namespace DaxStudio.Controls
             if (row?.Data != null)
             {
                 // Set up binding for Text property - only if not already bound from column
-                if (BindingOperations.GetBinding(this, TextProperty) == null)
+                // Handle Text binding - if Text property is set as a Binding, use it; otherwise use default
+                if (BindingOperations.GetBinding(this, TextProperty) is Binding textBinding)
                 {
-                    var textBinding = new Binding("Data.Name") { Source = row };
                     SetBinding(TextProperty, textBinding);
+                }
+                else if (Text != null)
+                {
+                    SetValue(TextProperty, Text);
                 }
 
                 // Set up binding for Icon property - only if not already bound from column
-                if (BindingOperations.GetBinding(this, IconProperty) == null)
+                if (BindingOperations.GetBinding(this, IconProperty) is Binding iconBinding)
                 {
-                    var iconBinding = new Binding("Data.Icon") { Source = row };
-                    SetBinding(IconProperty, iconBinding);
+                    SetBinding(TextProperty, iconBinding);
+                }
+                else if (Icon != null)
+                {
+                    SetValue(IconProperty, Icon);
                 }
 
                 // Set up binding for TextForeground property

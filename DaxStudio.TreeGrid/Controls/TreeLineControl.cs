@@ -130,7 +130,7 @@ namespace DaxStudio.Controls
             if (Level == 0) return;
 
             var pen = new Pen(LineStroke, LineThickness);
-            pen.DashStyle = new DashStyle(new double[] { 2, 1 },2);
+            pen.DashStyle = new DashStyle(new double[] { 2, 2 },2);
             var centerY = ActualHeight / 2;
 
             // Draw vertical lines for all ancestor levels

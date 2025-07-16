@@ -6,9 +6,9 @@ using System.Windows.Controls.Primitives;
 
 namespace DaxStudio.UI.Views
 {
-    public partial class HierarchicalDataGridExample : UserControl
+    public partial class TreeGridExample : UserControl
     {
-        public HierarchicalDataGridExample()
+        public TreeGridExample()
         {
             InitializeComponent();
             // Set the DataContext to the ViewModel

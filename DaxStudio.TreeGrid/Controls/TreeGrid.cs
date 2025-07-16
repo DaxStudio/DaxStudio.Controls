@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -18,7 +19,7 @@ namespace DaxStudio.Controls
     public class TreeGrid : DataGrid
     {
         private const string ExpanderColumnName = "TreeColumn";
-
+        private static Stopwatch stopwatch = new Stopwatch();
         static TreeGrid()
         {
             DefaultStyleKeyProperty.OverrideMetadata(typeof(TreeGrid),
@@ -251,6 +252,7 @@ namespace DaxStudio.Controls
 
         private void RefreshData(bool refreshItemMap = false)
         {
+            stopwatch.Restart();
             if (RootItems == null || string.IsNullOrEmpty(ChildrenBindingPath))
                 return;
 
@@ -266,19 +268,22 @@ namespace DaxStudio.Controls
                     rootRows.Add(rootRow);
                 }
             }
-
+            System.Diagnostics.Debug.WriteLine($"Hierarchy built : {stopwatch.ElapsedMilliseconds}ms");
             // After building the complete hierarchy, update the ancestors for all rows
             UpdateAncestorsForAllRows(rootRows);
-
+            System.Diagnostics.Debug.WriteLine($"Ancestors updated : {stopwatch.ElapsedMilliseconds}ms");
             // Build the new flattened structure  
             var newFlattenedRows = new List<TreeGridRow<object>>();
             foreach (var row in rootRows)
             {
                 BuildVisibleRowsList(row, newFlattenedRows);
             }
-
+            System.Diagnostics.Debug.WriteLine($"Visible rows built : {stopwatch.ElapsedMilliseconds}ms");
             // Perform incremental updates to _flattenedRows  
             UpdateFlattenedRowsCollection(newFlattenedRows);
+            System.Diagnostics.Debug.WriteLine($"Visible rows updated : {stopwatch.ElapsedMilliseconds}ms");
+            System.Diagnostics.Debug.WriteLine("====");
+            stopwatch.Stop();
         }
 
         private void BuildHierarchy(object item, int level, HierarchicalDataGridRow parent, bool rebuildItemMap)

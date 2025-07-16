@@ -128,6 +128,19 @@ namespace DaxStudio.Controls
             set => SetValue(ExpanderTemplateProperty, value);
         }
 
+        /// <summary>
+        /// The path to the property for text content, used when the Text property is not set
+        /// </summary>
+        public static readonly DependencyProperty TextPathProperty =
+            DependencyProperty.Register(nameof(TextPath), typeof(string), typeof(TreeGridTreeColumn),
+                new PropertyMetadata(null, OnTemplateChanged));
+
+        public string TextPath
+        {
+            get => (string)GetValue(TextPathProperty);
+            set => SetValue(TextPathProperty, value);
+        }
+
         private static void OnShowTreeLinesChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             if (d is TreeGridTreeColumn column)
@@ -172,6 +185,10 @@ namespace DaxStudio.Controls
             if (BindingOperations.GetBinding(this, TextProperty) is Binding textBinding)
             {
                 cellFactory.SetBinding(TreeGridTreeCell.TextProperty, textBinding);
+            }
+            else if (!string.IsNullOrEmpty(TextPath))
+            {
+                cellFactory.SetBinding(TreeGridTreeCell.TextProperty, new Binding(TextPath));
             }
             else if (Text != null)
             {

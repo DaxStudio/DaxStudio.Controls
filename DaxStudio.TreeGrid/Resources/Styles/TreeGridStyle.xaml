@@ -148,7 +148,8 @@
                                          AncestorLevels="{Binding RowData.Ancestors, RelativeSource={RelativeSource TemplatedParent}}"
                                          LineStroke="{Binding LineStroke, RelativeSource={RelativeSource TemplatedParent}}"
                                          LineThickness="{Binding LineThickness, RelativeSource={RelativeSource TemplatedParent}}"
-                                         Visibility="{Binding ShowTreeLines, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                                         Visibility="{Binding ShowTreeLines, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                              ClipToBounds="True" Margin="0,-1,0,-1"/>
 
                         <!-- Content -->
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
