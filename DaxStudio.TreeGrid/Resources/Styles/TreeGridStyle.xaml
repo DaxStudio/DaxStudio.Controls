@@ -76,6 +76,7 @@
 
     <!-- Expander Toggle Button Style -->
     <Style x:Key="ExpanderToggleStyle" TargetType="ToggleButton">
+        <!--<EventSetter Event="PreviewMouseDown" Handler="Expander_PreviewMouseDown"/>-->
         <Setter Property="Template" Value="{StaticResource ExpanderControlTemplate}"/>
     </Style>
 
@@ -169,10 +170,11 @@
 
                             <!-- Expander -->
                             <ToggleButton x:Name="PART_Expander"
-                                    Width="16" Height="16"
-                                    IsChecked="{Binding RowData.IsExpanded, RelativeSource={RelativeSource TemplatedParent}, Mode=OneWay}"
-                                    Foreground="Black"
-                                    Visibility="{Binding RowData.HasChildren, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource BooleanToHiddenConverter}}">
+                                      Width="16" Height="16"
+                                      IsChecked="{Binding RowData.IsExpanded, RelativeSource={RelativeSource TemplatedParent}, Mode=OneWay}"
+                                      Foreground="Black"
+                                      Visibility="{Binding RowData.HasChildren, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource BooleanToHiddenConverter}}"
+                                      >
                                 <ToggleButton.Style>
                                     <Style TargetType="ToggleButton" BasedOn="{StaticResource ExpanderToggleStyle}">
                                         <Style.Triggers>

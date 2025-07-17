@@ -9,6 +9,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Data;
+using System.Windows.Input;
 using System.Windows.Media;
 
 namespace DaxStudio.Controls
@@ -48,19 +49,20 @@ namespace DaxStudio.Controls
         private void OnSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             System.Diagnostics.Debug.WriteLine($"Selection changed: {e.AddedItems.Count} items added, {e.RemovedItems.Count} items removed");
-            foreach (TreeGridRow<object> row in e.AddedItems)
-            {
-                foreach (TreeGridRow<object> child in row.Children)
-                {
-                    SetSelectedLineLevelRecursive(row, row.Level, true);
-                }
-            }
 
             foreach (TreeGridRow<object> row in e.RemovedItems)
             {
                 foreach (TreeGridRow<object> child in row.Children)
                 {
                     SetSelectedLineLevelRecursive(row, row.Level, false);
+                }
+            }
+
+            foreach (TreeGridRow<object> row in e.AddedItems)
+            {
+                foreach (TreeGridRow<object> child in row.Children)
+                {
+                    SetSelectedLineLevelRecursive(row, row.Level, true);
                 }
             }
         }
@@ -71,6 +73,7 @@ namespace DaxStudio.Controls
             {
                 row.SelectedLineLevels[level] = value;
             }
+
             foreach (TreeGridRow<object> child in row.Children)
             {
                 SetSelectedLineLevelRecursive(child, level, value);
@@ -250,7 +253,9 @@ namespace DaxStudio.Controls
                 Converter = new BooleanToVisibilityConverter()
             });
 
-            expanderFactory.AddHandler(ToggleButton.ClickEvent, new RoutedEventHandler(OnExpanderClick));
+            expanderFactory.AddHandler(
+                UIElement.PreviewMouseDownEvent,
+                new MouseButtonEventHandler(Expander_PreviewMouseDown));
 
             // Create Content TextBlock
             var textBlockFactory = new FrameworkElementFactory(typeof(TextBlock));
@@ -362,11 +367,12 @@ namespace DaxStudio.Controls
         /// </summary>
         public void ToggleItem(object item)
         {
+            System.Diagnostics.Debug.WriteLine($"ToggleItem called for: {item}");
             if (_itemToRowMap.TryGetValue(item, out var row))
             {
                 row.IsExpanded = !row.IsExpanded;
                 RefreshData();
-                SetSelectedLineLevelRecursive((TreeGridRow)row, row.Level, row.IsExpanded);
+                SetSelectedLineLevelRecursive(row, row.Level, row.IsExpanded);
 
             }
         }
@@ -394,6 +400,11 @@ namespace DaxStudio.Controls
             }
             RefreshData();
 
+        }
+
+        private void Expander_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            e.Handled = true; // Prevents the event from bubbling to the DataGridRow
         }
     }
 }

@@ -5,6 +5,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Data;
+using System.Windows.Input;
 using System.Windows.Media;
 
 namespace DaxStudio.Controls
@@ -260,13 +261,29 @@ namespace DaxStudio.Controls
             if (GetTemplateChild("PART_Expander") is ToggleButton expander)
             {
                 expander.Click += OnExpanderButtonClick;
+                expander.PreviewMouseDown += OnExpanderPreviewMouseDown;
+                expander.PreviewMouseUp += OnExpanderPreviewMouseUp;
             }
+        }
+
+        private void OnExpanderPreviewMouseUp(object sender, MouseButtonEventArgs e)
+        {
+            //e.Handled = true; // Prevents the click from propagating further
+        }
+
+        private void OnExpanderPreviewMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            //e.Handled = true; // Prevents the click from propagating further
+            //RaiseEvent(new RoutedEventArgs(ExpanderClickEvent, this));
+
         }
 
         private void OnExpanderButtonClick(object sender, RoutedEventArgs e)
         {
+            
             // Raise the ExpanderClick event
             RaiseEvent(new RoutedEventArgs(ExpanderClickEvent, this));
+            e.Handled = true;
         }
     }
 }

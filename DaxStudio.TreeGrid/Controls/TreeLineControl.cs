@@ -167,9 +167,6 @@ namespace DaxStudio.Controls
             InvalidateVisual();
         }
 
-        const int topOffset = -2;
-        const int bottomOffset = 2;
-
         protected override void OnRender(DrawingContext drawingContext)
         {
             base.OnRender(drawingContext);
@@ -180,6 +177,7 @@ namespace DaxStudio.Controls
             pen.DashStyle = new DashStyle(new double[] { 2, 1 }, 2);
             var centerY = ActualHeight / 2;
             var selectedLevels = SelectedLineLevels?.ToArray();
+
             // Draw vertical lines for all ancestor levels
             if (AncestorLevels != null)
             {
@@ -204,20 +202,20 @@ namespace DaxStudio.Controls
             var currentX = Level * IndentWidth - IndentWidth / 2;
             bool isSelected = selectedLevels[Level-1];
             var linePen = isSelected ? new Pen(SelectedLineStroke ?? Brushes.Red, LineThickness) { DashStyle = pen.DashStyle } : pen;
+
             // Vertical line (up to center or full height)
             if (!IsLastChild)
             {
                 // Draw full vertical line if not last child
-                drawingContext.DrawLine(linePen, new Point(currentX, 0 + topOffset), new Point(currentX, ActualHeight + bottomOffset));
+                drawingContext.DrawLine(linePen, new Point(currentX, 0 ), new Point(currentX, ActualHeight ));
             }
             else
             {
                 // Draw only up to center if last child
                 drawingContext.DrawLine(linePen, new Point(currentX, 0), new Point(currentX, centerY));
             }
-            System.Diagnostics.Debug.WriteLine($"OnRender isSelected: {isSelected} Level: {Level}");
+            
             // Horizontal line to the expander/content
-            //var expanderX = Level * IndentWidth - 8; // 8 is half the expander width
             var expanderX = currentX + IndentWidth / 2;
             drawingContext.DrawLine(linePen, new Point(currentX, centerY), new Point(expanderX, centerY));
         }
