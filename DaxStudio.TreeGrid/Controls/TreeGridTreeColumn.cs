@@ -235,7 +235,6 @@ namespace DaxStudio.Controls
 
         private void OnExpanderPreviewMouseDownEvent(object sender, RoutedEventArgs e)
         {
-            System.Diagnostics.Debug.WriteLine("preview mouse down");
             if (e.Source is TreeGridTreeCell cell)
             {
                 var context = cell.DataContext as TreeGridRow<object>;

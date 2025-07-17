@@ -46,8 +46,6 @@ namespace DaxStudio.Controls
 
         private void OnSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            System.Diagnostics.Debug.WriteLine($"Selection changed: {e.AddedItems.Count} items added, {e.RemovedItems.Count} items removed");
-
             foreach (TreeGridRow<object> row in e.RemovedItems)
             {
                 foreach (TreeGridRow<object> child in row.Children)
@@ -94,16 +92,6 @@ namespace DaxStudio.Controls
             set => SetValue(ChildrenBindingPathProperty, value);
         }
 
-        public static readonly DependencyProperty ExpanderTemplateProperty =
-            DependencyProperty.Register(nameof(ExpanderTemplate), typeof(DataTemplate), typeof(TreeGrid),
-                new PropertyMetadata(null));
-
-        public DataTemplate ExpanderTemplate
-        {
-            get => (DataTemplate)GetValue(ExpanderTemplateProperty);
-            set => SetValue(ExpanderTemplateProperty, value);
-        }
-
         public static readonly DependencyProperty IndentWidthProperty =
             DependencyProperty.Register(nameof(IndentWidth), typeof(double), typeof(TreeGrid),
                 new PropertyMetadata(20.0));
@@ -124,6 +112,16 @@ namespace DaxStudio.Controls
             set => SetValue(RootItemsProperty, value);
         }
 
+        public static readonly DependencyProperty ExpandOnLoadProperty =
+            DependencyProperty.Register(nameof(ExpandOnLoad), typeof(bool), typeof(TreeGrid),
+                new PropertyMetadata(false, OnExpandOnLoadChanged));
+
+        public bool ExpandOnLoad
+        {
+            get => (bool)GetValue(ExpandOnLoadProperty);
+            set => SetValue(ExpandOnLoadProperty, value);
+        }
+
         private static void OnChildrenBindingPathChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             if (d is TreeGrid grid)
@@ -139,6 +137,18 @@ namespace DaxStudio.Controls
             {
                 grid.RebuildHierarchy();
                 grid.RefreshData();
+            }
+        }
+
+        private static void OnExpandOnLoadChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (d is TreeGrid grid && (bool)e.NewValue)
+            {
+                // If setting to true after hierarchy is already built, expand all nodes
+                if (grid._rootRows.Count > 0)
+                {
+                    grid.ExpandAll();
+                }
             }
         }
 
@@ -180,7 +190,8 @@ namespace DaxStudio.Controls
                 Data = item,
                 Level = level,
                 Parent = parent,
-                Children = new List<TreeGridRow<object>>()
+                Children = new List<TreeGridRow<object>>(),
+                IsExpanded = ExpandOnLoad // Set initial expansion state based on property
             };
 
             _itemToRowMap[item] = row;
@@ -224,16 +235,16 @@ namespace DaxStudio.Controls
             {
                 Header = "",
                 Width = new DataGridLength(200),
-                CellTemplate = CreateDefaultExpanderTemplate()
+                CellTemplate = CreateDefaultCellTemplate()
             };
 
             Columns.Insert(0, expanderColumn);
         }
 
-        private DataTemplate CreateDefaultExpanderTemplate()
+        private DataTemplate CreateDefaultCellTemplate()
         {
-            if (ExpanderTemplate != null)
-                return ExpanderTemplate;
+            //if (ExpanderTemplate != null)
+            //    return ExpanderTemplate;
 
             var template = new DataTemplate();
 
@@ -361,7 +372,6 @@ namespace DaxStudio.Controls
         /// </summary>
         public void ToggleItem(object item)
         {
-            System.Diagnostics.Debug.WriteLine($"ToggleItem called for: {item}");
             if (_itemToRowMap.TryGetValue(item, out var row))
             {
                 row.IsExpanded = !row.IsExpanded;
@@ -400,5 +410,43 @@ namespace DaxStudio.Controls
         {
             e.Handled = true; // Prevents the event from bubbling to the DataGridRow
         }
+
+        //protected override void PrepareContainerForItemOverride(DependencyObject element, object item)
+        //{
+        //    base.PrepareContainerForItemOverride(element, item);
+            
+        //    if (element is DataGridRow row)
+        //    {
+        //        // Apply any TreeGrid-specific properties to the row
+                
+        //        // When cells are generated, they'll pick up properties from the containing TreeGrid
+        //        row.Loaded += (sender, e) => 
+        //        {
+        //            // Find any TreeGridTreeCell instances in the row and set properties
+        //            foreach (var cell in row.FindVisualChildren<TreeGridTreeCell>())
+        //            {
+        //                cell.LineStroke = this.LineStroke;
+        //                cell.SelectedLineStroke = this.SelectedLineStroke;
+        //            }
+        //        };
+        //    }
+        //}
+
+        //// You may need this helper method to find visual children
+        //private static IEnumerable<T> FindVisualChildren<T>(this DependencyObject parent) where T : DependencyObject
+        //{
+        //    if (parent == null) yield break;
+
+        //    for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
+        //    {
+        //        var child = VisualTreeHelper.GetChild(parent, i);
+
+        //        if (child is T childAsT)
+        //            yield return childAsT;
+
+        //        foreach (var descendant in FindVisualChildren<T>(child))
+        //            yield return descendant;
+        //    }
+        //}
     }
 }
