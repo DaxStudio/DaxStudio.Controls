@@ -13,14 +13,17 @@ using System.Windows.Media;
 
 namespace DaxStudio.Controls
 {
-    /// <summary>
-    /// A tree grid that displays data in a tree-like structure with expandable/collapsible nodes
-    /// A tree grid that displays data in a tree-like structure with expandable/collapsible nodes
-    /// </summary>
     public class TreeGrid : DataGrid
     {
         private const string ExpanderColumnName = "TreeColumn";
         private static Stopwatch stopwatch = new Stopwatch();
+
+        // Cache for the root rows of the hierarchy
+        private List<TreeGridRow<object>> _rootRows = new List<TreeGridRow<object>>();
+
+        private readonly Dictionary<object, TreeGridRow<object>> _itemToRowMap = new Dictionary<object, TreeGridRow<object>>();
+        private readonly ObservableCollection<TreeGridRow<object>> _flattenedRows = new ObservableCollection<TreeGridRow<object>>();
+
         static TreeGrid()
         {
             DefaultStyleKeyProperty.OverrideMetadata(typeof(TreeGrid),
@@ -42,43 +45,38 @@ namespace DaxStudio.Controls
             SelectionChanged += OnSelectionChanged;
         }
 
-        
-
         private void OnSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             System.Diagnostics.Debug.WriteLine($"Selection changed: {e.AddedItems.Count} items added, {e.RemovedItems.Count} items removed");
-            foreach( TreeGridRow row in e.AddedItems )
+            foreach (TreeGridRow<object> row in e.AddedItems)
             {
-                foreach(TreeGridRow child in row.Children)
+                foreach (TreeGridRow<object> child in row.Children)
                 {
-                    SetSelectedLineLevelRecursive(row, row.Level , true);
+                    SetSelectedLineLevelRecursive(row, row.Level, true);
                 }
             }
 
-            foreach( TreeGridRow row in e.RemovedItems)
+            foreach (TreeGridRow<object> row in e.RemovedItems)
             {
-                foreach (TreeGridRow child in row.Children)
+                foreach (TreeGridRow<object> child in row.Children)
                 {
-                    SetSelectedLineLevelRecursive(row, row.Level , false);
+                    SetSelectedLineLevelRecursive(row, row.Level, false);
                 }
             }
         }
 
-        private void SetSelectedLineLevelRecursive(TreeGridRow row, int level, bool value)
+        private void SetSelectedLineLevelRecursive(TreeGridRow<object> row, int level, bool value)
         {
             if (row.SelectedLineLevels != null && level < row.SelectedLineLevels.Count)
             {
                 row.SelectedLineLevels[level] = value;
             }
-            foreach (TreeGridRow child in row.Children)
+            foreach (TreeGridRow<object> child in row.Children)
             {
                 SetSelectedLineLevelRecursive(child, level, value);
             }
         }
 
-        /// <summary>
-        /// The property path for child items in the hierarchy
-        /// </summary>
         public static readonly DependencyProperty ChildrenBindingPathProperty =
             DependencyProperty.Register(nameof(ChildrenBindingPath), typeof(string), typeof(TreeGrid),
                 new PropertyMetadata(string.Empty, OnChildrenBindingPathChanged));
@@ -89,9 +87,6 @@ namespace DaxStudio.Controls
             set => SetValue(ChildrenBindingPathProperty, value);
         }
 
-        /// <summary>
-        /// Template for the expander column
-        /// </summary>
         public static readonly DependencyProperty ExpanderTemplateProperty =
             DependencyProperty.Register(nameof(ExpanderTemplate), typeof(DataTemplate), typeof(TreeGrid),
                 new PropertyMetadata(null));
@@ -102,9 +97,6 @@ namespace DaxStudio.Controls
             set => SetValue(ExpanderTemplateProperty, value);
         }
 
-        /// <summary>
-        /// Indent width for each level of hierarchy
-        /// </summary>
         public static readonly DependencyProperty IndentWidthProperty =
             DependencyProperty.Register(nameof(IndentWidth), typeof(double), typeof(TreeGrid),
                 new PropertyMetadata(20.0));
@@ -115,9 +107,6 @@ namespace DaxStudio.Controls
             set => SetValue(IndentWidthProperty, value);
         }
 
-        /// <summary>
-        /// The root items collection for the hierarchy
-        /// </summary>
         public static readonly DependencyProperty RootItemsProperty =
             DependencyProperty.Register(nameof(RootItems), typeof(IEnumerable), typeof(TreeGrid),
                 new PropertyMetadata(null, OnRootItemsChanged));
@@ -128,15 +117,12 @@ namespace DaxStudio.Controls
             set => SetValue(RootItemsProperty, value);
         }
 
-        private readonly Dictionary<object, TreeGridRow<object>> _itemToRowMap = new Dictionary<object, TreeGridRow<object>>();
-        //private readonly List<HierarchicalDataGridRow> _flattenedRows = new List<HierarchicalDataGridRow>();
-        private readonly ObservableCollection<TreeGridRow<object>> _flattenedRows = new ObservableCollection<TreeGridRow<object>>();
-
         private static void OnChildrenBindingPathChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             if (d is TreeGrid grid)
             {
-                grid.RefreshData(true);
+                grid.RebuildHierarchy();
+                grid.RefreshData();
             }
         }
 
@@ -144,7 +130,8 @@ namespace DaxStudio.Controls
         {
             if (d is TreeGrid grid)
             {
-                grid.RefreshData(true);
+                grid.RebuildHierarchy();
+                grid.RefreshData();
             }
         }
 
@@ -154,70 +141,78 @@ namespace DaxStudio.Controls
             {
                 CreateDefaultExpanderColumn();
             }
-            //RefreshData();
             ItemsSource = _flattenedRows;
         }
 
-        /// <summary>
-        /// Expands the specified item
-        /// </summary>
-        public void ExpandItem(object item)
+        // Rebuilds the hierarchy and caches it in _rootRows
+        private void RebuildHierarchy()
         {
-            if (_itemToRowMap.TryGetValue(item, out var row))
+            _itemToRowMap.Clear();
+            _rootRows.Clear();
+
+            if (RootItems == null || string.IsNullOrEmpty(ChildrenBindingPath))
+                return;
+
+            foreach (var rootItem in RootItems)
             {
-                row.IsExpanded = true;
-                RefreshData();
+                var rootRow = BuildHierarchy(rootItem, 0, null);
+                if (rootRow != null)
+                    _rootRows.Add(rootRow);
             }
+
+            UpdateAncestorsForAllRows(_rootRows);
         }
 
-        /// <summary>
-        /// Collapses the specified item
-        /// </summary>
-        public void CollapseItem(object item)
+        // Builds the hierarchy and returns the root row for the given item
+        private TreeGridRow<object> BuildHierarchy(object item, int level, TreeGridRow<object> parent)
         {
-            if (_itemToRowMap.TryGetValue(item, out var row))
+            if (item == null) return null;
+
+            var row = new TreeGridRow<object>
             {
-                row.IsExpanded = false;
-                RefreshData();
+                Data = item,
+                Level = level,
+                Parent = parent,
+                Children = new List<TreeGridRow<object>>()
+            };
+
+            _itemToRowMap[item] = row;
+
+            if (parent != null)
+            {
+                parent.Children.Add(row);
             }
+
+            var children = GetChildren(item);
+            if (children != null)
+            {
+                foreach (var child in children)
+                {
+                    BuildHierarchy(child, level + 1, row);
+                }
+            }
+
+            return row;
         }
 
-        /// <summary>
-        /// Toggles the expansion state of the specified item
-        /// </summary>
-        public void ToggleItem(object item)
+        private void RefreshData()
         {
-            if (_itemToRowMap.TryGetValue(item, out var row))
-            {
-                row.IsExpanded = !row.IsExpanded;
-                RefreshData();
-                SetSelectedLineLevelRecursive((TreeGridRow)row, row.Level, row.IsExpanded);
-                
-            }
-        }
+            stopwatch.Restart();
+            if (_rootRows == null || _rootRows.Count == 0)
+                return;
 
-        /// <summary>
-        /// Expands all items in the hierarchy
-        /// </summary>
-        public void ExpandAll()
-        {
-            foreach (var row in _itemToRowMap.Values)
+            // Build the new flattened structure  
+            var newFlattenedRows = new List<TreeGridRow<object>>();
+            foreach (var row in _rootRows)
             {
-                row.IsExpanded = true;
+                BuildVisibleRowsList(row, newFlattenedRows);
             }
-            RefreshData();
-        }
-
-        /// <summary>
-        /// Collapses all items in the hierarchy
-        /// </summary>
-        public void CollapseAll()
-        {
-            foreach (var row in _itemToRowMap.Values)
-            {
-                row.IsExpanded = false;
-            }
-            RefreshData();
+            System.Diagnostics.Debug.WriteLine($"Visible rows built : {stopwatch.ElapsedMilliseconds}ms");
+            // Perform incremental updates to _flattenedRows  
+            UpdateFlattenedRowsCollection(newFlattenedRows);
+            System.Diagnostics.Debug.WriteLine($"Visible rows updated : {stopwatch.ElapsedMilliseconds}ms");
+            System.Diagnostics.Debug.WriteLine("====");
+            stopwatch.Stop();
         }
 
         private void CreateDefaultExpanderColumn()
@@ -243,14 +238,6 @@ namespace DaxStudio.Controls
             var stackPanelFactory = new FrameworkElementFactory(typeof(StackPanel));
             stackPanelFactory.SetValue(StackPanel.OrientationProperty, Orientation.Horizontal);
             stackPanelFactory.SetValue(StackPanel.VerticalAlignmentProperty, VerticalAlignment.Center);
-
-            // Create margin binding for indentation
-            //var marginBinding = new Binding("Level")
-            //{
-            //    Converter = new Converters.IndentConverter(),
-            //    ConverterParameter = IndentWidth
-            //};
-            //stackPanelFactory.SetBinding(StackPanel.MarginProperty, marginBinding);
 
             // Create Expander
             var expanderFactory = new FrameworkElementFactory(typeof(ToggleButton));
@@ -288,70 +275,6 @@ namespace DaxStudio.Controls
             }
         }
 
-        private void RefreshData(bool refreshItemMap = false)
-        {
-            stopwatch.Restart();
-            if (RootItems == null || string.IsNullOrEmpty(ChildrenBindingPath))
-                return;
-
-            if (refreshItemMap) _itemToRowMap.Clear();
-
-            // Build hierarchy (this part remains the same as we need the complete structure)  
-            var rootRows = new List<TreeGridRow<object>>();
-            foreach (var rootItem in RootItems)
-            {
-                BuildHierarchy(rootItem, 0, null, refreshItemMap);
-                if (_itemToRowMap.TryGetValue(rootItem, out var rootRow))
-                {
-                    rootRows.Add(rootRow);
-                }
-            }
-            System.Diagnostics.Debug.WriteLine($"Hierarchy built : {stopwatch.ElapsedMilliseconds}ms");
-            // After building the complete hierarchy, update the ancestors for all rows
-            UpdateAncestorsForAllRows(rootRows);
-            System.Diagnostics.Debug.WriteLine($"Ancestors updated : {stopwatch.ElapsedMilliseconds}ms");
-            // Build the new flattened structure  
-            var newFlattenedRows = new List<TreeGridRow<object>>();
-            foreach (var row in rootRows)
-            {
-                BuildVisibleRowsList(row, newFlattenedRows);
-            }
-            System.Diagnostics.Debug.WriteLine($"Visible rows built : {stopwatch.ElapsedMilliseconds}ms");
-            // Perform incremental updates to _flattenedRows  
-            UpdateFlattenedRowsCollection(newFlattenedRows);
-            System.Diagnostics.Debug.WriteLine($"Visible rows updated : {stopwatch.ElapsedMilliseconds}ms");
-            System.Diagnostics.Debug.WriteLine("====");
-            stopwatch.Stop();
-        }
-
-        private void BuildHierarchy(object item, int level, TreeGridRow parent, bool rebuildItemMap)
-        {
-            var row = new TreeGridRow ()
-            {
-                Data = item,
-                Level = level,
-                Parent = parent
-            };
-
-            if (rebuildItemMap) _itemToRowMap[item] = row;
-
-            if (parent != null)
-            {
-                parent.Children.Add(row);
-            }
-
-            // Get children using reflection or property path
-            var children = GetChildren(item);
-
-            if (children != null)
-            {
-                foreach (var child in children)
-                {
-                    BuildHierarchy(child, level + 1, row, rebuildItemMap);
-                }
-            }
-        }
-
         private void UpdateAncestorsForAllRows(List<TreeGridRow<object>> rootRows)
         {
             foreach (var rootRow in rootRows)
@@ -362,13 +285,11 @@ namespace DaxStudio.Controls
 
         private void UpdateAncestorsRecursive(TreeGridRow<object> row)
         {
-            // Update ancestors for this row based on its position among siblings
             if (row.Parent != null)
             {
                 var siblings = row.Parent.Children;
                 var isLastChild = siblings.LastOrDefault() == row;
 
-                // Copy parent's ancestors and add this row's position
                 row.Ancestors = new List<bool>(row.Parent.Ancestors);
                 row.Ancestors.Add(isLastChild);
                 row.SelectedLineLevels = new ObservableCollection<bool>(row.Parent.SelectedLineLevels);
@@ -376,12 +297,10 @@ namespace DaxStudio.Controls
             }
             else
             {
-                // Root level - no ancestors
                 row.Ancestors = new List<bool>();
                 row.SelectedLineLevels = new ObservableCollection<bool>();
             }
 
-            // Recursively update children
             foreach (var child in row.Children)
             {
                 UpdateAncestorsRecursive(child);
@@ -410,14 +329,10 @@ namespace DaxStudio.Controls
             }
         }
 
-        
-
-void UpdateFlattenedRowsCollection(List<TreeGridRow<object>> newRows)
+        void UpdateFlattenedRowsCollection(List<TreeGridRow<object>> newRows)
         {
-            // Convert current collection to list for easier manipulation
             var currentRows = _flattenedRows.ToList();
 
-            // Find rows to remove (exist in current but not in new)
             for (int i = currentRows.Count - 1; i >= 0; i--)
             {
                 if (!newRows.Contains(currentRows[i]))
@@ -426,7 +341,6 @@ void UpdateFlattenedRowsCollection(List<TreeGridRow<object>> newRows)
                 }
             }
 
-            // Find rows to add and their correct positions
             for (int newIndex = 0; newIndex < newRows.Count; newIndex++)
             {
                 var newRow = newRows[newIndex];
@@ -434,16 +348,52 @@ void UpdateFlattenedRowsCollection(List<TreeGridRow<object>> newRows)
 
                 if (currentIndex == -1)
                 {
-                    // Row doesn't exist, insert it at the correct position
                     _flattenedRows.Insert(newIndex, newRow);
                 }
                 else if (currentIndex != newIndex)
                 {
-                    // Row exists but in wrong position, move it
                     _flattenedRows.Move(currentIndex, newIndex);
                 }
             }
         }
-    }
 
+        /// <summary>
+        /// Toggles the expansion state of the specified item
+        /// </summary>
+        public void ToggleItem(object item)
+        {
+            if (_itemToRowMap.TryGetValue(item, out var row))
+            {
+                row.IsExpanded = !row.IsExpanded;
+                RefreshData();
+                SetSelectedLineLevelRecursive((TreeGridRow)row, row.Level, row.IsExpanded);
+
+            }
+        }
+
+        /// <summary>
+        /// Expands all items in the hierarchy
+        /// </summary>
+        public void ExpandAll()
+        {
+            foreach (var row in _itemToRowMap.Values)
+            {
+                row.IsExpanded = true;
+            }
+            RefreshData();
+        }
+
+        /// <summary>
+        /// Collapses all items in the hierarchy
+        /// </summary>
+        public void CollapseAll()
+        {
+            foreach (var row in _itemToRowMap.Values)
+            {
+                row.IsExpanded = false;
+            }
+            RefreshData();
+
+        }
+    }
 }
