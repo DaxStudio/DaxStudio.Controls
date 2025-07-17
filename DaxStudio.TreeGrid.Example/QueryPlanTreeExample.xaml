@@ -6,62 +6,87 @@
 
     <UserControl.Resources>
         <ResourceDictionary>
-            <ControlTemplate x:Key="Expander2" TargetType="ToggleButton">
-                <Border Background="Transparent" 
-        BorderBrush="Transparent" 
-        BorderThickness="0"
-        Width="16" 
-        Height="16">
-                    <Grid>
-                        <!--Fill="{DynamicResource Theme.Brush.Default.Fore}"-->
-                        <Path x:Name="ExpanderArrow"
-              Data="M 4 2 L 8 6 L 4 10 Z"
-              Fill="Black"
-              Stretch="Uniform"
-              Width="8"
-              Height="8"
-              Stroke="Black"
-              StrokeThickness="1"
-              RenderTransformOrigin="0.5,0.5">
-                            <Path.RenderTransform>
-                                <RotateTransform Angle="0"/>
-                            </Path.RenderTransform>
-                        </Path>
-                    </Grid>
+
+            <SolidColorBrush x:Key="Theme.Brush.Default.Fore" Color="Black"/>
+            <SolidColorBrush x:Key="Theme.Brush.Control.Border" Color="#CCCCCC"/>
+            <SolidColorBrush x:Key="Theme.Brush.Control.Hover" Color="#F0F0F0"/>
+            <SolidColorBrush x:Key="Theme.Brush.Control.Pressed" Color="#E0E0E0"/>
+            <SolidColorBrush x:Key="Theme.Brush.Control.Disabled" Color="#A0A0A0"/>
+            <SolidColorBrush x:Key="Theme.Brush.Accent" Color="#007ACC"/>
+
+
+            <ControlTemplate x:Key="SnoopExpanderTemplate" TargetType="{x:Type ToggleButton}">
+                <Border x:Name="Border"
+                            Width="19"
+                            Height="13"
+                            Background="#00FFFFFF">
+                    <Border x:Name="Border1"
+                                Width="9"
+                                Height="9"
+                                BorderBrush="#FF9495A2"
+                                BorderThickness="1 1 1 1"
+                                CornerRadius="1,1,1,1"
+                                SnapsToDevicePixels="True">
+                        <Border.Background>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                <GradientStop Color="#FFFFFFFF" Offset="0.4" />
+                                <GradientStop Color="#FFC6CEDA" Offset="1" />
+                            </LinearGradientBrush>
+                        </Border.Background>
+                        <Path x:Name="ExpandPath"
+                                  Margin="1 1 1 1"
+                                  Data="M0,2L0,3 2,3 2,5 3,5 3,3 5,3 5,2 3,2 3,0 2,0 2,2z"
+                                  Fill="#FF000000" />
+                    </Border>
                 </Border>
                 <ControlTemplate.Triggers>
                     <Trigger Property="IsChecked" Value="True">
-                        <Setter Property="Fill" TargetName="ExpanderArrow" Value="Red"/>
-                        <Trigger.EnterActions>
-
-                            <BeginStoryboard>
-                                <Storyboard>
-                                    <DoubleAnimation Storyboard.TargetName="ExpanderArrow"
-                                   Storyboard.TargetProperty="(Path.RenderTransform).(RotateTransform.Angle)"
-                                   To="90" Duration="0:0:0.0"/>
-                                </Storyboard>
-                            </BeginStoryboard>
-                        </Trigger.EnterActions>
-                        <Trigger.ExitActions>
-                            <BeginStoryboard>
-                                <Storyboard>
-                                    <DoubleAnimation Storyboard.TargetName="ExpanderArrow"
-                                   Storyboard.TargetProperty="(Path.RenderTransform).(RotateTransform.Angle)"
-                                   To="0" Duration="0:0:0.0"/>
-                                </Storyboard>
-                            </BeginStoryboard>
-                        </Trigger.ExitActions>
-                    </Trigger>
-
-                    <Trigger Property="IsMouseOver" Value="True">
-                        <Setter TargetName="ExpanderArrow" Property="Fill" Value="{DynamicResource Theme.Brush.Accent}"/>
-                    </Trigger>
-
-                    <Trigger Property="IsChecked" Value="False">
-                        <Setter Property="Fill" TargetName="ExpanderArrow" Value="Transparent"/>
+                        <Setter TargetName="ExpandPath" Property="Data" Value="M0,2L0,3 5,3 5,2z" />
                     </Trigger>
                 </ControlTemplate.Triggers>
             </ControlTemplate>
+
+            <!-- Define the custom ToggleButton template for Plus/Minus expander -->
+            <ControlTemplate x:Key="PlusMinusExpanderTemplate" TargetType="ToggleButton">
+                <Grid>
+                    <Image x:Name="Plus"
+                        Source="/DaxStudio.Controls.TreeGrid;component/Resources/Images/plus_light.png"
+                       Width="15" Height="15"
+                       HorizontalAlignment="Center" 
+                       VerticalAlignment="Center"/>
+                    <Image x:Name="Minus"
+                        Source="/DaxStudio.Controls.TreeGrid;component/Resources/Images/minus_light.png"
+                        Width="15" Height="15"
+                        HorizontalAlignment="Center" 
+                        VerticalAlignment="Center"/>
+                </Grid>
+
+                <ControlTemplate.Triggers>
+        <Trigger Property="IsChecked" Value="True">
+            <!-- Hide vertical line for minus sign -->
+            <Setter TargetName="Minus" Property="Visibility" Value="Visible"/>
+                        <Setter TargetName="Plus" Property="Visibility" Value="Hidden"/>
+                    </Trigger>
+                    <Trigger Property="IsChecked" Value="False">
+                        <!-- Hide vertical line for minus sign -->
+                        <Setter TargetName="Minus" Property="Visibility" Value="Hidden"/>
+                        <Setter TargetName="Plus" Property="Visibility" Value="Visible"/>
+                    </Trigger>
+                    <!--<Trigger Property="IsMouseOver" Value="True">
+            <Setter TargetName="Border" Property="Background" Value="{DynamicResource Theme.Brush.Control.Hover}"/>
+            <Setter TargetName="HorizontalLine" Property="Stroke" Value="{DynamicResource Theme.Brush.Accent}"/>
+            <Setter TargetName="VerticalLine" Property="Stroke" Value="{DynamicResource Theme.Brush.Accent}"/>
+        </Trigger>-->
+        <!--<Trigger Property="IsPressed" Value="True">
+            <Setter TargetName="Border" Property="Background" Value="{DynamicResource Theme.Brush.Control.Pressed}"/>
+        </Trigger>
+        <Trigger Property="IsEnabled" Value="False">
+            <Setter TargetName="Border" Property="Opacity" Value="0.5"/>
+            <Setter TargetName="HorizontalLine" Property="Stroke" Value="{DynamicResource Theme.Brush.Control.Disabled}"/>
+            <Setter TargetName="VerticalLine" Property="Stroke" Value="{DynamicResource Theme.Brush.Control.Disabled}"/>
+        </Trigger>-->
+    </ControlTemplate.Triggers>
+</ControlTemplate>
 
         </ResourceDictionary>
     </UserControl.Resources>
@@ -78,18 +103,18 @@
             <Button Content="Collapse All" Click="CollapseAll_Click" Margin="0,0,5,0"/>
         </StackPanel>
 
-        <!-- Hierarchical Data Grid -->
+        <!-- Tree Grid -->
         <ctrl:TreeGrid x:Name="HierarchicalGrid" 
                                    Grid.Row="1"
+                                   AlternatingRowBackground="#eeeeee"
                                    RootItems="{Binding RootItems}"
                                    ChildrenBindingPath="Children"
+                                   ExpandOnLoad="True"
                                    IndentWidth="20"
                                    Margin="5">
 
             <!-- Define columns -->
             <ctrl:TreeGrid.Columns>
-
-
 
                 <!-- Additional columns -->
                 <DataGridTextColumn Header="RowNumber" 
@@ -110,11 +135,12 @@
                 
                 <!-- Tree Column using custom control -->
                 <ctrl:TreeGridTreeColumn Header="Operation" 
-                    Width="300"
+                    Width="*"
                     TextPath="Data.Operation"
                     IndentWidth="16"
+                    ExpanderTemplate="{StaticResource SnoopExpanderTemplate}"                     
                     LineStroke="#AAAAAA"
-                                         SelectedLineStroke="Red"
+                    SelectedLineStroke="Red"
                     LineThickness="0.8">
                 </ctrl:TreeGridTreeColumn>
 
