@@ -16,8 +16,6 @@ namespace DaxStudio.Controls
 {
     public class TreeGrid : DataGrid
     {
-        private const string ExpanderColumnName = "TreeColumn";
-        private static Stopwatch stopwatch = new Stopwatch();
 
         // Cache for the root rows of the hierarchy
         private List<TreeGridRow<object>> _rootRows = new List<TreeGridRow<object>>();
@@ -60,8 +58,14 @@ namespace DaxStudio.Controls
 
             foreach (TreeGridRow<object> row in e.AddedItems)
             {
+                if (row.IsCollapsing)
+                {
+                    row.IsCollapsing = false; // Reset collapsing state
+                    continue; // Skip if collapsing
+                }
                 foreach (TreeGridRow<object> child in row.Children)
                 {
+
                     SetSelectedLineLevelRecursive(row, row.Level, true);
                 }
             }
@@ -200,7 +204,6 @@ namespace DaxStudio.Controls
 
         private void RefreshData()
         {
-            stopwatch.Restart();
             if (_rootRows == null || _rootRows.Count == 0)
                 return;
 
@@ -210,12 +213,9 @@ namespace DaxStudio.Controls
             {
                 BuildVisibleRowsList(row, newFlattenedRows);
             }
-            System.Diagnostics.Debug.WriteLine($"Visible rows built : {stopwatch.ElapsedMilliseconds}ms");
+
             // Perform incremental updates to _flattenedRows  
             UpdateFlattenedRowsCollection(newFlattenedRows);
-            System.Diagnostics.Debug.WriteLine($"Visible rows updated : {stopwatch.ElapsedMilliseconds}ms");
-            System.Diagnostics.Debug.WriteLine("====");
-            stopwatch.Stop();
         }
 
         private void CreateDefaultExpanderColumn()
@@ -246,13 +246,16 @@ namespace DaxStudio.Controls
             var expanderFactory = new FrameworkElementFactory(typeof(ToggleButton));
             expanderFactory.SetValue(ToggleButton.WidthProperty, 16.0);
             expanderFactory.SetValue(ToggleButton.HeightProperty, 16.0);
-            expanderFactory.SetValue(ToggleButton.StyleProperty, FindResource("ExpanderToggleStyle"));
+            
+            // Use a style without event setter
+            expanderFactory.SetValue(ToggleButton.StyleProperty, FindResource("ExpanderControlTemplate"));
             expanderFactory.SetBinding(ToggleButton.IsCheckedProperty, new Binding("IsExpanded"));
             expanderFactory.SetBinding(ToggleButton.VisibilityProperty, new Binding("HasChildren")
             {
                 Converter = new BooleanToVisibilityConverter()
             });
 
+            // Add event handler programmatically with name
             expanderFactory.AddHandler(
                 UIElement.PreviewMouseDownEvent,
                 new MouseButtonEventHandler(Expander_PreviewMouseDown));
@@ -269,15 +272,6 @@ namespace DaxStudio.Controls
             template.VisualTree = stackPanelFactory;
 
             return template;
-        }
-
-        private void OnExpanderClick(object sender, RoutedEventArgs e)
-        {
-            if (sender is ToggleButton toggleButton && toggleButton.DataContext is TreeGridRow<object> row)
-            {
-                row.IsExpanded = toggleButton.IsChecked ?? false;
-                RefreshData();
-            }
         }
 
         private void UpdateAncestorsForAllRows(List<TreeGridRow<object>> rootRows)

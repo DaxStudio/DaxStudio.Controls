@@ -210,6 +210,15 @@ namespace DaxStudio.Controls
             remove => RemoveHandler(ExpanderClickEvent, value);
         }
 
+        public static readonly RoutedEvent ExpanderPreviewMouseDownEvent = EventManager.RegisterRoutedEvent(
+            nameof(ExpanderPreviewMouseDown), RoutingStrategy.Bubble, typeof(RoutedEventHandler), typeof(TreeGridTreeCell));
+
+        public event RoutedEventHandler ExpanderPreviewMouseDown
+        {
+            add => AddHandler(ExpanderPreviewMouseDownEvent, value);
+            remove => RemoveHandler(ExpanderPreviewMouseDownEvent, value);
+        }
+
         private static void OnRowDataChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             if (d is TreeGridTreeCell control && e.NewValue is TreeGridRow<object> row)
@@ -262,20 +271,14 @@ namespace DaxStudio.Controls
             {
                 expander.Click += OnExpanderButtonClick;
                 expander.PreviewMouseDown += OnExpanderPreviewMouseDown;
-                expander.PreviewMouseUp += OnExpanderPreviewMouseUp;
             }
-        }
-
-        private void OnExpanderPreviewMouseUp(object sender, MouseButtonEventArgs e)
-        {
-            //e.Handled = true; // Prevents the click from propagating further
         }
 
         private void OnExpanderPreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
             //e.Handled = true; // Prevents the click from propagating further
             //RaiseEvent(new RoutedEventArgs(ExpanderClickEvent, this));
-
+            RaiseEvent(new RoutedEventArgs(ExpanderPreviewMouseDownEvent, this));
         }
 
         private void OnExpanderButtonClick(object sender, RoutedEventArgs e)
@@ -283,7 +286,7 @@ namespace DaxStudio.Controls
             
             // Raise the ExpanderClick event
             RaiseEvent(new RoutedEventArgs(ExpanderClickEvent, this));
-            e.Handled = true;
+
         }
     }
 }

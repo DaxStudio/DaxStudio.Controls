@@ -220,35 +220,5 @@ namespace DaxStudio.Controls
             drawingContext.DrawLine(linePen, new Point(currentX, centerY), new Point(expanderX, centerY));
         }
 
-        private void SetSelectedLineLevelRecursive(TreeGridRow row, int level, bool value)
-        {
-            if (row.SelectedLineLevels != null && level < row.SelectedLineLevels.Count)
-            {
-                row.SelectedLineLevels[level] = value;
-            }
-            foreach (TreeGridRow child in row.Children)
-            {
-                SetSelectedLineLevelRecursive(child, level, value);
-            }
-        }
-
-        private void treeGridRows_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
-        {
-            if (e.NewItems != null)
-            {
-                foreach (TreeGridRow row in e.NewItems)
-                {
-                    SetSelectedLineLevelRecursive(row, row.Level - 1, true);
-                }
-            }
-
-            if (e.OldItems != null)
-            {
-                foreach (TreeGridRow row in e.OldItems)
-                {
-                    SetSelectedLineLevelRecursive(row, row.Level - 1, false);
-                }
-            }
-        }
     }
 }

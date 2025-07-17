@@ -17,7 +17,7 @@ namespace DaxStudio.Controls.Model
         public int Level { get; set; }
         public TreeGridRow<T> Parent { get; set; }
         public List<TreeGridRow<T>> Children { get; set; } = new List<TreeGridRow<T>>();
-        
+        public bool IsCollapsing { get; set; }
         /// <summary>
         /// Array indicating whether each ancestor level is the last child of its parent
         /// Used for drawing tree lines efficiently without runtime calculations

@@ -1,4 +1,5 @@
 using DaxStudio.Controls.Model;
+using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -226,9 +227,20 @@ namespace DaxStudio.Controls
 
             // Handle the expander click event
             cellFactory.AddHandler(TreeGridTreeCell.ExpanderClickEvent, new RoutedEventHandler(OnExpanderClick));
+            cellFactory.AddHandler(TreeGridTreeCell.ExpanderPreviewMouseDownEvent, new RoutedEventHandler(OnExpanderPreviewMouseDownEvent));
 
             template.VisualTree = cellFactory;
             return template;
+        }
+
+        private void OnExpanderPreviewMouseDownEvent(object sender, RoutedEventArgs e)
+        {
+            System.Diagnostics.Debug.WriteLine("preview mouse down");
+            if (e.Source is TreeGridTreeCell cell)
+            {
+                var context = cell.DataContext as TreeGridRow<object>;
+                if (context.IsExpanded) context.IsCollapsing = true;
+            }
         }
 
         private void OnExpanderClick(object sender, RoutedEventArgs e)
@@ -243,12 +255,12 @@ namespace DaxStudio.Controls
 
         private TreeGrid FindParentTreeGrid(DependencyObject child)
         {
-            var parent = System.Windows.Media.VisualTreeHelper.GetParent(child);
+            var parent = VisualTreeHelper.GetParent(child);
             while (parent != null)
             {
                 if (parent is TreeGrid treeGrid)
                     return treeGrid;
-                parent = System.Windows.Media.VisualTreeHelper.GetParent(parent);
+                parent = VisualTreeHelper.GetParent(parent);
             }
             return null;
         }

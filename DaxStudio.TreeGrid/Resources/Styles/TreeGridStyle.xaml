@@ -24,7 +24,6 @@
             Width="16" 
             Height="16">
             <Grid>
-                <!--Fill="{DynamicResource Theme.Brush.Default.Fore}"-->
                 <Path x:Name="ExpanderArrow"
                   Data="M 4 2 L 8 6 L 4 10 Z"
                   Fill="Black"
@@ -76,7 +75,6 @@
 
     <!-- Expander Toggle Button Style -->
     <Style x:Key="ExpanderToggleStyle" TargetType="ToggleButton">
-        <!--<EventSetter Event="PreviewMouseDown" Handler="Expander_PreviewMouseDown"/>-->
         <Setter Property="Template" Value="{StaticResource ExpanderControlTemplate}"/>
     </Style>
 
@@ -159,7 +157,6 @@
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                             <!-- Indentation -->
                             <Border >
-                                <!-- Width="{Binding RowData.Level, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource IndentConverter}, ConverterParameter={Binding IndentWidth, RelativeSource={RelativeSource TemplatedParent}}}"-->
                                 <Border.Width>
                                     <MultiBinding Converter="{StaticResource MultiplyValueConverter}">
                                         <Binding Path="RowData.Level" RelativeSource="{RelativeSource TemplatedParent}"/>
