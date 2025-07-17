@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 
@@ -22,7 +23,8 @@ namespace DaxStudio.Controls.Model
         /// Used for drawing tree lines efficiently without runtime calculations
         /// </summary>
         public List<bool> Ancestors { get; set; } = new List<bool>();
-        
+        public ObservableCollection<bool> SelectedLineLevels { get; set; } = new ObservableCollection<bool>();
+
         private bool _hasChildren;
         public bool HasChildren
         {
@@ -67,7 +69,7 @@ namespace DaxStudio.Controls.Model
     /// <summary>
     /// Non-generic version for backward compatibility
     /// </summary>
-    public class HierarchicalDataGridRow : TreeGridRow<object>
+    public class TreeGridRow : TreeGridRow<object>
     {
     }
 }

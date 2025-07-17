@@ -99,6 +99,19 @@ namespace DaxStudio.Controls
         }
 
         /// <summary>
+        /// The line stroke brush for selected tree lines
+        /// </summary>
+        public static readonly DependencyProperty SelectedLineStrokeProperty =
+            DependencyProperty.Register(nameof(SelectedLineStroke), typeof(Brush), typeof(TreeGridTreeCell),
+                new PropertyMetadata(new SolidColorBrush(Color.FromRgb(0xAA, 0xAA, 0xAA))));
+
+        public Brush SelectedLineStroke
+        {
+            get => (Brush)GetValue(SelectedLineStrokeProperty);
+            set => SetValue(LineStrokeProperty, value);
+        }
+
+        /// <summary>
         /// The line thickness for tree lines
         /// </summary>
         public static readonly DependencyProperty LineThicknessProperty =

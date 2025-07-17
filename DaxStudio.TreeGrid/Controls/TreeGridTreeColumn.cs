@@ -38,6 +38,19 @@ namespace DaxStudio.Controls
         }
 
         /// <summary>
+        /// The line stroke brush for tree lines
+        /// </summary>
+        public static readonly DependencyProperty SelectedLineStrokeProperty =
+            DependencyProperty.Register(nameof(SelectedLineStroke), typeof(System.Windows.Media.Brush), typeof(TreeGridTreeColumn),
+                new PropertyMetadata(new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0xAA, 0xAA, 0xAA))));
+
+        public System.Windows.Media.Brush SelectedLineStroke
+        {
+            get => (System.Windows.Media.Brush)GetValue(SelectedLineStrokeProperty);
+            set => SetValue(LineStrokeProperty, value);
+        }
+
+        /// <summary>
         /// The line thickness for tree lines
         /// </summary>
         public static readonly DependencyProperty LineThicknessProperty =
@@ -178,6 +191,7 @@ namespace DaxStudio.Controls
             // Bind the properties from the column to the cell
             cellFactory.SetBinding(TreeGridTreeCell.IndentWidthProperty, new Binding(nameof(IndentWidth)) { Source = this });
             cellFactory.SetBinding(TreeGridTreeCell.LineStrokeProperty, new Binding(nameof(LineStroke)) { Source = this });
+            cellFactory.SetBinding(TreeGridTreeCell.SelectedLineStrokeProperty, new Binding(nameof(SelectedLineStroke)) { Source = this });
             cellFactory.SetBinding(TreeGridTreeCell.LineThicknessProperty, new Binding(nameof(LineThickness)) { Source = this });
             cellFactory.SetBinding(TreeGridTreeCell.ShowTreeLinesProperty, new Binding(nameof(ShowTreeLines)) { Source = this });
             

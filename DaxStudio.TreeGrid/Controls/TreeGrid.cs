@@ -1,4 +1,5 @@
 ﻿using DaxStudio.Controls.Model;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -38,6 +39,41 @@ namespace DaxStudio.Controls
             this.AlternatingRowBackground = new SolidColorBrush(Color.FromArgb(25, 0, 0, 0));
 
             Loaded += OnLoaded;
+            SelectionChanged += OnSelectionChanged;
+        }
+
+        
+
+        private void OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            System.Diagnostics.Debug.WriteLine($"Selection changed: {e.AddedItems.Count} items added, {e.RemovedItems.Count} items removed");
+            foreach( TreeGridRow row in e.AddedItems )
+            {
+                foreach(TreeGridRow child in row.Children)
+                {
+                    SetSelectedLineLevelRecursive(row, row.Level , true);
+                }
+            }
+
+            foreach( TreeGridRow row in e.RemovedItems)
+            {
+                foreach (TreeGridRow child in row.Children)
+                {
+                    SetSelectedLineLevelRecursive(row, row.Level , false);
+                }
+            }
+        }
+
+        private void SetSelectedLineLevelRecursive(TreeGridRow row, int level, bool value)
+        {
+            if (row.SelectedLineLevels != null && level < row.SelectedLineLevels.Count)
+            {
+                row.SelectedLineLevels[level] = value;
+            }
+            foreach (TreeGridRow child in row.Children)
+            {
+                SetSelectedLineLevelRecursive(child, level, value);
+            }
         }
 
         /// <summary>
@@ -155,6 +191,8 @@ namespace DaxStudio.Controls
             {
                 row.IsExpanded = !row.IsExpanded;
                 RefreshData();
+                SetSelectedLineLevelRecursive((TreeGridRow)row, row.Level, row.IsExpanded);
+                
             }
         }
 
@@ -286,9 +324,9 @@ namespace DaxStudio.Controls
             stopwatch.Stop();
         }
 
-        private void BuildHierarchy(object item, int level, HierarchicalDataGridRow parent, bool rebuildItemMap)
+        private void BuildHierarchy(object item, int level, TreeGridRow parent, bool rebuildItemMap)
         {
-            var row = new HierarchicalDataGridRow ()
+            var row = new TreeGridRow ()
             {
                 Data = item,
                 Level = level,
@@ -333,11 +371,14 @@ namespace DaxStudio.Controls
                 // Copy parent's ancestors and add this row's position
                 row.Ancestors = new List<bool>(row.Parent.Ancestors);
                 row.Ancestors.Add(isLastChild);
+                row.SelectedLineLevels = new ObservableCollection<bool>(row.Parent.SelectedLineLevels);
+                row.SelectedLineLevels.Add(false);
             }
             else
             {
                 // Root level - no ancestors
                 row.Ancestors = new List<bool>();
+                row.SelectedLineLevels = new ObservableCollection<bool>();
             }
 
             // Recursively update children

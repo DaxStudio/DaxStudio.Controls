@@ -114,7 +114,8 @@
                     TextPath="Data.Operation"
                     IndentWidth="16"
                     LineStroke="#AAAAAA"
-                    LineThickness="1">
+                                         SelectedLineStroke="Red"
+                    LineThickness="0.8">
                 </ctrl:TreeGridTreeColumn>
 
 

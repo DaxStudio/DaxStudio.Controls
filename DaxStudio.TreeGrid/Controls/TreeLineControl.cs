@@ -1,4 +1,6 @@
+using DaxStudio.Controls.Model;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Linq;
 using System.Windows;
@@ -65,6 +67,16 @@ namespace DaxStudio.Controls
             set => SetValue(AncestorLevelsProperty, value);
         }
 
+        public static readonly DependencyProperty SelectedLineLevelsProperty =
+            DependencyProperty.Register(nameof(SelectedLineLevels), typeof(IEnumerable<bool>), typeof(TreeLineControl),
+                new PropertyMetadata(null, OnSelectedLineLevelsChanged));
+
+        public IEnumerable<bool> SelectedLineLevels
+        {
+            get => (IEnumerable<bool>)GetValue(SelectedLineLevelsProperty);
+            set => SetValue(SelectedLineLevelsProperty, value);
+        }
+
         public static readonly DependencyProperty LineStrokeProperty =
             DependencyProperty.Register(nameof(LineStroke), typeof(Brush), typeof(TreeLineControl),
                 new PropertyMetadata(new SolidColorBrush(Colors.Gray), OnLineStrokeChanged));
@@ -83,6 +95,16 @@ namespace DaxStudio.Controls
         {
             get => (double)GetValue(LineThicknessProperty);
             set => SetValue(LineThicknessProperty, value);
+        }
+
+        public static readonly DependencyProperty SelectedLineStrokeProperty =
+            DependencyProperty.Register(nameof(SelectedLineStroke), typeof(Brush), typeof(TreeLineControl),
+                new PropertyMetadata(Brushes.Red, OnSelectedLineStrokeChanged));
+
+        public Brush SelectedLineStroke
+        {
+            get => (Brush)GetValue(SelectedLineStrokeProperty);
+            set => SetValue(SelectedLineStrokeProperty, value);
         }
 
         private static void OnLevelChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -110,6 +132,21 @@ namespace DaxStudio.Controls
             ((TreeLineControl)d).InvalidateVisual();
         }
 
+        private static void OnSelectedLineLevelsChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            var control = (TreeLineControl)d;
+
+            // Unsubscribe from old collection
+            if (e.OldValue is INotifyCollectionChanged oldCollection)
+                oldCollection.CollectionChanged -= control.SelectedLineLevels_CollectionChanged;
+
+            // Subscribe to new collection
+            if (e.NewValue is INotifyCollectionChanged newCollection)
+                newCollection.CollectionChanged += control.SelectedLineLevels_CollectionChanged;
+
+            control.InvalidateVisual();
+        }
+
         private static void OnLineStrokeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             ((TreeLineControl)d).InvalidateVisual();
@@ -120,60 +157,100 @@ namespace DaxStudio.Controls
             ((TreeLineControl)d).InvalidateVisual();
         }
 
+        private static void OnSelectedLineStrokeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            ((TreeLineControl)d).InvalidateVisual();
+        }
+
+        private void SelectedLineLevels_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            InvalidateVisual();
+        }
+
         const int topOffset = -2;
         const int bottomOffset = 2;
 
         protected override void OnRender(DrawingContext drawingContext)
         {
             base.OnRender(drawingContext);
-            
+
             if (Level == 0) return;
 
             var pen = new Pen(LineStroke, LineThickness);
-            pen.DashStyle = new DashStyle(new double[] { 2, 2 },2);
+            pen.DashStyle = new DashStyle(new double[] { 2, 1 }, 2);
             var centerY = ActualHeight / 2;
-
+            var selectedLevels = SelectedLineLevels?.ToArray();
             // Draw vertical lines for all ancestor levels
             if (AncestorLevels != null)
             {
                 var ancestors = AncestorLevels.ToArray();
+                
                 for (int i = 0; i < ancestors.Length && i < Level - 1; i++)
                 {
                     var x = (i + 1) * IndentWidth - IndentWidth / 2;
-                    
+
                     // Draw vertical line only if this ancestor has more siblings
                     if (!ancestors[i])
                     {
-                        drawingContext.DrawLine(pen, new Point(x, 0 + topOffset), new Point(x, ActualHeight + bottomOffset));
+                        // Use highlight if selected
+                        bool isAncestorSelected = selectedLevels != null && i < selectedLevels.Length && selectedLevels[i];
+                        var ancestorLinePen = isAncestorSelected ? new Pen(SelectedLineStroke ?? Brushes.Red, LineThickness) { DashStyle = pen.DashStyle } : pen;
+                        drawingContext.DrawLine(ancestorLinePen, new Point(x, 0), new Point(x, ActualHeight));
                     }
                 }
-                Debug.WriteLine($"Rendering TreeLineControl at Level {Level}, LastChild: {IsLastChild}, HasChildren: {HasChildren}, Ancestors: {ancestors.Count()} ");
-            }
-            else
-            {
-                Debug.WriteLine($"Rendering TreeLineControl at Level {Level}, LastChild: {IsLastChild}, HasChildren: {HasChildren}, Ancestors: 0 ");
-
             }
 
-                // Draw lines for current level
-                var currentX = Level * IndentWidth - IndentWidth / 2;
-
+            // Draw lines for current level
+            var currentX = Level * IndentWidth - IndentWidth / 2;
+            bool isSelected = selectedLevels[Level-1];
+            var linePen = isSelected ? new Pen(SelectedLineStroke ?? Brushes.Red, LineThickness) { DashStyle = pen.DashStyle } : pen;
             // Vertical line (up to center or full height)
             if (!IsLastChild)
             {
                 // Draw full vertical line if not last child
-                drawingContext.DrawLine(pen, new Point(currentX, 0 + topOffset), new Point(currentX, ActualHeight + bottomOffset));
+                drawingContext.DrawLine(linePen, new Point(currentX, 0 + topOffset), new Point(currentX, ActualHeight + bottomOffset));
             }
             else
             {
                 // Draw only up to center if last child
-                drawingContext.DrawLine(pen, new Point(currentX, 0), new Point(currentX, centerY));
+                drawingContext.DrawLine(linePen, new Point(currentX, 0), new Point(currentX, centerY));
             }
-
+            System.Diagnostics.Debug.WriteLine($"OnRender isSelected: {isSelected} Level: {Level}");
             // Horizontal line to the expander/content
             //var expanderX = Level * IndentWidth - 8; // 8 is half the expander width
             var expanderX = currentX + IndentWidth / 2;
-            drawingContext.DrawLine(pen, new Point(currentX, centerY), new Point(expanderX, centerY));
+            drawingContext.DrawLine(linePen, new Point(currentX, centerY), new Point(expanderX, centerY));
+        }
+
+        private void SetSelectedLineLevelRecursive(TreeGridRow row, int level, bool value)
+        {
+            if (row.SelectedLineLevels != null && level < row.SelectedLineLevels.Count)
+            {
+                row.SelectedLineLevels[level] = value;
+            }
+            foreach (TreeGridRow child in row.Children)
+            {
+                SetSelectedLineLevelRecursive(child, level, value);
+            }
+        }
+
+        private void treeGridRows_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (e.NewItems != null)
+            {
+                foreach (TreeGridRow row in e.NewItems)
+                {
+                    SetSelectedLineLevelRecursive(row, row.Level - 1, true);
+                }
+            }
+
+            if (e.OldItems != null)
+            {
+                foreach (TreeGridRow row in e.OldItems)
+                {
+                    SetSelectedLineLevelRecursive(row, row.Level - 1, false);
+                }
+            }
         }
     }
 }

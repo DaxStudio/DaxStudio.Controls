@@ -99,9 +99,10 @@
                 <!-- Tree Column using custom control -->
                 <ctrl:TreeGridTreeColumn Header="Name" 
                                         Width="300"
-                                        Text ="{Binding Data.Name}"
+                                        TextPath ="Data.Name"
                                         IndentWidth="16"
                                         LineStroke="#AAAAAA"
+                                         SelectedLineStroke="Red"
                                         LineThickness="1">
                     <!-- ExpanderTemplate="{StaticResource Expander2}"-->
                     
