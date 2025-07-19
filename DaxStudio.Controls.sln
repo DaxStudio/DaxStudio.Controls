@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.14.36301.6
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DaxStudio.Controls.TreeGrid", "DaxStudio.TreeGrid\DaxStudio.Controls.TreeGrid.csproj", "{906D4137-00DF-4C8F-8561-25FB474D9C7A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DaxStudio.Controls", "DaxStudio.TreeGrid\DaxStudio.Controls.csproj", "{906D4137-00DF-4C8F-8561-25FB474D9C7A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DaxStudio.TreeGrid.Example", "DaxStudio.TreeGrid.Example\DaxStudio.TreeGrid.Example.csproj", "{277C8912-179F-461C-855E-AD9C9BD0F837}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DaxStudio.Controls.Example", "DaxStudio.TreeGrid.Example\DaxStudio.Controls.Example.csproj", "{277C8912-179F-461C-855E-AD9C9BD0F837}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

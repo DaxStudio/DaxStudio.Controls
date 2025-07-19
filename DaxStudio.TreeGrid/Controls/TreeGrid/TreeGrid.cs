@@ -1,8 +1,11 @@
 ﻿using DaxStudio.Controls.Model;
+using DaxStudio.Controls.Utils;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Windows;
@@ -46,26 +49,31 @@ namespace DaxStudio.Controls
 
         private void OnSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            foreach (TreeGridRow<object> row in e.RemovedItems)
+            // Batch process selection changes
+            _isUpdatingFlattenedRows = true;
+            try
             {
-                foreach (TreeGridRow<object> child in row.Children)
+                foreach (TreeGridRow<object> row in e.RemovedItems)
                 {
-                    SetSelectedLineLevelRecursive(row, row.Level, false);
+                    if (!row.IsCollapsing)
+                    {
+                        SetSelectedLineLevelRecursive(row, row.Level, false);
+                    }
                 }
-            }
 
-            foreach (TreeGridRow<object> row in e.AddedItems)
-            {
-                if (row.IsCollapsing)
+                foreach (TreeGridRow<object> row in e.AddedItems)
                 {
-                    row.IsCollapsing = false; // Reset collapsing state
-                    continue; // Skip if collapsing
-                }
-                foreach (TreeGridRow<object> child in row.Children)
-                {
-
+                    if (row.IsCollapsing)
+                    {
+                        row.IsCollapsing = false;
+                        continue;
+                    }
                     SetSelectedLineLevelRecursive(row, row.Level, true);
                 }
+            }
+            finally
+            {
+                _isUpdatingFlattenedRows = false;
             }
         }
 
@@ -213,20 +221,160 @@ namespace DaxStudio.Controls
             return row;
         }
 
+        // Add these performance-related properties
+        private bool _isUpdatingFlattenedRows = false;
+        private readonly HashSet<TreeGridRow<object>> _visibleRowsSet = new HashSet<TreeGridRow<object>>();
+
+        // Optimized RefreshData method
         private void RefreshData()
         {
-            if (_rootRows == null || _rootRows.Count == 0)
+            if (_rootRows == null || _rootRows.Count == 0 || _isUpdatingFlattenedRows)
                 return;
 
-            // Build the new flattened structure  
-            var newFlattenedRows = new List<TreeGridRow<object>>();
-            foreach (var row in _rootRows)
+            _isUpdatingFlattenedRows = true;
+            try
             {
-                BuildVisibleRowsList(row, newFlattenedRows);
-            }
+                // Build the new flattened structure more efficiently
+                var newFlattenedRows = new List<TreeGridRow<object>>();
+                _visibleRowsSet.Clear();
 
-            // Perform incremental updates to _flattenedRows  
-            UpdateFlattenedRowsCollection(newFlattenedRows);
+                foreach (var row in _rootRows)
+                {
+                    BuildVisibleRowsListOptimized(row, newFlattenedRows);
+                }
+
+                // Perform batch updates to _flattenedRows
+                UpdateFlattenedRowsCollectionOptimized(newFlattenedRows);
+            }
+            finally
+            {
+                _isUpdatingFlattenedRows = false;
+            }
+        }
+
+        // Optimized visible rows building
+        private void BuildVisibleRowsListOptimized(TreeGridRow<object> row, List<TreeGridRow<object>> visibleRows)
+        {
+            visibleRows.Add(row);
+            _visibleRowsSet.Add(row);
+
+            if (row.IsExpanded && row.HasChildren)
+            {
+                foreach (var child in row.Children)
+                {
+                    BuildVisibleRowsListOptimized(child, visibleRows);
+                }
+            }
+        }
+
+        // Optimized collection update with batch operations
+        private void UpdateFlattenedRowsCollectionOptimized(List<TreeGridRow<object>> newRows)
+        {
+            // Suspend collection change notifications during bulk updates
+            using (var deferRefresh = new DeferRefresh(_flattenedRows))
+            {
+                // Remove items not in new set
+                for (int i = _flattenedRows.Count - 1; i >= 0; i--)
+                {
+                    if (!_visibleRowsSet.Contains(_flattenedRows[i]))
+                    {
+                        _flattenedRows.RemoveAt(i);
+                    }
+                }
+
+                // Add/move items efficiently
+                for (int newIndex = 0; newIndex < newRows.Count; newIndex++)
+                {
+                    var newRow = newRows[newIndex];
+                    var currentIndex = _flattenedRows.IndexOf(newRow);
+
+                    if (currentIndex == -1)
+                    {
+                        _flattenedRows.Insert(newIndex, newRow);
+                    }
+                    else if (currentIndex != newIndex)
+                    {
+                        _flattenedRows.Move(currentIndex, newIndex);
+                    }
+                }
+            }
+        }
+
+        // Optimized toggle with minimal refresh
+        public void ToggleItem(object item)
+        {
+            using (new OverrideCursor(Cursors.Wait))
+            {
+                if (_itemToRowMap.TryGetValue(item, out var row))
+                {
+                    // Mark row as collapsing if it's being collapsed
+                    if (row.IsExpanded)
+                    {
+                        row.IsCollapsing = true;
+                        MarkDescendantsAsCollapsing(row);
+                    }
+
+                    row.IsExpanded = !row.IsExpanded;
+                    RefreshData();
+
+                    // Update selection lines more efficiently
+                    if (row.IsExpanded)
+                    {
+                        SetSelectedLineLevelRecursive(row, row.Level, true);
+                    }
+                }
+            }
+        }
+
+        // Helper method to mark descendants as collapsing
+        private void MarkDescendantsAsCollapsing(TreeGridRow<object> row)
+        {
+            foreach (var child in row.Children)
+            {
+                child.IsCollapsing = true;
+                MarkDescendantsAsCollapsing(child);
+            }
+        }
+
+        // Optimized ExpandAll/CollapseAll with batch operations
+        public void ExpandAll()
+        {
+            using (new OverrideCursor(Cursors.Wait))
+            {
+                _isUpdatingFlattenedRows = true;
+                try
+                {
+                    foreach (var row in _itemToRowMap.Values)
+                    {
+                        row.IsExpanded = true;
+                    }
+                }
+                finally
+                {
+                    _isUpdatingFlattenedRows = false;
+                }
+                RefreshData();
+            }
+        }
+
+        public void CollapseAll()
+        {
+            using (new OverrideCursor(Cursors.Wait))
+            {
+                _isUpdatingFlattenedRows = true;
+                try
+                {
+                    foreach (var row in _itemToRowMap.Values)
+                    {
+                        row.IsExpanded = false;
+                    }
+                }
+                finally
+                {
+                    _isUpdatingFlattenedRows = false;
+                }
+                RefreshData();
+            }
         }
 
         private void CreateDefaultExpanderColumn()
@@ -257,7 +405,7 @@ namespace DaxStudio.Controls
             var expanderFactory = new FrameworkElementFactory(typeof(ToggleButton));
             expanderFactory.SetValue(ToggleButton.WidthProperty, 16.0);
             expanderFactory.SetValue(ToggleButton.HeightProperty, 16.0);
-            
+
             // Use a style without event setter
             expanderFactory.SetValue(ToggleButton.StyleProperty, FindResource("ExpanderControlTemplate"));
             expanderFactory.SetBinding(ToggleButton.IsCheckedProperty, new Binding("IsExpanded"));
@@ -367,86 +515,56 @@ namespace DaxStudio.Controls
             }
         }
 
-        /// <summary>
-        /// Toggles the expansion state of the specified item
-        /// </summary>
-        public void ToggleItem(object item)
-        {
-            if (_itemToRowMap.TryGetValue(item, out var row))
-            {
-                row.IsExpanded = !row.IsExpanded;
-                RefreshData();
-                SetSelectedLineLevelRecursive(row, row.Level, row.IsExpanded);
 
-            }
-        }
 
-        /// <summary>
-        /// Expands all items in the hierarchy
-        /// </summary>
-        public void ExpandAll()
-        {
-            foreach (var row in _itemToRowMap.Values)
-            {
-                row.IsExpanded = true;
-            }
-            RefreshData();
-        }
 
-        /// <summary>
-        /// Collapses all items in the hierarchy
-        /// </summary>
-        public void CollapseAll()
-        {
-            foreach (var row in _itemToRowMap.Values)
-            {
-                row.IsExpanded = false;
-            }
-            RefreshData();
-
-        }
 
         private void Expander_PreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
             e.Handled = true; // Prevents the event from bubbling to the DataGridRow
         }
 
-        //protected override void PrepareContainerForItemOverride(DependencyObject element, object item)
-        //{
-        //    base.PrepareContainerForItemOverride(element, item);
+
+    }
+
+    // Helper class for deferring ObservableCollection notifications
+    public class DeferRefresh : IDisposable
+    {
+        private readonly ObservableCollection<TreeGridRow<object>> _collection;
+        private readonly PropertyChangedEventHandler _propertyChangedHandler;
+        private readonly NotifyCollectionChangedEventHandler _collectionChangedHandler;
+
+        public DeferRefresh(ObservableCollection<TreeGridRow<object>> collection)
+        {
             
-        //    if (element is DataGridRow row)
-        //    {
-        //        // Apply any TreeGrid-specific properties to the row
-                
-        //        // When cells are generated, they'll pick up properties from the containing TreeGrid
-        //        row.Loaded += (sender, e) => 
-        //        {
-        //            // Find any TreeGridTreeCell instances in the row and set properties
-        //            foreach (var cell in row.FindVisualChildren<TreeGridTreeCell>())
-        //            {
-        //                cell.LineStroke = this.LineStroke;
-        //                cell.SelectedLineStroke = this.SelectedLineStroke;
-        //            }
-        //        };
-        //    }
-        //}
+            _collection = collection;
+            // Store original handlers and temporarily remove them
+            var collectionChangedField = typeof(ObservableCollection<TreeGridRow<object>>)
+                .GetField("CollectionChanged", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+            var propertyChangedField = typeof(ObservableCollection<TreeGridRow<object>>)
+                .GetField("PropertyChanged", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
 
-        //// You may need this helper method to find visual children
-        //private static IEnumerable<T> FindVisualChildren<T>(this DependencyObject parent) where T : DependencyObject
-        //{
-        //    if (parent == null) yield break;
+            _collectionChangedHandler = (NotifyCollectionChangedEventHandler)collectionChangedField?.GetValue(_collection);
+            _propertyChangedHandler = (PropertyChangedEventHandler)propertyChangedField?.GetValue(_collection);
 
-        //    for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
-        //    {
-        //        var child = VisualTreeHelper.GetChild(parent, i);
+            // Temporarily clear the handlers
+            collectionChangedField?.SetValue(_collection, null);
+            propertyChangedField?.SetValue(_collection, null);
+        }
 
-        //        if (child is T childAsT)
-        //            yield return childAsT;
+        public void Dispose()
+        {
+            // Restore handlers and fire a reset notification
+            var collectionChangedField = typeof(ObservableCollection<TreeGridRow<object>>)
+                .GetField("CollectionChanged", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+            var propertyChangedField = typeof(ObservableCollection<TreeGridRow<object>>)
+                .GetField("PropertyChanged", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
 
-        //        foreach (var descendant in FindVisualChildren<T>(child))
-        //            yield return descendant;
-        //    }
-        //}
+            collectionChangedField?.SetValue(_collection, _collectionChangedHandler);
+            propertyChangedField?.SetValue(_collection, _propertyChangedHandler);
+
+            // Fire a reset notification
+            _collectionChangedHandler?.Invoke(_collection, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
+        }
     }
 }
