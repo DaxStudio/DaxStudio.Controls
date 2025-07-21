@@ -5,7 +5,7 @@
     xmlns:conv="clr-namespace:DaxStudio.Controls.Converters">
 
     <ResourceDictionary.MergedDictionaries>
-        <ResourceDictionary Source="/DaxStudio.Controls.TreeGrid;component/Resources/Styles/TreeGridStyle.xaml" />
+        <ResourceDictionary Source="/DaxStudio.Controls;component/Resources/Styles/TreeGridStyle.xaml" />
     </ResourceDictionary.MergedDictionaries>
     
     

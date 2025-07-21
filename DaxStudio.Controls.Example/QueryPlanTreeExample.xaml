@@ -46,48 +46,6 @@
                 </ControlTemplate.Triggers>
             </ControlTemplate>
 
-            <!-- Define the custom ToggleButton template for Plus/Minus expander -->
-            <ControlTemplate x:Key="PlusMinusExpanderTemplate" TargetType="ToggleButton">
-                <Grid>
-                    <Image x:Name="Plus"
-                        Source="/DaxStudio.Controls.TreeGrid;component/Resources/Images/plus_light.png"
-                       Width="15" Height="15"
-                       HorizontalAlignment="Center" 
-                       VerticalAlignment="Center"/>
-                    <Image x:Name="Minus"
-                        Source="/DaxStudio.Controls.TreeGrid;component/Resources/Images/minus_light.png"
-                        Width="15" Height="15"
-                        HorizontalAlignment="Center" 
-                        VerticalAlignment="Center"/>
-                </Grid>
-
-                <ControlTemplate.Triggers>
-        <Trigger Property="IsChecked" Value="True">
-            <!-- Hide vertical line for minus sign -->
-            <Setter TargetName="Minus" Property="Visibility" Value="Visible"/>
-                        <Setter TargetName="Plus" Property="Visibility" Value="Hidden"/>
-                    </Trigger>
-                    <Trigger Property="IsChecked" Value="False">
-                        <!-- Hide vertical line for minus sign -->
-                        <Setter TargetName="Minus" Property="Visibility" Value="Hidden"/>
-                        <Setter TargetName="Plus" Property="Visibility" Value="Visible"/>
-                    </Trigger>
-                    <!--<Trigger Property="IsMouseOver" Value="True">
-            <Setter TargetName="Border" Property="Background" Value="{DynamicResource Theme.Brush.Control.Hover}"/>
-            <Setter TargetName="HorizontalLine" Property="Stroke" Value="{DynamicResource Theme.Brush.Accent}"/>
-            <Setter TargetName="VerticalLine" Property="Stroke" Value="{DynamicResource Theme.Brush.Accent}"/>
-        </Trigger>-->
-        <!--<Trigger Property="IsPressed" Value="True">
-            <Setter TargetName="Border" Property="Background" Value="{DynamicResource Theme.Brush.Control.Pressed}"/>
-        </Trigger>
-        <Trigger Property="IsEnabled" Value="False">
-            <Setter TargetName="Border" Property="Opacity" Value="0.5"/>
-            <Setter TargetName="HorizontalLine" Property="Stroke" Value="{DynamicResource Theme.Brush.Control.Disabled}"/>
-            <Setter TargetName="VerticalLine" Property="Stroke" Value="{DynamicResource Theme.Brush.Control.Disabled}"/>
-        </Trigger>-->
-    </ControlTemplate.Triggers>
-</ControlTemplate>
-
         </ResourceDictionary>
     </UserControl.Resources>
 
@@ -106,13 +64,13 @@
         <!-- Tree Grid -->
         <ctrl:TreeGrid x:Name="HierarchicalGrid" 
                        EnableRowVirtualization="True"
-                                   Grid.Row="1"
-                                   AlternatingRowBackground="#eeeeee"
-                                   RootItems="{Binding RootItems}"
-                                   ChildrenBindingPath="Children"
-                                   ExpandOnLoad="True"
-                                   IndentWidth="20"
-                                   Margin="5">
+                       Grid.Row="1"
+                       AlternatingRowBackground="#eeeeee"
+                       RootItems="{Binding RootItems}"
+                       ChildrenBindingPath="Children"
+                       ExpandOnLoad="True"
+                       IndentWidth="20"
+                       Margin="5">
 
             <!-- Define columns -->
             <ctrl:TreeGrid.Columns>
@@ -125,7 +83,6 @@
                 <!-- Additional columns -->
                 <DataGridTextColumn Header="Records" 
                    Binding="{Binding Data.Records}" 
-                                    
                    Width="100">
                     <DataGridTextColumn.ElementStyle>
                         <Style TargetType="TextBlock">
@@ -141,7 +98,7 @@
                     IndentWidth="16"
                     ExpanderTemplate="{StaticResource SnoopExpanderTemplate}"                     
                     LineStroke="#AAAAAA"
-                    SelectedLineStroke="Red"
+
                     LineThickness="0.8">
                 </ctrl:TreeGridTreeColumn>
 
