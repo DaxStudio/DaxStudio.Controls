@@ -4,8 +4,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Collections.Specialized;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Windows;
@@ -14,7 +12,6 @@ using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Shapes;
 
 namespace DaxStudio.Controls
 {
@@ -761,38 +758,6 @@ namespace DaxStudio.Controls
             }
         }
 
-        void UpdateFlattenedRowsCollection(List<TreeGridRow<object>> newRows)
-        {
-            var currentRows = _flattenedRows.ToList();
-
-            for (int i = currentRows.Count - 1; i >= 0; i--)
-            {
-                if (!newRows.Contains(currentRows[i]))
-                {
-                    _flattenedRows.RemoveAt(i);
-                }
-            }
-
-            for (int newIndex = 0; newIndex < newRows.Count; newIndex++)
-            {
-                var newRow = newRows[newIndex];
-                var currentIndex = _flattenedRows.IndexOf(newRow);
-
-                if (currentIndex == -1)
-                {
-                    _flattenedRows.Insert(newIndex, newRow);
-                }
-                else if (currentIndex != newIndex)
-                {
-                    _flattenedRows.Move(currentIndex, newIndex);
-                }
-            }
-        }
-
-
-
-
-
         private void Expander_PreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
             e.Handled = true; // Prevents the event from bubbling to the DataGridRow
@@ -801,44 +766,4 @@ namespace DaxStudio.Controls
 
     }
 
-    // Helper class for deferring ObservableCollection notifications
-    public class DeferRefresh : IDisposable
-    {
-        private readonly ObservableCollection<TreeGridRow<object>> _collection;
-        private readonly PropertyChangedEventHandler _propertyChangedHandler;
-        private readonly NotifyCollectionChangedEventHandler _collectionChangedHandler;
-
-        public DeferRefresh(ObservableCollection<TreeGridRow<object>> collection)
-        {
-            
-            _collection = collection;
-            // Store original handlers and temporarily remove them
-            var collectionChangedField = typeof(ObservableCollection<TreeGridRow<object>>)
-                .GetField("CollectionChanged", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
-            var propertyChangedField = typeof(ObservableCollection<TreeGridRow<object>>)
-                .GetField("PropertyChanged", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
-
-            _collectionChangedHandler = (NotifyCollectionChangedEventHandler)collectionChangedField?.GetValue(_collection);
-            _propertyChangedHandler = (PropertyChangedEventHandler)propertyChangedField?.GetValue(_collection);
-
-            // Temporarily clear the handlers
-            collectionChangedField?.SetValue(_collection, null);
-            propertyChangedField?.SetValue(_collection, null);
-        }
-
-        public void Dispose()
-        {
-            // Restore handlers and fire a reset notification
-            var collectionChangedField = typeof(ObservableCollection<TreeGridRow<object>>)
-                .GetField("CollectionChanged", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
-            var propertyChangedField = typeof(ObservableCollection<TreeGridRow<object>>)
-                .GetField("PropertyChanged", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
-
-            collectionChangedField?.SetValue(_collection, _collectionChangedHandler);
-            propertyChangedField?.SetValue(_collection, _propertyChangedHandler);
-
-            // Fire a reset notification
-            _collectionChangedHandler?.Invoke(_collection, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
-        }
-    }
 }
