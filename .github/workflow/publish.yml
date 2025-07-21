@@ -1,0 +1,36 @@
+name: Publish Multi-Targeted NuGet Package
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-publish:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            8.0.x
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build .NET 8.0
+        run: dotnet build --configuration Release --framework net8.0
+
+      - name: Build .NET Framework 4.7.2
+        run: msbuild YourProject.csproj /p:Configuration=Release /p:TargetFramework=net472
+
+      - name: Pack NuGet package
+        run: dotnet pack --configuration Release --output ./nupkg
+
+      - name: Push package to NuGet
+        run: dotnet nuget push ./nupkg/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
+
