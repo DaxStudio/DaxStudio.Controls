@@ -44,36 +44,44 @@ namespace DaxStudio.Controls
             this.AlternatingRowBackground = new SolidColorBrush(Color.FromArgb(25, 0, 0, 0));
 
             Loaded += OnLoaded;
-            SelectionChanged += OnSelectionChanged;
+            //SelectionChanged += OnSelectionChanged;
         }
+
+        private readonly object _selectionChangeLock = new object();
 
         private void OnSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            // Batch process selection changes
-            _isUpdatingFlattenedRows = true;
-            try
+            // Ensure thread safety with lock
+            lock (_selectionChangeLock)
             {
-                foreach (TreeGridRow<object> row in e.RemovedItems)
+                // Batch process selection changes
+                _isUpdatingFlattenedRows = true;
+                try
                 {
-                    if (!row.IsCollapsing)
+                    // Process removed items first to avoid conflicts
+                    foreach (TreeGridRow<object> row in e.RemovedItems)
                     {
-                        SetSelectedLineLevelRecursive(row, row.Level, false);
+                        if (!row.IsCollapsing)
+                        {
+                            SetSelectedLineLevelRecursive(row, row.Level, false);
+                        }
                     }
-                }
 
-                foreach (TreeGridRow<object> row in e.AddedItems)
-                {
-                    if (row.IsCollapsing)
+                    // Then process added items
+                    foreach (TreeGridRow<object> row in e.AddedItems)
                     {
-                        row.IsCollapsing = false;
-                        continue;
+                        if (row.IsCollapsing)
+                        {
+                            row.IsCollapsing = false;
+                            continue;
+                        }
+                        SetSelectedLineLevelRecursive(row, row.Level, true);
                     }
-                    SetSelectedLineLevelRecursive(row, row.Level, true);
                 }
-            }
-            finally
-            {
-                _isUpdatingFlattenedRows = false;
+                finally
+                {
+                    _isUpdatingFlattenedRows = false;
+                }
             }
         }
 
@@ -166,7 +174,21 @@ namespace DaxStudio.Controls
             {
                 CreateDefaultExpanderColumn();
             }
-            ItemsSource = _flattenedRows;
+            else
+            {
+                foreach (var column in Columns)
+                {
+                    if (column is TreeGridTreeColumn treeColumn )
+                    {
+                        if (treeColumn.SelectedLineStroke != null)
+                        {
+                            // If the column is a TreeGridTreeColumn and the SelectedLineStroke property is set, set up selection change handling
+                            SelectionChanged += this.OnSelectionChanged;
+                        }
+                    }
+                }
+            }
+                ItemsSource = _flattenedRows;
         }
 
         // Rebuilds the hierarchy and caches it in _rootRows
