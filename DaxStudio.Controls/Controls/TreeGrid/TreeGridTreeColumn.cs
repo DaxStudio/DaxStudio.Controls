@@ -30,11 +30,11 @@ namespace DaxStudio.Controls
         /// </summary>
         public static readonly DependencyProperty LineStrokeProperty =
             DependencyProperty.Register(nameof(LineStroke), typeof(System.Windows.Media.Brush), typeof(TreeGridTreeColumn),
-                new PropertyMetadata(new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0xAA, 0xAA, 0xAA))));
+                new PropertyMetadata(new SolidColorBrush(System.Windows.Media.Color.FromRgb(0xAA, 0xAA, 0xAA))));
 
-        public System.Windows.Media.Brush LineStroke
+        public Brush LineStroke
         {
-            get => (System.Windows.Media.Brush)GetValue(LineStrokeProperty);
+            get => (Brush)GetValue(LineStrokeProperty);
             set => SetValue(LineStrokeProperty, value);
         }
 
@@ -43,11 +43,11 @@ namespace DaxStudio.Controls
         /// </summary>
         public static readonly DependencyProperty SelectedLineStrokeProperty =
             DependencyProperty.Register(nameof(SelectedLineStroke), typeof(System.Windows.Media.Brush), typeof(TreeGridTreeColumn),
-                new PropertyMetadata(new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0xAA, 0xAA, 0xAA))));
+                new PropertyMetadata(new SolidColorBrush(System.Windows.Media.Color.FromRgb(0xAA, 0xAA, 0xAA))));
 
-        public System.Windows.Media.Brush SelectedLineStroke
+        public Brush SelectedLineStroke
         {
-            get => (System.Windows.Media.Brush)GetValue(SelectedLineStrokeProperty);
+            get => (Brush)GetValue(SelectedLineStrokeProperty);
             set => SetValue(LineStrokeProperty, value);
         }
 
