@@ -14,11 +14,22 @@ using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Shapes;
 
 namespace DaxStudio.Controls
 {
     public class TreeGrid : DataGrid
     {
+        // Add these dependency properties for context menu configuration
+        public static readonly DependencyProperty ShowDefaultContextMenuProperty =
+            DependencyProperty.Register(nameof(ShowDefaultContextMenu), typeof(bool), typeof(TreeGrid),
+                new PropertyMetadata(true, OnShowDefaultContextMenuChanged));
+
+        public bool ShowDefaultContextMenu
+        {
+            get => (bool)GetValue(ShowDefaultContextMenuProperty);
+            set => SetValue(ShowDefaultContextMenuProperty, value);
+        }
 
         // Cache for the root rows of the hierarchy
         private List<TreeGridRow<object>> _rootRows = new List<TreeGridRow<object>>();
@@ -45,6 +56,155 @@ namespace DaxStudio.Controls
 
             Loaded += OnLoaded;
             //SelectionChanged += OnSelectionChanged;
+        }
+
+        private static void OnShowDefaultContextMenuChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (d is TreeGrid grid)
+            {
+                grid.SetupDefaultContextMenu();
+            }
+        }
+
+        private void SetupDefaultContextMenu()
+        {
+            if (ShowDefaultContextMenu && ContextMenu == null)
+            {
+                var contextMenu = new ContextMenu();
+
+                // Expand All
+                var expandAllItem = new MenuItem { Header = "Expand All" };
+                expandAllItem.Click += (s, e) => ExpandAll();
+                contextMenu.Items.Add(expandAllItem);
+
+                // Collapse All
+                var collapseAllItem = new MenuItem { Header = "Collapse All" };
+                collapseAllItem.Click += (s, e) => CollapseAll();
+                contextMenu.Items.Add(collapseAllItem);
+
+                // Separator
+                contextMenu.Items.Add(new Separator());
+
+                // Expand Selected
+                var expandSelectedItem = new MenuItem { Header = "Expand Selected"};
+                expandSelectedItem.Click += (s, e) => {
+                    if (SelectedItem is TreeGridRow<object> row && row.HasChildren && !row.IsExpanded)
+                    {
+                        ExpandItemRecursively(row.Data);
+                    }
+                };
+                contextMenu.Items.Add(expandSelectedItem);
+
+                // Collapse Selected (uncommented and fixed)
+                var collapseSelectedItem = new MenuItem { Header = "Collapse Selected" };
+                collapseSelectedItem.Click += (s, e) => {
+                    if (SelectedItem is TreeGridRow<object> row && row.HasChildren && row.IsExpanded)
+                    {
+                        CollapseItemRecursively(row.Data);
+                    }
+                };
+                contextMenu.Items.Add(collapseSelectedItem);
+
+                // Update menu states when opened
+                contextMenu.Opened += (s, e) => {
+                    var selectedRow = SelectedItem as TreeGridRow<object>;
+                    expandSelectedItem.IsEnabled = selectedRow?.HasChildren == true && !selectedRow.IsExpanded;
+                    collapseSelectedItem.IsEnabled = selectedRow?.HasChildren == true && selectedRow.IsExpanded;
+                    
+                    expandAllItem.IsEnabled = _itemToRowMap.Values.Any(r => r.HasChildren && !r.IsExpanded);
+                    collapseAllItem.IsEnabled = _itemToRowMap.Values.Any(r => r.HasChildren && r.IsExpanded);
+                };
+
+                ContextMenu = contextMenu;
+            }
+            else if (!ShowDefaultContextMenu && ContextMenu != null)
+            {
+                // Only remove if it's our default menu (simple check)
+                if (ContextMenu.Items.Count >= 2 && 
+                    ContextMenu.Items[0] is MenuItem firstItem && 
+                    firstItem.Header.ToString() == "Expand All")
+                {
+                    ContextMenu = null;
+                }
+            }
+        }
+
+        private void ExpandItemRecursively(object data)
+        {
+            if (data == null || !_itemToRowMap.TryGetValue(data, out var row))
+                return;
+
+            // Use batch operation for performance
+            _isUpdatingFlattenedRows = true;
+            try
+            {
+                // Expand the specified item and all its descendants
+                ExpandRowRecursively(row);
+            }
+            finally
+            {
+                _isUpdatingFlattenedRows = false;
+            }
+            
+            // Refresh the UI to show the expanded items
+            RefreshData();
+        }
+
+        private void ExpandRowRecursively(TreeGridRow<object> row)
+        {
+            if (row == null)
+                return;
+
+            // Expand this row if it has children
+            if (row.HasChildren)
+            {
+                row.IsExpanded = true;
+            }
+
+            // Recursively expand all child rows
+            foreach (var child in row.Children)
+            {
+                ExpandRowRecursively(child);
+            }
+        }
+
+        private void CollapseItemRecursively(object data)
+        {
+            if (data == null || !_itemToRowMap.TryGetValue(data, out var row))
+                return;
+
+            // Use batch operation for performance
+            _isUpdatingFlattenedRows = true;
+            try
+            {
+                // Collapse the specified item and all its descendants
+                CollapseRowRecursively(row);
+            }
+            finally
+            {
+                _isUpdatingFlattenedRows = false;
+            }
+            
+            // Refresh the UI to show the collapsed items
+            RefreshData();
+        }
+
+        private void CollapseRowRecursively(TreeGridRow<object> row)
+        {
+            if (row == null)
+                return;
+
+            // Recursively collapse all child rows first
+            foreach (var child in row.Children)
+            {
+                CollapseRowRecursively(child);
+            }
+
+            // Then collapse this row if it has children
+            if (row.HasChildren)
+            {
+                row.IsExpanded = false;
+            }
         }
 
         private readonly object _selectionChangeLock = new object();
@@ -192,6 +352,9 @@ namespace DaxStudio.Controls
                 }
             }
                 ItemsSource = _flattenedRows;
+                
+                // Setup default context menu after everything is loaded
+                SetupDefaultContextMenu();
         }
 
         // Rebuilds the hierarchy and caches it in _rootRows
@@ -414,8 +577,8 @@ namespace DaxStudio.Controls
         // Optimized toggle with minimal refresh
         public void ToggleItem(object item)
         {
-            using (new OverrideCursor(Cursors.Wait))
-            {
+            //using (new OverrideCursor(Cursors.Wait))
+            //{
                 if (_itemToRowMap.TryGetValue(item, out var row))
                 {
                     // Mark row as collapsing if it's being collapsed
@@ -434,7 +597,7 @@ namespace DaxStudio.Controls
                         SetSelectedLineLevelRecursive(row, row.Level, true);
                     }
                 }
-            }
+            //}
         }
 
         // Helper method to mark descendants as collapsing

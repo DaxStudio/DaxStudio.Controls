@@ -73,9 +73,40 @@
         </ControlTemplate.Triggers>
     </ControlTemplate>
 
+    <ControlTemplate x:Key="PlusMinusExpanderTemplate" TargetType="{x:Type ToggleButton}">
+        <Border x:Name="Border"
+                            Width="19"
+                            Height="13"
+                            Background="#00FFFFFF">
+            <Border x:Name="Border1"
+                                Width="9"
+                                Height="9"
+                                BorderBrush="#FF9495A2"
+                                BorderThickness="1 1 1 1"
+                                CornerRadius="1,1,1,1"
+                                SnapsToDevicePixels="True">
+                <Border.Background>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                        <GradientStop Color="#FFFFFFFF" Offset="0.4" />
+                        <GradientStop Color="#FFC6CEDA" Offset="1" />
+                    </LinearGradientBrush>
+                </Border.Background>
+                <Path x:Name="ExpandPath"
+                                  Margin="1 1 1 1"
+                                  Data="M0,2L0,3 2,3 2,5 3,5 3,3 5,3 5,2 3,2 3,0 2,0 2,2z"
+                                  Fill="#FF000000" />
+            </Border>
+        </Border>
+        <ControlTemplate.Triggers>
+            <Trigger Property="IsChecked" Value="True">
+                <Setter TargetName="ExpandPath" Property="Data" Value="M0,2L0,3 5,3 5,2z" />
+            </Trigger>
+        </ControlTemplate.Triggers>
+    </ControlTemplate>
+
     <!-- Expander Toggle Button Style -->
     <Style x:Key="ExpanderToggleStyle" TargetType="ToggleButton">
-        <Setter Property="Template" Value="{StaticResource ExpanderControlTemplate}"/>
+        <Setter Property="Template" Value="{StaticResource PlusMinusExpanderTemplate}"/>
     </Style>
 
      <!--TreeGrid Style--> 
