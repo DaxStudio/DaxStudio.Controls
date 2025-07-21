@@ -178,14 +178,17 @@ namespace DaxStudio.Controls
             {
                 foreach (var column in Columns)
                 {
-                    if (column is TreeGridTreeColumn treeColumn )
-                    {
-                        if (treeColumn.SelectedLineStroke != null)
-                        {
-                            // If the column is a TreeGridTreeColumn and the SelectedLineStroke property is set, set up selection change handling
-                            SelectionChanged += this.OnSelectionChanged;
-                        }
-                    }
+                    if (!(column is TreeGridTreeColumn treeColumn))
+                        continue;
+                    
+                    if (!(treeColumn.SelectedLineStroke is SolidColorBrush selectedBrush) || !treeColumn.ShowTreeLines)
+                        continue;
+                    
+                    if (selectedBrush.Color == Colors.Transparent)
+                        continue;
+                    
+                    // If the column is a TreeGridTreeColumn and the SelectedLineStroke property is set, set up selection change handling
+                    SelectionChanged += this.OnSelectionChanged;
                 }
             }
                 ItemsSource = _flattenedRows;
@@ -246,6 +249,9 @@ namespace DaxStudio.Controls
         // Add these performance-related properties
         private bool _isUpdatingFlattenedRows = false;
         private readonly HashSet<TreeGridRow<object>> _visibleRowsSet = new HashSet<TreeGridRow<object>>();
+        private readonly Stopwatch _refreshTimer = new Stopwatch();
+        // Add this field for better performance tracking
+        private int _lastRefreshRowCount = 0;
 
         // Optimized RefreshData method
         private void RefreshData()
@@ -253,6 +259,7 @@ namespace DaxStudio.Controls
             if (_rootRows == null || _rootRows.Count == 0 || _isUpdatingFlattenedRows)
                 return;
 
+            _refreshTimer.Restart();
             _isUpdatingFlattenedRows = true;
             try
             {
@@ -265,12 +272,27 @@ namespace DaxStudio.Controls
                     BuildVisibleRowsListOptimized(row, newFlattenedRows);
                 }
 
+                // Early exit if no changes
+                if (newFlattenedRows.Count == _lastRefreshRowCount && 
+                    _flattenedRows.Count == _lastRefreshRowCount &&
+                    newFlattenedRows.SequenceEqual(_flattenedRows))
+                {
+                    Debug.WriteLine("TreeGrid RefreshData: No changes detected, skipping update");
+                    return;
+                }
+
+                _lastRefreshRowCount = newFlattenedRows.Count;
+                Debug.WriteLine($"TreeGrid Visible Rows built: {newFlattenedRows.Count} rows at {_refreshTimer.ElapsedMilliseconds} ms");
+
                 // Perform batch updates to _flattenedRows
                 UpdateFlattenedRowsCollectionOptimized(newFlattenedRows);
+                Debug.WriteLine($"TreeGrid Flattened Rows updated at: {_refreshTimer.ElapsedMilliseconds} ms");
             }
             finally
             {
                 _isUpdatingFlattenedRows = false;
+                Debug.WriteLine($"TreeGrid RefreshData completed in: {_refreshTimer.ElapsedMilliseconds} ms");
+                Debug.WriteLine("====");
             }
         }
 
@@ -290,35 +312,102 @@ namespace DaxStudio.Controls
         }
 
         // Optimized collection update with batch operations
+        // Alternative high-performance implementation
         private void UpdateFlattenedRowsCollectionOptimized(List<TreeGridRow<object>> newRows)
         {
-            // Suspend collection change notifications during bulk updates
             using (var deferRefresh = new DeferRefresh(_flattenedRows))
             {
-                // Remove items not in new set
-                for (int i = _flattenedRows.Count - 1; i >= 0; i--)
+                // Quick check for complete replacement scenario
+                if (_flattenedRows.Count == 0)
                 {
-                    if (!_visibleRowsSet.Contains(_flattenedRows[i]))
+                    // Simple add all
+                    foreach (var row in newRows)
                     {
-                        _flattenedRows.RemoveAt(i);
+                        _flattenedRows.Add(row);
                     }
+                    return;
                 }
 
-                // Add/move items efficiently
-                for (int newIndex = 0; newIndex < newRows.Count; newIndex++)
+                if (newRows.Count == 0)
                 {
-                    var newRow = newRows[newIndex];
-                    var currentIndex = _flattenedRows.IndexOf(newRow);
-
-                    if (currentIndex == -1)
-                    {
-                        _flattenedRows.Insert(newIndex, newRow);
-                    }
-                    else if (currentIndex != newIndex)
-                    {
-                        _flattenedRows.Move(currentIndex, newIndex);
-                    }
+                    // Simple clear all
+                    _flattenedRows.Clear();
+                    return;
                 }
+
+                // Use a more efficient diff algorithm
+                var operations = CalculateMinimalOperations(_flattenedRows, newRows);
+                ApplyOperations(operations);
+            }
+        }
+
+        private struct CollectionOperation
+        {
+            public enum OperationType { Insert, Remove, Move }
+            public OperationType Type;
+            public int Index;
+            public int TargetIndex; // For moves
+            public TreeGridRow<object> Item; // For inserts
+        }
+
+        private List<CollectionOperation> CalculateMinimalOperations(
+            ObservableCollection<TreeGridRow<object>> current, 
+            List<TreeGridRow<object>> target)
+        {
+            var operations = new List<CollectionOperation>();
+            
+            // Create lookup for fast existence checks
+            var targetSet = new HashSet<TreeGridRow<object>>(target);
+            var currentList = current.ToList();
+            
+            // Find items to remove
+            for (int i = currentList.Count - 1; i >= 0; i--)
+            {
+                if (!targetSet.Contains(currentList[i]))
+                {
+                    operations.Add(new CollectionOperation 
+                    { 
+                        Type = CollectionOperation.OperationType.Remove, 
+                        Index = i 
+                    });
+                }
+            }
+            
+            // Find items to add and their positions
+            var currentSet = new HashSet<TreeGridRow<object>>(currentList);
+            for (int i = 0; i < target.Count; i++)
+            {
+                if (!currentSet.Contains(target[i]))
+                {
+                    operations.Add(new CollectionOperation 
+                    { 
+                        Type = CollectionOperation.OperationType.Insert, 
+                        Index = i, 
+                        Item = target[i] 
+                    });
+                }
+            }
+            
+            return operations;
+        }
+
+        private void ApplyOperations(List<CollectionOperation> operations)
+        {
+            // Apply removals first (in reverse order)
+            var removals = operations.Where(op => op.Type == CollectionOperation.OperationType.Remove)
+                            .OrderByDescending(op => op.Index);
+            foreach (var removal in removals)
+            {
+                _flattenedRows.RemoveAt(removal.Index);
+            }
+            
+            // Apply insertions
+            var insertions = operations.Where(op => op.Type == CollectionOperation.OperationType.Insert)
+                              .OrderBy(op => op.Index);
+            foreach (var insertion in insertions)
+            {
+                int safeIndex = Math.Min(insertion.Index, _flattenedRows.Count);
+                _flattenedRows.Insert(safeIndex, insertion.Item);
             }
         }
 

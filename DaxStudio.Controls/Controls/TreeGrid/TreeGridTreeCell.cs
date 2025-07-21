@@ -104,7 +104,7 @@ namespace DaxStudio.Controls
         /// </summary>
         public static readonly DependencyProperty SelectedLineStrokeProperty =
             DependencyProperty.Register(nameof(SelectedLineStroke), typeof(Brush), typeof(TreeGridTreeCell),
-                new PropertyMetadata(new SolidColorBrush(Color.FromRgb(0xAA, 0xAA, 0xAA))));
+                new PropertyMetadata(new SolidColorBrush(Colors.Transparent)));
 
         public Brush SelectedLineStroke
         {
