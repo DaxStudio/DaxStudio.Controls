@@ -12,11 +12,25 @@ namespace DaxStudio.Controls.Model
     public class TreeGridRow<T> : INotifyPropertyChanged
     {
         private bool _isExpanded;
+        private bool _hasChildren;
+        private bool _hasChildrenCalculated = false;
 
         public T Data { get; set; }
         public int Level { get; set; }
         public TreeGridRow<T> Parent { get; set; }
-        public List<TreeGridRow<T>> Children { get; set; } = new List<TreeGridRow<T>>();
+        public List<TreeGridRow<T>> Children
+        {
+            get => _children;
+            set
+            {
+                _children = value;
+                _hasChildrenCalculated = false; // Invalidate cache
+                NotifyOfPropertyChange();
+                NotifyOfPropertyChange(nameof(HasChildren));
+            }
+        }
+        private List<TreeGridRow<T>> _children = new List<TreeGridRow<T>>();
+
         public bool IsCollapsing { get; set; }
         /// <summary>
         /// Array indicating whether each ancestor level is the last child of its parent
@@ -25,11 +39,18 @@ namespace DaxStudio.Controls.Model
         public List<bool> Ancestors { get; set; } = new List<bool>();
         public ObservableCollection<bool> SelectedLineLevels { get; set; } = new ObservableCollection<bool>();
 
-        private bool _hasChildren;
         public bool HasChildren
         {
-            get => Children.Any();
-
+            get
+            {
+                // Cache the result to avoid repeated LINQ calls
+                if (!_hasChildrenCalculated)
+                {
+                    _hasChildren = Children?.Count > 0;
+                    _hasChildrenCalculated = true;
+                }
+                return _hasChildren;
+            }
         }
 
         public bool IsExpanded
@@ -63,6 +84,45 @@ namespace DaxStudio.Controls.Model
         protected void NotifyOfPropertyChange([System.Runtime.CompilerServices.CallerMemberName] string propertyName = null)
         {
             OnPropertyChanged(propertyName);
+        }
+
+        // Add method to add children efficiently
+        public void AddChild(TreeGridRow<T> child)
+        {
+            Children.Add(child);
+            if (!_hasChildren)
+            {
+                _hasChildren = true;
+                _hasChildrenCalculated = true;
+                NotifyOfPropertyChange(nameof(HasChildren));
+            }
+        }
+
+        // Add this method to properly reset selection state
+        public void ClearSelectionState()
+        {
+            IsCollapsing = false;
+            if (SelectedLineLevels != null)
+            {
+                for (int i = 0; i < SelectedLineLevels.Count; i++)
+                {
+                    SelectedLineLevels[i] = false;
+                }
+            }
+        }
+
+        // Add this method to ensure consistent selection level initialization
+        public void EnsureSelectionLevels(int requiredLevels)
+        {
+            if (SelectedLineLevels == null)
+            {
+                SelectedLineLevels = new ObservableCollection<bool>();
+            }
+            
+            while (SelectedLineLevels.Count < requiredLevels)
+            {
+                SelectedLineLevels.Add(false);
+            }
         }
     }
 

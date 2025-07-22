@@ -48,7 +48,7 @@ namespace DaxStudio.Controls
         public Brush SelectedLineStroke
         {
             get => (Brush)GetValue(SelectedLineStrokeProperty);
-            set => SetValue(LineStrokeProperty, value);
+            set => SetValue(SelectedLineStrokeProperty, value); // Fixed: was setting LineStrokeProperty
         }
 
         /// <summary>
@@ -238,6 +238,10 @@ namespace DaxStudio.Controls
             if (e.Source is TreeGridTreeCell cell)
             {
                 var context = cell.DataContext as TreeGridRow<object>;
+                if (context == null) { 
+                    //e.Handled = true; 
+                    return; 
+                }
                 if (context.IsExpanded) context.IsCollapsing = true;
             }
         }

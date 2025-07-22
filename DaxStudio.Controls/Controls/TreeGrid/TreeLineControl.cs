@@ -1,4 +1,5 @@
 using DaxStudio.Controls.Model;
+using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Diagnostics;
@@ -6,6 +7,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using System.Windows.Threading;
 
 namespace DaxStudio.Controls
 {
@@ -107,29 +109,44 @@ namespace DaxStudio.Controls
             set => SetValue(SelectedLineStrokeProperty, value);
         }
 
+        // Add this field to batch invalidation calls
+        private bool _invalidationScheduled = false;
+        
+        private void ScheduleInvalidation()
+        {
+            if (_invalidationScheduled) return;
+            
+            _invalidationScheduled = true;
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                _invalidationScheduled = false;
+                InvalidateVisual();
+            }), DispatcherPriority.Render);
+        }
+
         private static void OnLevelChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            ((TreeLineControl)d).InvalidateVisual();
+            ((TreeLineControl)d).ScheduleInvalidation();
         }
 
         private static void OnIndentWidthChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            ((TreeLineControl)d).InvalidateVisual();
+            ((TreeLineControl)d).ScheduleInvalidation();
         }
 
         private static void OnIsLastChildChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            ((TreeLineControl)d).InvalidateVisual();
+            ((TreeLineControl)d).ScheduleInvalidation();
         }
 
         private static void OnHasChildrenChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            ((TreeLineControl)d).InvalidateVisual();
+            ((TreeLineControl)d).ScheduleInvalidation();
         }
 
         private static void OnAncestorLevelsChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            ((TreeLineControl)d).InvalidateVisual();
+            ((TreeLineControl)d).ScheduleInvalidation();
         }
 
         private static void OnSelectedLineLevelsChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -144,22 +161,22 @@ namespace DaxStudio.Controls
             if (e.NewValue is INotifyCollectionChanged newCollection)
                 newCollection.CollectionChanged += control.SelectedLineLevels_CollectionChanged;
 
-            control.InvalidateVisual();
+            control.ScheduleInvalidation();
         }
 
         private static void OnLineStrokeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            ((TreeLineControl)d).InvalidateVisual();
+            ((TreeLineControl)d).ScheduleInvalidation();
         }
 
         private static void OnLineThicknessChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            ((TreeLineControl)d).InvalidateVisual();
+            ((TreeLineControl)d).ScheduleInvalidation();
         }
 
         private static void OnSelectedLineStrokeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            ((TreeLineControl)d).InvalidateVisual();
+            ((TreeLineControl)d).ScheduleInvalidation();
         }
 
         private void SelectedLineLevels_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
@@ -167,14 +184,31 @@ namespace DaxStudio.Controls
             InvalidateVisual();
         }
 
+        // Add these fields for caching
+        private Pen _cachedPen;
+        private Brush _cachedLineStroke;
+        private double _cachedLineThickness;
+
         protected override void OnRender(DrawingContext drawingContext)
         {
             base.OnRender(drawingContext);
 
             if (Level == 0) return;
 
-            var pen = new Pen(LineStroke, LineThickness);
-            pen.DashStyle = new DashStyle(new double[] { 2, 1 }, 2);
+            // Cache frequently used objects
+            if (_cachedPen == null || !_cachedLineStroke.Equals(LineStroke) || _cachedLineThickness != LineThickness)
+            {
+                _cachedPen?.Freeze(); // Freeze old pen
+                _cachedPen = new Pen(LineStroke, LineThickness);
+                _cachedPen.DashStyle = new DashStyle(new double[] { 2, 1 }, 2);
+                _cachedPen.Freeze(); // Freeze for better performance
+                _cachedLineStroke = LineStroke;
+                _cachedLineThickness = LineThickness;
+            }
+
+            // ... rest of rendering code using _cachedPen
+
+            var pen = _cachedPen;
             var centerY = ActualHeight / 2;
             var selectedLevels = SelectedLineLevels?.ToArray();
 

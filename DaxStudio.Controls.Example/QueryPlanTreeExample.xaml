@@ -98,7 +98,7 @@
                     IndentWidth="16"
                     ExpanderTemplate="{StaticResource SnoopExpanderTemplate}"                     
                     LineStroke="#AAAAAA"
-
+                    SelectedLineStroke="Red"
                     LineThickness="0.8">
                 </ctrl:TreeGridTreeColumn>
 
