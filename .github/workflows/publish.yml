@@ -25,9 +25,6 @@ jobs:
       - name: Build all target frameworks
         run: dotnet build DaxStudio.Controls\DaxStudio.Controls.csproj --configuration Release 
 
-      - name: Pack NuGet package
-        run: dotnet pack --configuration Release --output ./nupkg
-
       - name: Push package to NuGet
-        run: dotnet nuget push ./nupkg/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
+        run: dotnet nuget push ./bin/Release/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
 
