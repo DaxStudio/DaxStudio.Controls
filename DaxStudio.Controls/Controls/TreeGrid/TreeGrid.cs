@@ -32,7 +32,7 @@ namespace DaxStudio.Controls
         }
 
         // Cache for the root rows of the hierarchy
-        private List<TreeGridRow<object>> _rootRows = new List<TreeGridRow<object>>();
+        private readonly List<TreeGridRow<object>> _rootRows = new List<TreeGridRow<object>>();
 
         private readonly Dictionary<object, TreeGridRow<object>> _itemToRowMap = new Dictionary<object, TreeGridRow<object>>();
         private readonly ObservableCollection<TreeGridRow<object>> _flattenedRows = new ObservableCollection<TreeGridRow<object>>();
@@ -151,7 +151,7 @@ namespace DaxStudio.Controls
             try
             {
                 // Expand the specified item and all its descendants
-                ExpandRowRecursively(row);
+                TreeGrid.ExpandRowRecursively(row);
             }
             finally
             {
@@ -162,7 +162,7 @@ namespace DaxStudio.Controls
             RefreshData();
         }
 
-        private void ExpandRowRecursively(TreeGridRow<object> row)
+        private static void ExpandRowRecursively(TreeGridRow<object> row)
         {
             if (row == null)
                 return;
@@ -176,7 +176,7 @@ namespace DaxStudio.Controls
             // Recursively expand all child rows
             foreach (var child in row.Children)
             {
-                ExpandRowRecursively(child);
+                TreeGrid.ExpandRowRecursively(child);
             }
         }
 
@@ -190,7 +190,7 @@ namespace DaxStudio.Controls
             try
             {
                 // Collapse the specified item and all its descendants
-                CollapseRowRecursively(row);
+                TreeGrid.CollapseRowRecursively(row);
             }
             finally
             {
@@ -201,7 +201,7 @@ namespace DaxStudio.Controls
             RefreshData();
         }
 
-        private void CollapseRowRecursively(TreeGridRow<object> row)
+        private static void CollapseRowRecursively(TreeGridRow<object> row)
         {
             if (row == null)
                 return;
@@ -209,7 +209,7 @@ namespace DaxStudio.Controls
             // Recursively collapse all child rows first
             foreach (var child in row.Children)
             {
-                CollapseRowRecursively(child);
+                TreeGrid.CollapseRowRecursively(child);
             }
 
             // Then collapse this row if it has children
@@ -236,7 +236,7 @@ namespace DaxStudio.Controls
                     // ALWAYS clear previous selections - remove IsCollapsing check
                     foreach (TreeGridRow<object> row in e.RemovedItems)
                     {
-                        ClearSelectedLineRecursive(row);
+                        TreeGrid.ClearSelectedLineRecursive(row);
                     }
 
                     // Set new selections
@@ -252,7 +252,7 @@ namespace DaxStudio.Controls
                         else
                         {
                             // Only update selection lines when NOT collapsing
-                            SetSelectedLineRecursive(row, row.Level, true);
+                            TreeGrid.SetSelectedLineRecursive(row, row.Level, true);
                         }
                     }
                 }
@@ -264,7 +264,7 @@ namespace DaxStudio.Controls
         }
 
         // Add this new method for complete cleanup
-        private void ClearSelectedLineRecursive(TreeGridRow<object> row)
+        private static void ClearSelectedLineRecursive(TreeGridRow<object> row)
         {            
             // Clear all selection levels for this row's path
             if (row.SelectedLineLevels != null)
@@ -282,7 +282,7 @@ namespace DaxStudio.Controls
         }
 
         // Improve the existing method
-        private void SetSelectedLineRecursive(TreeGridRow<object> row, int level, bool value)
+        private static void SetSelectedLineRecursive(TreeGridRow<object> row, int level, bool value)
         {
                       
             if (row.SelectedLineLevels != null)
@@ -590,7 +590,7 @@ namespace DaxStudio.Controls
                 }
 
                 // Use a more efficient diff algorithm
-                var operations = CalculateMinimalOperations(_flattenedRows, newRows);
+                var operations = TreeGrid.CalculateMinimalOperations(_flattenedRows, newRows);
                 ApplyOperations(operations);
             }
         }
@@ -604,7 +604,7 @@ namespace DaxStudio.Controls
             public TreeGridRow<object> Item; // For inserts
         }
 
-        private List<CollectionOperation> CalculateMinimalOperations(
+        private static List<CollectionOperation> CalculateMinimalOperations(
             ObservableCollection<TreeGridRow<object>> current, 
             List<TreeGridRow<object>> target)
         {
@@ -668,38 +668,26 @@ namespace DaxStudio.Controls
         // Optimized toggle with minimal refresh
         public void ToggleItem(object item)
         {
-            //using (new OverrideCursor(Cursors.Wait))
-            //{
-                if (_itemToRowMap.TryGetValue(item, out var row))
+
+            if (_itemToRowMap.TryGetValue(item, out var row))
+            {
+                // Mark row as collapsing if it's being collapsed
+                if (row.IsExpanded)
                 {
-                    // Mark row as collapsing if it's being collapsed
-                    if (row.IsExpanded)
-                    {
-                        row.IsCollapsing = true;
-                        //MarkDescendantsAsCollapsing(row);
-                    }
-
-                    row.IsExpanded = !row.IsExpanded;
-                    RefreshData();
-
-                    // Update selection lines more efficiently
-                    if (row.IsExpanded)
-                    {
-                        SetSelectedLineRecursive(row, row.Level, true);
-                    }
+                    row.IsCollapsing = true;
+                    //MarkDescendantsAsCollapsing(row);
                 }
-            //}
-        }
 
-        // Helper method to mark descendants as collapsing
-        //private void MarkDescendantsAsCollapsing(TreeGridRow<object> row)
-        //{
-        //    foreach (var child in row.Children)
-        //    {
-        //        child.IsCollapsing = true;
-        //        MarkDescendantsAsCollapsing(child);
-        //    }
-        //}
+                row.IsExpanded = !row.IsExpanded;
+                RefreshData();
+
+                // Update selection lines more efficiently
+                if (row.IsExpanded)
+                {
+                    SetSelectedLineRecursive(row, row.Level, true);
+                }
+            }
+        }
 
         // Optimized ExpandAll/CollapseAll with batch operations
         public void ExpandAll()
@@ -802,11 +790,11 @@ namespace DaxStudio.Controls
         {
             foreach (var rootRow in rootRows)
             {
-                UpdateAncestorsRecursive(rootRow);
+                TreeGrid.UpdateAncestorsRecursive(rootRow);
             }
         }
 
-        private void UpdateAncestorsRecursive(TreeGridRow<object> row)
+        private static void UpdateAncestorsRecursive(TreeGridRow<object> row)
         {
             if (row.Parent != null)
             {
@@ -826,7 +814,7 @@ namespace DaxStudio.Controls
 
             foreach (var child in row.Children)
             {
-                UpdateAncestorsRecursive(child);
+                TreeGrid.UpdateAncestorsRecursive(child);
             }
         }
 
@@ -839,7 +827,7 @@ namespace DaxStudio.Controls
             return property?.GetValue(item) as IEnumerable;
         }
 
-        private void BuildVisibleRowsList(TreeGridRow<object> row, List<TreeGridRow<object>> visibleRows)
+        private static void BuildVisibleRowsList(TreeGridRow<object> row, List<TreeGridRow<object>> visibleRows)
         {
             visibleRows.Add(row);
 
@@ -847,7 +835,7 @@ namespace DaxStudio.Controls
             {
                 foreach (var child in row.Children)
                 {
-                    BuildVisibleRowsList(child, visibleRows);
+                    TreeGrid.BuildVisibleRowsList(child, visibleRows);
                 }
             }
         }

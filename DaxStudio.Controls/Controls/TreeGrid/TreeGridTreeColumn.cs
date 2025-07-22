@@ -237,10 +237,9 @@ namespace DaxStudio.Controls
         {
             if (e.Source is TreeGridTreeCell cell)
             {
-                var context = cell.DataContext as TreeGridRow<object>;
-                if (context == null) { 
-                    //e.Handled = true; 
-                    return; 
+                if (!(cell.DataContext is TreeGridRow<object> context))
+                {
+                    return;
                 }
                 if (context.IsExpanded) context.IsCollapsing = true;
             }
@@ -251,12 +250,12 @@ namespace DaxStudio.Controls
             if (sender is TreeGridTreeCell cell && cell.RowData is TreeGridRow<object> row)
             {
                 // Find the parent TreeGrid and toggle the item
-                var treeGrid = FindParentTreeGrid(cell);
+                var treeGrid = TreeGridTreeColumn.FindParentTreeGrid(cell);
                 treeGrid?.ToggleItem(row.Data);
             }
         }
 
-        private TreeGrid FindParentTreeGrid(DependencyObject child)
+        private static TreeGrid FindParentTreeGrid(DependencyObject child)
         {
             var parent = VisualTreeHelper.GetParent(child);
             while (parent != null)

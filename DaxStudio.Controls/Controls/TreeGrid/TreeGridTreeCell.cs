@@ -276,8 +276,6 @@ namespace DaxStudio.Controls
 
         private void OnExpanderPreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
-            //e.Handled = true; // Prevents the click from propagating further
-            //RaiseEvent(new RoutedEventArgs(ExpanderClickEvent, this));
             RaiseEvent(new RoutedEventArgs(ExpanderPreviewMouseDownEvent, this));
         }
 
