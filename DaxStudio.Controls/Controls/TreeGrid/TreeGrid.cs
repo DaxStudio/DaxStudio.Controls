@@ -4,8 +4,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Collections.Specialized;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Windows;
@@ -14,7 +12,9 @@ using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Shapes;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Windows.Threading;
 
 namespace DaxStudio.Controls
 {
@@ -37,6 +37,10 @@ namespace DaxStudio.Controls
         private readonly Dictionary<object, TreeGridRow<object>> _itemToRowMap = new Dictionary<object, TreeGridRow<object>>();
         private readonly ObservableCollection<TreeGridRow<object>> _flattenedRows = new ObservableCollection<TreeGridRow<object>>();
 
+        // Add these missing fields for async RefreshData
+        private readonly SemaphoreSlim _refreshSemaphore = new SemaphoreSlim(1, 1);
+        private CancellationTokenSource _refreshCancellation;
+
         static TreeGrid()
         {
             DefaultStyleKeyProperty.OverrideMetadata(typeof(TreeGrid),
@@ -53,6 +57,14 @@ namespace DaxStudio.Controls
             this.HeadersVisibility = DataGridHeadersVisibility.Column;
             this.GridLinesVisibility = DataGridGridLinesVisibility.None;
             this.AlternatingRowBackground = new SolidColorBrush(Color.FromArgb(25, 0, 0, 0));
+
+            // Enable virtualization for better performance with large datasets
+            this.EnableRowVirtualization = true;
+            this.EnableColumnVirtualization = true;
+            
+            // Use recycling mode for even better performance - Fixed syntax
+            VirtualizingPanel.SetVirtualizationMode(this, VirtualizationMode.Recycling);
+            VirtualizingPanel.SetScrollUnit(this, ScrollUnit.Item);
 
             Loaded += OnLoaded;
             //SelectionChanged += OnSelectionChanged;
@@ -214,28 +226,34 @@ namespace DaxStudio.Controls
             // Ensure thread safety with lock
             lock (_selectionChangeLock)
             {
-                // Batch process selection changes
+                // Prevent recursive calls during updates
+                if (_isUpdatingFlattenedRows)
+                    return;
+
                 _isUpdatingFlattenedRows = true;
                 try
                 {
-                    // Process removed items first to avoid conflicts
+                    // ALWAYS clear previous selections - remove IsCollapsing check
                     foreach (TreeGridRow<object> row in e.RemovedItems)
                     {
-                        if (!row.IsCollapsing)
-                        {
-                            SetSelectedLineLevelRecursive(row, row.Level, false);
-                        }
+                        ClearSelectedLineRecursive(row);
                     }
 
-                    // Then process added items
+                    // Set new selections
                     foreach (TreeGridRow<object> row in e.AddedItems)
                     {
+                        // Skip updating selection lines if row is collapsing
                         if (row.IsCollapsing)
                         {
+                            Debug.WriteLine($"Skipping selection update for collapsing row at level {row.Level}");
+                            // Reset IsCollapsing flag but don't update selection lines
                             row.IsCollapsing = false;
-                            continue;
                         }
-                        SetSelectedLineLevelRecursive(row, row.Level, true);
+                        else
+                        {
+                            // Only update selection lines when NOT collapsing
+                            SetSelectedLineRecursive(row, row.Level, true);
+                        }
                     }
                 }
                 finally
@@ -245,16 +263,47 @@ namespace DaxStudio.Controls
             }
         }
 
-        private void SetSelectedLineLevelRecursive(TreeGridRow<object> row, int level, bool value)
-        {
-            if (row.SelectedLineLevels != null && level < row.SelectedLineLevels.Count)
+        // Add this new method for complete cleanup
+        private void ClearSelectedLineRecursive(TreeGridRow<object> row)
+        {            
+            // Clear all selection levels for this row's path
+            if (row.SelectedLineLevels != null)
             {
-                row.SelectedLineLevels[level] = value;
+                for (int i = 0; i < row.SelectedLineLevels.Count; i++)
+                {
+                    row.SelectedLineLevels[i] = false;
+                }
+            }
+            // Clear selection for all descendants
+            foreach (TreeGridRow<object> child in row.Children)
+            {   
+                ClearSelectedLineRecursive(child);
+            }
+        }
+
+        // Improve the existing method
+        private void SetSelectedLineRecursive(TreeGridRow<object> row, int level, bool value)
+        {
+                      
+            if (row.SelectedLineLevels != null)
+            {
+                // Ensure the collection is large enough
+                while (row.SelectedLineLevels.Count <= level)
+                {
+                    row.SelectedLineLevels.Add(false);
+                }
+                
+                // Only set the specific level, don't clear others unless explicitly needed
+                if (level < row.SelectedLineLevels.Count)
+                {
+                    row.SelectedLineLevels[level] = value;
+                }
             }
 
+            // Propagate to children for the same level (ancestor line)
             foreach (TreeGridRow<object> child in row.Children)
             {
-                SetSelectedLineLevelRecursive(child, level, value);
+                SetSelectedLineRecursive(child, level, value);
             }
         }
 
@@ -296,6 +345,17 @@ namespace DaxStudio.Controls
         {
             get => (bool)GetValue(ExpandOnLoadProperty);
             set => SetValue(ExpandOnLoadProperty, value);
+        }
+
+        // Add this property
+        public static readonly DependencyProperty EnableLazyLoadingProperty =
+            DependencyProperty.Register(nameof(EnableLazyLoading), typeof(bool), typeof(TreeGrid),
+                new PropertyMetadata(false));
+
+        public bool EnableLazyLoading
+        {
+            get => (bool)GetValue(EnableLazyLoadingProperty);
+            set => SetValue(EnableLazyLoadingProperty, value);
         }
 
         private static void OnChildrenBindingPathChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -391,18 +451,18 @@ namespace DaxStudio.Controls
             };
 
             _itemToRowMap[item] = row;
+            if (parent != null) parent.AddChild(row); // Use the optimized AddChild method
 
-            if (parent != null)
+            // Only build children if not using lazy loading or if expanded
+            if (!EnableLazyLoading || row.IsExpanded)
             {
-                parent.Children.Add(row);
-            }
-
-            var children = GetChildren(item);
-            if (children != null)
-            {
-                foreach (var child in children)
+                var children = GetChildren(item);
+                if (children != null)
                 {
-                    BuildHierarchy(child, level + 1, row);
+                    foreach (var child in children)
+                    {
+                        BuildHierarchy(child, level + 1, row);
+                    }
                 }
             }
 
@@ -417,23 +477,46 @@ namespace DaxStudio.Controls
         private int _lastRefreshRowCount = 0;
 
         // Optimized RefreshData method
-        private void RefreshData()
+        private async void RefreshData()
         {
             if (_rootRows == null || _rootRows.Count == 0 || _isUpdatingFlattenedRows)
                 return;
 
-            _refreshTimer.Restart();
-            _isUpdatingFlattenedRows = true;
+            // Cancel any pending refresh
+            _refreshCancellation?.Cancel();
+            _refreshCancellation = new CancellationTokenSource();
+            var cancellationToken = _refreshCancellation.Token;
+
+            if (!await _refreshSemaphore.WaitAsync(0)) // Don't wait, just skip if busy
+                return;
+
             try
             {
+                _refreshTimer.Restart();
+                _isUpdatingFlattenedRows = true;
+
                 // Build the new flattened structure more efficiently
                 var newFlattenedRows = new List<TreeGridRow<object>>();
                 _visibleRowsSet.Clear();
 
+                // Process in batches for large datasets
+                const int batchSize = 1000;
+                int processed = 0;
+
                 foreach (var row in _rootRows)
                 {
+                    if (cancellationToken.IsCancellationRequested) return;
+                    
                     BuildVisibleRowsListOptimized(row, newFlattenedRows);
+                    
+                    // Yield control every batch to keep UI responsive
+                    if (++processed % batchSize == 0)
+                    {
+                        await Dispatcher.Yield(DispatcherPriority.Background);
+                    }
                 }
+
+                if (cancellationToken.IsCancellationRequested) return;
 
                 // Early exit if no changes
                 if (newFlattenedRows.Count == _lastRefreshRowCount && 
@@ -447,13 +530,21 @@ namespace DaxStudio.Controls
                 _lastRefreshRowCount = newFlattenedRows.Count;
                 Debug.WriteLine($"TreeGrid Visible Rows built: {newFlattenedRows.Count} rows at {_refreshTimer.ElapsedMilliseconds} ms");
 
-                // Perform batch updates to _flattenedRows
-                UpdateFlattenedRowsCollectionOptimized(newFlattenedRows);
+                // Perform batch updates to _flattenedRows on UI thread
+                await Dispatcher.InvokeAsync(() =>
+                {
+                    if (!cancellationToken.IsCancellationRequested)
+                    {
+                        UpdateFlattenedRowsCollectionOptimized(newFlattenedRows);
+                    }
+                }, DispatcherPriority.Normal);
+
                 Debug.WriteLine($"TreeGrid Flattened Rows updated at: {_refreshTimer.ElapsedMilliseconds} ms");
             }
             finally
             {
                 _isUpdatingFlattenedRows = false;
+                _refreshSemaphore.Release();
                 Debug.WriteLine($"TreeGrid RefreshData completed in: {_refreshTimer.ElapsedMilliseconds} ms");
                 Debug.WriteLine("====");
             }
@@ -585,7 +676,7 @@ namespace DaxStudio.Controls
                     if (row.IsExpanded)
                     {
                         row.IsCollapsing = true;
-                        MarkDescendantsAsCollapsing(row);
+                        //MarkDescendantsAsCollapsing(row);
                     }
 
                     row.IsExpanded = !row.IsExpanded;
@@ -594,21 +685,21 @@ namespace DaxStudio.Controls
                     // Update selection lines more efficiently
                     if (row.IsExpanded)
                     {
-                        SetSelectedLineLevelRecursive(row, row.Level, true);
+                        SetSelectedLineRecursive(row, row.Level, true);
                     }
                 }
             //}
         }
 
         // Helper method to mark descendants as collapsing
-        private void MarkDescendantsAsCollapsing(TreeGridRow<object> row)
-        {
-            foreach (var child in row.Children)
-            {
-                child.IsCollapsing = true;
-                MarkDescendantsAsCollapsing(child);
-            }
-        }
+        //private void MarkDescendantsAsCollapsing(TreeGridRow<object> row)
+        //{
+        //    foreach (var child in row.Children)
+        //    {
+        //        child.IsCollapsing = true;
+        //        MarkDescendantsAsCollapsing(child);
+        //    }
+        //}
 
         // Optimized ExpandAll/CollapseAll with batch operations
         public void ExpandAll()
@@ -761,38 +852,6 @@ namespace DaxStudio.Controls
             }
         }
 
-        void UpdateFlattenedRowsCollection(List<TreeGridRow<object>> newRows)
-        {
-            var currentRows = _flattenedRows.ToList();
-
-            for (int i = currentRows.Count - 1; i >= 0; i--)
-            {
-                if (!newRows.Contains(currentRows[i]))
-                {
-                    _flattenedRows.RemoveAt(i);
-                }
-            }
-
-            for (int newIndex = 0; newIndex < newRows.Count; newIndex++)
-            {
-                var newRow = newRows[newIndex];
-                var currentIndex = _flattenedRows.IndexOf(newRow);
-
-                if (currentIndex == -1)
-                {
-                    _flattenedRows.Insert(newIndex, newRow);
-                }
-                else if (currentIndex != newIndex)
-                {
-                    _flattenedRows.Move(currentIndex, newIndex);
-                }
-            }
-        }
-
-
-
-
-
         private void Expander_PreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
             e.Handled = true; // Prevents the event from bubbling to the DataGridRow
@@ -801,44 +860,4 @@ namespace DaxStudio.Controls
 
     }
 
-    // Helper class for deferring ObservableCollection notifications
-    public class DeferRefresh : IDisposable
-    {
-        private readonly ObservableCollection<TreeGridRow<object>> _collection;
-        private readonly PropertyChangedEventHandler _propertyChangedHandler;
-        private readonly NotifyCollectionChangedEventHandler _collectionChangedHandler;
-
-        public DeferRefresh(ObservableCollection<TreeGridRow<object>> collection)
-        {
-            
-            _collection = collection;
-            // Store original handlers and temporarily remove them
-            var collectionChangedField = typeof(ObservableCollection<TreeGridRow<object>>)
-                .GetField("CollectionChanged", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
-            var propertyChangedField = typeof(ObservableCollection<TreeGridRow<object>>)
-                .GetField("PropertyChanged", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
-
-            _collectionChangedHandler = (NotifyCollectionChangedEventHandler)collectionChangedField?.GetValue(_collection);
-            _propertyChangedHandler = (PropertyChangedEventHandler)propertyChangedField?.GetValue(_collection);
-
-            // Temporarily clear the handlers
-            collectionChangedField?.SetValue(_collection, null);
-            propertyChangedField?.SetValue(_collection, null);
-        }
-
-        public void Dispose()
-        {
-            // Restore handlers and fire a reset notification
-            var collectionChangedField = typeof(ObservableCollection<TreeGridRow<object>>)
-                .GetField("CollectionChanged", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
-            var propertyChangedField = typeof(ObservableCollection<TreeGridRow<object>>)
-                .GetField("PropertyChanged", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
-
-            collectionChangedField?.SetValue(_collection, _collectionChangedHandler);
-            propertyChangedField?.SetValue(_collection, _propertyChangedHandler);
-
-            // Fire a reset notification
-            _collectionChangedHandler?.Invoke(_collection, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
-        }
-    }
 }
