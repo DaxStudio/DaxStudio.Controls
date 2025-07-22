@@ -22,11 +22,8 @@ jobs:
       - name: Restore dependencies
         run: dotnet restore
 
-      - name: Build .NET 8.0
-        run: dotnet build DaxStudio.Controls\DaxStudio.Controls.csproj --configuration Release --framework net8.0-windows
-
-      - name: Build .NET Framework 4.7.2
-        run: msbuild DaxStudio.Controls\DaxStudio.Controls.csproj /p:Configuration=Release /p:TargetFramework=net472
+      - name: Build all target frameworks
+        run: dotnet build DaxStudio.Controls\DaxStudio.Controls.csproj --configuration Release 
 
       - name: Pack NuGet package
         run: dotnet pack --configuration Release --output ./nupkg

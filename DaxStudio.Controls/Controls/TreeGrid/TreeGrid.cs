@@ -600,7 +600,7 @@ namespace DaxStudio.Controls
             public enum OperationType { Insert, Remove, Move }
             public OperationType Type;
             public int Index;
-            public int TargetIndex; // For moves
+            //public int TargetIndex; // For moves
             public TreeGridRow<object> Item; // For inserts
         }
 
