@@ -24,12 +24,16 @@
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
   </ItemGroup>
+	
+  <PropertyGroup>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+  </PropertyGroup>
+	
+  <PropertyGroup>
+    <PackageReadmeFile>readme.md</PackageReadmeFile>
+  </PropertyGroup>
 
-	<PropertyGroup>
-		<PackageReadmeFile>readme.md</PackageReadmeFile>
-	</PropertyGroup>
-
-	<ItemGroup>
-		<None Include="Docs\readme.md" Pack="true" PackagePath="\" />
-	</ItemGroup>
+  <ItemGroup>
+    <None Include="Docs\readme.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
 </Project>
