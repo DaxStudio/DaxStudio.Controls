@@ -451,7 +451,7 @@ namespace DaxStudio.Controls
             };
 
             _itemToRowMap[item] = row;
-            if (parent != null) parent.AddChild(row); // Use the optimized AddChild method
+            parent?.AddChild(row); // Use the optimized AddChild method
 
             // Only build children if not using lazy loading or if expanded
             if (!EnableLazyLoading || row.IsExpanded)

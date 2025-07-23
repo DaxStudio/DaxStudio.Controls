@@ -31,6 +31,10 @@
 	
   <PropertyGroup>
     <PackageReadmeFile>readme.md</PackageReadmeFile>
+    <Authors>DAX Studio</Authors>
+    <Description>Contains control developed for use in DAX Studio which have bee</Description>
+    <Copyright>Copyright $([System.DateTime]::Now.Year) $(Company)</Copyright>
+    <RepositoryUrl>https://github.com/DaxStudio/DaxStudio.Controls</RepositoryUrl>
   </PropertyGroup>
 
   <ItemGroup>

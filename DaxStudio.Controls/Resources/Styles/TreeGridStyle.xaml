@@ -208,7 +208,7 @@
                                         <Style.Triggers>
                                             <DataTrigger Binding="{Binding ExpanderTemplate, RelativeSource={RelativeSource TemplatedParent}}" Value="{x:Null}">
                                                 <!-- Use default template when ExpanderTemplate is null -->
-                                                <Setter Property="Template" Value="{StaticResource ExpanderControlTemplate}"/>
+                                                <Setter Property="Template" Value="{StaticResource PlusMinusExpanderTemplate}"/>
                                             </DataTrigger>
                                         </Style.Triggers>
                                         <Style.Setters>

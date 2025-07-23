@@ -102,8 +102,9 @@
                                         TextPath ="Data.Name"
                                         IndentWidth="16"
                                         LineStroke="#AAAAAA"
-                                         SelectedLineStroke="Red"
-                                        LineThickness="1">
+                                        SelectedLineStroke="Red"
+                                        LineThickness="1"
+                                         >
                     <!-- ExpanderTemplate="{StaticResource Expander2}"-->
                     
                     <!--<ctrl:TreeGridTreeColumn.TextTemplate>
