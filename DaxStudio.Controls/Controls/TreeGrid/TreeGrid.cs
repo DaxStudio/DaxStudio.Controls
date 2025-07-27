@@ -41,6 +41,7 @@ namespace DaxStudio.Controls
         // Add these missing fields for async RefreshData
         private readonly SemaphoreSlim _refreshSemaphore = new SemaphoreSlim(1, 1);
         private CancellationTokenSource _refreshCancellation;
+        private DispatcherTimer _rebuildDebounceTimer;
 
         static TreeGrid()
         {
@@ -69,6 +70,18 @@ namespace DaxStudio.Controls
 
             Loaded += OnLoaded;
             //SelectionChanged += OnSelectionChanged;
+
+            // ... existing code ...
+            _rebuildDebounceTimer = new DispatcherTimer
+            {
+                Interval = TimeSpan.FromMilliseconds(50) // Adjust as needed
+            };
+            _rebuildDebounceTimer.Tick += (s, e) =>
+            {
+                _rebuildDebounceTimer.Stop();
+                RebuildHierarchy();
+                RefreshData();
+            };
         }
 
         private static void OnShowDefaultContextMenuChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -149,6 +162,7 @@ namespace DaxStudio.Controls
 
             // Use batch operation for performance
             _isUpdatingFlattenedRows = true;
+            System.Diagnostics.Debug.WriteLine("ExpandItemRecursively _isUpdatingFlattenedRows = true;");
             try
             {
                 // Expand the specified item and all its descendants
@@ -188,6 +202,7 @@ namespace DaxStudio.Controls
 
             // Use batch operation for performance
             _isUpdatingFlattenedRows = true;
+            System.Diagnostics.Debug.WriteLine("CollapseItemRecursively _isUpdatingFlattenedRows = true;");
             try
             {
                 // Collapse the specified item and all its descendants
@@ -232,6 +247,7 @@ namespace DaxStudio.Controls
                     return;
 
                 _isUpdatingFlattenedRows = true;
+                System.Diagnostics.Debug.WriteLine("OnSelectionChanged _isUpdatingFlattenedRows = true;");
                 try
                 {
                     // ALWAYS clear previous selections - remove IsCollapsing check
@@ -329,7 +345,7 @@ namespace DaxStudio.Controls
         }
 
         public static readonly DependencyProperty RootItemsProperty =
-            DependencyProperty.Register(nameof(RootItems), typeof(IEnumerable), typeof(TreeGrid),
+            DependencyProperty.Register(nameof(RootItems), typeof(INotifyCollectionChanged), typeof(TreeGrid),
                 new PropertyMetadata(null, OnRootItemsChanged));
 
         public IEnumerable RootItems
@@ -385,9 +401,9 @@ namespace DaxStudio.Controls
 
         private void RootItems_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
-            // Handle collection changes here
-            RebuildHierarchy();
-            RefreshData();
+            // Restart the debounce timer
+            _rebuildDebounceTimer.Stop();
+            _rebuildDebounceTimer.Start();
         }
 
         private static void OnExpandOnLoadChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -508,7 +524,7 @@ namespace DaxStudio.Controls
             {
                 _refreshTimer.Restart();
                 _isUpdatingFlattenedRows = true;
-
+                System.Diagnostics.Debug.WriteLine("RefreshData _isUpdatingFlattenedRows = true;");
                 // Build the new flattened structure more efficiently
                 var newFlattenedRows = new List<TreeGridRow<object>>();
                 _visibleRowsSet.Clear();
@@ -709,6 +725,7 @@ namespace DaxStudio.Controls
             using (new OverrideCursor(Cursors.Wait))
             {
                 _isUpdatingFlattenedRows = true;
+                System.Diagnostics.Debug.WriteLine("ExpandAll _isUpdatingFlattenedRows = true;");
                 try
                 {
                     foreach (var row in _itemToRowMap.Values)
@@ -729,6 +746,7 @@ namespace DaxStudio.Controls
             using (new OverrideCursor(Cursors.Wait))
             {
                 _isUpdatingFlattenedRows = true;
+                System.Diagnostics.Debug.WriteLine("CollapseAll _isUpdatingFlattenedRows = true;");
                 try
                 {
                     foreach (var row in _itemToRowMap.Values)
@@ -858,6 +876,7 @@ namespace DaxStudio.Controls
         {
             e.Handled = true; // Prevents the event from bubbling to the DataGridRow
         }
+
 
 
     }

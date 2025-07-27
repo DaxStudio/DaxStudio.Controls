@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.ObjectModel;
 using Caliburn.Micro;
 
 namespace DaxStudio.UI.ViewModels
@@ -7,7 +8,36 @@ namespace DaxStudio.UI.ViewModels
     {
         public TreeGridExampleViewModel()
         {
-            RootItems = new ObservableCollection<TreeItem>
+            RootItems = GetTreeItems();
+        }
+
+        public void Reset() {
+            //RootItems.Clear();
+            var newItems = GetTreeItems();
+            //foreach (var item in newItems)
+            //{
+            //    RootItems.Add(item);
+            //}
+            RootItems.Add(newItems[1]);
+        }
+
+        public void AddChild()
+        {
+            RootItems[0].Children.Add(new TreeItem { 
+                Name = "Dynamic Table",
+                Type = "Table",
+                Description = "Dynamic Table Desc",
+                Children = new ObservableCollection<TreeItem>
+                            {
+                                new TreeItem { Name = "DynamicID", Type = "Column", Description = "Unique identifier" },
+                                new TreeItem { Name = "DynamicName", Type = "Column", Description = "Customer name" }
+                            }
+            });
+        }
+
+        private ObservableCollection<TreeItem> GetTreeItems()
+        {
+            return new ObservableCollection<TreeItem>
             {
                 new TreeItem
                 {
@@ -57,6 +87,8 @@ namespace DaxStudio.UI.ViewModels
 
         public ObservableCollection<TreeItem> RootItems { get; }
     }
+
+
 
     public class TreeItem : PropertyChangedBase
     {
