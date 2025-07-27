@@ -15,6 +15,7 @@ using System.Windows.Media;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Threading;
+using System.Collections.Specialized;
 
 namespace DaxStudio.Controls
 {
@@ -371,9 +372,22 @@ namespace DaxStudio.Controls
         {
             if (d is TreeGrid grid)
             {
+                if (e.OldValue is INotifyCollectionChanged oldCollection)
+                    oldCollection.CollectionChanged -= grid.RootItems_CollectionChanged;
+
+                if (e.NewValue is INotifyCollectionChanged newCollection)
+                    newCollection.CollectionChanged += grid.RootItems_CollectionChanged;
+
                 grid.RebuildHierarchy();
                 grid.RefreshData();
             }
+        }
+
+        private void RootItems_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            // Handle collection changes here
+            RebuildHierarchy();
+            RefreshData();
         }
 
         private static void OnExpandOnLoadChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)

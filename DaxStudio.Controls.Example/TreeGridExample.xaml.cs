@@ -32,5 +32,10 @@ namespace DaxStudio.UI.Views
                 HierarchicalGrid.ToggleItem(row.Data);
             }
         }
+
+        private void PruneTree_Click(object sender, RoutedEventArgs e)
+        {
+            ((TreeGridExampleViewModel)HierarchicalGrid.DataContext).RootItems.RemoveAt(1);
+        }
     }
 }
