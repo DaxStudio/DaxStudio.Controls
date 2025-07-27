@@ -12,13 +12,19 @@ namespace DaxStudio.UI.ViewModels
         }
 
         public void Reset() {
-            //RootItems.Clear();
+            RootItems.Clear();
             var newItems = GetTreeItems();
-            //foreach (var item in newItems)
-            //{
-            //    RootItems.Add(item);
-            //}
-            RootItems.Add(newItems[1]);
+            foreach (var item in newItems)
+            {
+                RootItems.Add(item);
+            }
+            //RootItems.Add(newItems[1]);
+        }
+
+        public void Clear()
+        {
+            RootItems.Clear();
+
         }
 
         public void AddChild()

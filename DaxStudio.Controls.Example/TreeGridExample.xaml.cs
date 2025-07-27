@@ -42,5 +42,10 @@ namespace DaxStudio.UI.Views
         {
             ((TreeGridExampleViewModel)HierarchicalGrid.DataContext).Reset();
         }
+
+        private void ClearTree_Click(object sender, RoutedEventArgs e)
+        {
+            ((TreeGridExampleViewModel)HierarchicalGrid.DataContext).Clear();
+        }
     }
 }

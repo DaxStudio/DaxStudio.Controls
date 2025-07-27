@@ -509,6 +509,12 @@ namespace DaxStudio.Controls
         // Optimized RefreshData method
         private async void RefreshData()
         {
+            if (_rootRows?.Count ==0 )
+            {
+                _flattenedRows.Clear();
+                return;
+            }
+
             if (_rootRows == null || _rootRows.Count == 0 || _isUpdatingFlattenedRows)
                 return;
 
