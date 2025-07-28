@@ -63,6 +63,8 @@
                 </ControlTemplate.Triggers>
             </ControlTemplate>
 
+            <!--<Color x:Key="DaxStudio.TreeGrid.Colors.ExpanderPath">#FF00FF00</Color>
+            <SolidColorBrush x:Key="DaxStudio.TreeGrid.Brushes.ExpanderPath" Color="{StaticResource DaxStudio.TreeGrid.Colors.ExpanderPath}"/>-->
         </ResourceDictionary>
     </UserControl.Resources>
 

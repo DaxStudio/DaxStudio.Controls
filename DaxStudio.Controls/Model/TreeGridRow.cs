@@ -126,10 +126,4 @@ namespace DaxStudio.Controls.Model
         }
     }
 
-    /// <summary>
-    /// Non-generic version for backward compatibility
-    /// </summary>
-    public class TreeGridRow : TreeGridRow<object>
-    {
-    }
 }

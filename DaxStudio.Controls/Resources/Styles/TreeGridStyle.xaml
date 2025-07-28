@@ -1,8 +1,12 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:options="http://schemas.microsoft.com/winfx/2006/xaml/presentation/options"
                     xmlns:ctrl="clr-namespace:DaxStudio.Controls"
                     xmlns:conv="clr-namespace:DaxStudio.Controls.Converters">
-
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="/DaxStudio.Controls;component/Resources/Styles/TreeGridTheme.xaml" />
+    </ResourceDictionary.MergedDictionaries>
+    
     <!-- Converters -->
     <conv:IndentConverter x:Key="IndentConverter"/>
     <conv:IsLastChildConverter x:Key="IsLastChildConverter"/>
@@ -10,13 +14,18 @@
     <conv:MultiplyValueConverter x:Key="MultiplyValueConverter" />
     <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
     <conv:NullToVisibilityConverter x:Key="NullToVisibilityConverter"/>
-    
+
+
+
+
     <!-- Tree Line Drawing Control -->
     <Style x:Key="TreeLineStyle" TargetType="Border">
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="IsHitTestVisible" Value="False"/>
     </Style>
 
+
+    
     <ControlTemplate x:Key="ExpanderControlTemplate" TargetType="ToggleButton">
         <Border Background="Transparent" 
             BorderBrush="Transparent" 
@@ -77,24 +86,20 @@
         <Border x:Name="Border"
                             Width="19"
                             Height="13"
-                            Background="#00FFFFFF">
+                            Background="{StaticResource DaxStudio.TreeGrid.Brushes.ExpanderBackground}">
             <Border x:Name="Border1"
                                 Width="9"
                                 Height="9"
-                                BorderBrush="#FF9495A2"
+                                BorderBrush="{StaticResource DaxStudio.TreeGrid.Brushes.ExpanderBorder}"
                                 BorderThickness="1 1 1 1"
                                 CornerRadius="1,1,1,1"
-                                SnapsToDevicePixels="True">
-                <Border.Background>
-                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                        <GradientStop Color="#FFFFFFFF" Offset="0.4" />
-                        <GradientStop Color="#FFC6CEDA" Offset="1" />
-                    </LinearGradientBrush>
-                </Border.Background>
+                                SnapsToDevicePixels="True"
+                                Background="{StaticResource DaxStudio.TreeGrid.Brushes.ExpanderBorderGradient}">
+
                 <Path x:Name="ExpandPath"
                                   Margin="1 1 1 1"
                                   Data="M0,2L0,3 2,3 2,5 3,5 3,3 5,3 5,2 3,2 3,0 2,0 2,2z"
-                                  Fill="#FF000000" />
+                                  Fill="{StaticResource DaxStudio.TreeGrid.Brushes.ExpanderPath}" />
             </Border>
         </Border>
         <ControlTemplate.Triggers>

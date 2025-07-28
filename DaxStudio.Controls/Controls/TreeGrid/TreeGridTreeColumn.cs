@@ -43,7 +43,7 @@ namespace DaxStudio.Controls
         /// </summary>
         public static readonly DependencyProperty SelectedLineStrokeProperty =
             DependencyProperty.Register(nameof(SelectedLineStroke), typeof(System.Windows.Media.Brush), typeof(TreeGridTreeColumn),
-                new PropertyMetadata(new SolidColorBrush(System.Windows.Media.Color.FromRgb(0xAA, 0xAA, 0xAA))));
+                new PropertyMetadata(new SolidColorBrush(Colors.Transparent)));
 
         public Brush SelectedLineStroke
         {

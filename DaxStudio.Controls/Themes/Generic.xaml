@@ -2,12 +2,13 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:ctrl="clr-namespace:DaxStudio.Controls"
-    xmlns:conv="clr-namespace:DaxStudio.Controls.Converters">
+    xmlns:conv="clr-namespace:DaxStudio.Controls.Converters"
+    >
 
     <ResourceDictionary.MergedDictionaries>
+        <!--<ResourceDictionary Source="/DaxStudio.Controls;component/Resources/Styles/TreeGridTheme.xaml" />-->
         <ResourceDictionary Source="/DaxStudio.Controls;component/Resources/Styles/TreeGridStyle.xaml" />
     </ResourceDictionary.MergedDictionaries>
-    
-    
+
 
 </ResourceDictionary>

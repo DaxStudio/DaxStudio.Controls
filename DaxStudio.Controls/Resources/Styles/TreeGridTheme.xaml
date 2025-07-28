@@ -1,0 +1,21 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Color x:Key="DaxStudio.TreeGrid.Colors.ExpanderBackground">#00FFFFFF</Color>
+    <Color x:Key="DaxStudio.TreeGrid.Colors.ExpanderBorder">#FF9495A2</Color>
+    <Color x:Key="DaxStudio.TreeGrid.Colors.ExpanderPath">#FF000000</Color>
+    <Color x:Key="DaxStudio.TreeGrid.Colors.ExpanderBorderGradientStop1">#FFFFFFFF</Color>
+    <Color x:Key="DaxStudio.TreeGrid.Colors.ExpanderBorderGradientStop2">#FFC6CEDA</Color>
+    
+    <SolidColorBrush x:Key="DaxStudio.TreeGrid.Brushes.ExpanderBackground" 
+                     Color="{StaticResource DaxStudio.TreeGrid.Colors.ExpanderBackground}"/>
+    <SolidColorBrush x:Key="DaxStudio.TreeGrid.Brushes.ExpanderBorder" 
+                     Color="{StaticResource DaxStudio.TreeGrid.Colors.ExpanderBorder}"/>
+    <SolidColorBrush x:Key="DaxStudio.TreeGrid.Brushes.ExpanderPath" 
+                     Color="{StaticResource DaxStudio.TreeGrid.Colors.ExpanderPath}"/>
+    <LinearGradientBrush x:Key="DaxStudio.TreeGrid.Brushes.ExpanderBorderGradient" 
+                         StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Color="{StaticResource DaxStudio.TreeGrid.Colors.ExpanderBorderGradientStop1}" Offset="0.4" />
+        <GradientStop Color="{StaticResource DaxStudio.TreeGrid.Colors.ExpanderBorderGradientStop2}" Offset="1" />
+    </LinearGradientBrush>
+</ResourceDictionary>
