@@ -4,6 +4,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Linq;
 using System.Windows;
@@ -11,10 +12,9 @@ using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Input;
-using System.Windows.Media;
 using System.Threading;
 using System.Windows.Threading;
-using System.Reflection;
+using System.Windows.Media;
 
 namespace DaxStudio.Controls
 {
@@ -44,6 +44,10 @@ namespace DaxStudio.Controls
         private readonly Stopwatch _refreshTimer = new Stopwatch();
         private int _lastRefreshRowCount = 0;
         private readonly object _selectionChangeLock = new object();
+        public ICommand ExecuteCustomDescendantFilter { get; private set; }
+        // Add these fields to track bound collections
+        private INotifyCollectionChanged _rootItemsCollectionNotifier;
+        private readonly Dictionary<object, INotifyCollectionChanged> _childCollectionNotifiers = new Dictionary<object, INotifyCollectionChanged>();
 
         static TreeGrid()
         {
@@ -63,17 +67,20 @@ namespace DaxStudio.Controls
             this.AlternatingRowBackground = new SolidColorBrush(Color.FromArgb(25, 0, 0, 0));
 
             // Enable virtualization for better performance with large datasets
-            this.EnableRowVirtualization = true;
-            this.EnableColumnVirtualization = true;
+            //this.EnableRowVirtualization = true;
+            //this.EnableColumnVirtualization = true;
             
             // Use recycling mode for even better performance
             VirtualizingPanel.SetVirtualizationMode(this, VirtualizationMode.Recycling);
             VirtualizingPanel.SetScrollUnit(this, ScrollUnit.Item);
 
+            ExecuteCustomDescendantFilter = new RelayCommand(ExecuteCustomDescendantsFilterAction);
+
             Loaded += OnLoaded;
+            Unloaded += OnUnloaded;
         }
 
-        #region Dependency Properties
+        // Dependency Properties
 
         public static readonly DependencyProperty ChildrenBindingPathProperty =
             DependencyProperty.Register(nameof(ChildrenBindingPath), typeof(string), typeof(TreeGrid),
@@ -85,15 +92,15 @@ namespace DaxStudio.Controls
             set => SetValue(ChildrenBindingPathProperty, value);
         }
 
-        public static readonly DependencyProperty IndentWidthProperty =
-            DependencyProperty.Register(nameof(IndentWidth), typeof(double), typeof(TreeGrid),
-                new PropertyMetadata(20.0));
+        //public static readonly DependencyProperty IndentWidthProperty =
+        //    DependencyProperty.Register(nameof(IndentWidth), typeof(double), typeof(TreeGrid),
+        //        new PropertyMetadata(20.0));
 
-        public double IndentWidth
-        {
-            get => (double)GetValue(IndentWidthProperty);
-            set => SetValue(IndentWidthProperty, value);
-        }
+        //public double IndentWidth
+        //{
+        //    get => (double)GetValue(IndentWidthProperty);
+        //    set => SetValue(IndentWidthProperty, value);
+        //}
 
         public static readonly DependencyProperty RootItemsProperty =
             DependencyProperty.Register(nameof(RootItems), typeof(IEnumerable), typeof(TreeGrid),
@@ -115,17 +122,15 @@ namespace DaxStudio.Controls
             set => SetValue(ExpandOnLoadProperty, value);
         }
 
-        public static readonly DependencyProperty EnableLazyLoadingProperty =
-            DependencyProperty.Register(nameof(EnableLazyLoading), typeof(bool), typeof(TreeGrid),
-                new PropertyMetadata(false));
+        public static readonly DependencyProperty AddCustomMenusAtBottomProperty =
+            DependencyProperty.Register(nameof(AddCustomMenusAtBottom), typeof(bool), typeof(TreeGrid),
+                new PropertyMetadata(true));
 
-        public bool EnableLazyLoading
+        public bool AddCustomMenusAtBottom
         {
-            get => (bool)GetValue(EnableLazyLoadingProperty);
-            set => SetValue(EnableLazyLoadingProperty, value);
+            get => (bool)GetValue(AddCustomMenusAtBottomProperty);
+            set => SetValue(AddCustomMenusAtBottomProperty, value);
         }
-
-        #endregion
 
         #region Event Handlers for Dependency Properties
 
@@ -146,15 +151,6 @@ namespace DaxStudio.Controls
             }
         }
 
-        private static void OnRootItemsChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-        {
-            if (d is TreeGrid grid)
-            {
-                grid.RebuildHierarchy();
-                grid.RefreshData();
-            }
-        }
-
         private static void OnExpandOnLoadChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             if (d is TreeGrid grid && (bool)e.NewValue)
@@ -163,6 +159,31 @@ namespace DaxStudio.Controls
                 {
                     grid.ExpandAll();
                 }
+            }
+        }
+
+        // Modify the OnRootItemsChanged method to handle collection changes
+        private static void OnRootItemsChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (d is TreeGrid grid)
+            {
+                // Unsubscribe from old collection's change notifications
+                if (e.OldValue is INotifyCollectionChanged oldNotifier && grid._rootItemsCollectionNotifier != null)
+                {
+                    oldNotifier.CollectionChanged -= grid.OnRootItemsCollectionChanged;
+                    grid._rootItemsCollectionNotifier = null;
+                }
+
+                // Subscribe to new collection's change notifications
+                if (e.NewValue is INotifyCollectionChanged newNotifier)
+                {
+                    grid._rootItemsCollectionNotifier = newNotifier;
+                    newNotifier.CollectionChanged += grid.OnRootItemsCollectionChanged;
+                }
+
+                // Rebuild hierarchy and refresh
+                grid.RebuildHierarchy();
+                grid.RefreshData();
             }
         }
 
@@ -237,6 +258,7 @@ namespace DaxStudio.Controls
             UpdateAncestorsForAllRows(_rootRows);
         }
 
+        // Modify BuildHierarchy to track child collection notifications
         private TreeGridRow<object> BuildHierarchy(object item, int level, TreeGridRow<object> parent)
         {
             if (item == null) return null;
@@ -253,19 +275,46 @@ namespace DaxStudio.Controls
             _itemToRowMap[item] = row;
             parent?.AddChild(row);
 
-            if (!EnableLazyLoading || row.IsExpanded)
+            // Subscribe to child collection changes if available
+            SubscribeToChildCollectionChanges(item);
+
+            var children = GetChildren(item);
+            if (children != null)
             {
-                var children = GetChildren(item);
-                if (children != null)
+                foreach (var child in children)
                 {
-                    foreach (var child in children)
-                    {
-                        BuildHierarchy(child, level + 1, row);
-                    }
+                    BuildHierarchy(child, level + 1, row);
                 }
             }
 
             return row;
+        }
+
+        // Add this method to handle child collection changes
+        private void SubscribeToChildCollectionChanges(object item)
+        {
+            if (item == null || string.IsNullOrEmpty(ChildrenBindingPath))
+                return;
+
+            try
+            {
+                var property = item.GetType().GetProperty(ChildrenBindingPath);
+                var childCollection = property?.GetValue(item) as INotifyCollectionChanged;
+                
+                if (childCollection != null && !_childCollectionNotifiers.ContainsKey(item))
+                {
+                    childCollection.CollectionChanged += OnChildCollectionChanged;
+                    _childCollectionNotifiers[item] = childCollection;
+                    
+                    // Store the parent item as a tag on the event subscription
+                    // so we know which item to update when children change
+                    childCollection.CollectionChanged += (s, e) => OnChildCollectionChanged(item, e);
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error subscribing to child collection changes: {ex.Message}");
+            }
         }
 
         private IEnumerable GetChildren(object item)
@@ -777,48 +826,116 @@ namespace DaxStudio.Controls
 
         private void SetupDefaultContextMenu()
         {
-            if (ShowDefaultContextMenu && ContextMenu == null)
+            if (ShowDefaultContextMenu)
             {
-                var contextMenu = new ContextMenu();
+                ContextMenu menu = null;
 
-                var expandAllItem = new MenuItem { Header = "Expand All" };
+                // If there's already a context menu, we'll merge with it
+                if (ContextMenu != null)
+                {
+                    menu = ContextMenu;
+
+                    // Check if we've already added our default items
+                    bool hasDefaultItems = menu.Items.OfType<MenuItem>()
+                        .Any(item => item.Header.ToString() == "Expand All" && item.Tag as string == "TreeGridDefaultItem");
+
+                    if (hasDefaultItems)
+                        return; // Default items already present
+
+                    // Add separator if there are existing items
+                    if (menu.Items.Count > 0 && !AddCustomMenusAtBottom)
+                    {
+                        menu.Items.Add(new Separator());
+                    }
+                }
+                else
+                {
+                    menu = new ContextMenu();
+                    ContextMenu = menu;
+                }
+
+                // Add default menu items
+                var expandAllItem = new MenuItem { Header = "Expand All", Tag = "TreeGridDefaultItem" };
                 expandAllItem.Click += (s, e) => ExpandAll();
-                contextMenu.Items.Add(expandAllItem);
+                AddMenuItem(0, expandAllItem);
 
-                var collapseAllItem = new MenuItem { Header = "Collapse All" };
+                var collapseAllItem = new MenuItem { Header = "Collapse All", Tag = "TreeGridDefaultItem" };
                 collapseAllItem.Click += (s, e) => CollapseAll();
-                contextMenu.Items.Add(collapseAllItem);
+                AddMenuItem(1,collapseAllItem);
 
-                contextMenu.Items.Add(new Separator());
+                AddSeparator(2);
 
-                var expandSelectedItem = new MenuItem { Header = "Expand Selected"};
-                expandSelectedItem.Click += (s, e) => {
+                var expandSelectedItem = new MenuItem { Header = "Expand Selected", Tag = "TreeGridDefaultItem" };
+                expandSelectedItem.Click += (s, e) =>
+                {
                     if (SelectedItem is TreeGridRow<object> row && row.HasChildren && !row.IsExpanded)
                     {
                         ExpandItemRecursively(row);
                     }
                 };
-                contextMenu.Items.Add(expandSelectedItem);
+                AddMenuItem(3,expandSelectedItem);
 
-                var collapseSelectedItem = new MenuItem { Header = "Collapse Selected" };
-                collapseSelectedItem.Click += (s, e) => {
+                var collapseSelectedItem = new MenuItem { Header = "Collapse Selected", Tag = "TreeGridDefaultItem" };
+                collapseSelectedItem.Click += (s, e) =>
+                {
                     if (SelectedItem is TreeGridRow<object> row && row.HasChildren && row.IsExpanded)
                     {
                         CollapseItemRecursively(row);
                     }
                 };
-                contextMenu.Items.Add(collapseSelectedItem);
+                AddMenuItem(4,collapseSelectedItem);
 
-                contextMenu.Opened += (s, e) => {
+                ContextMenu.Opened += (s, e) =>
+                {
                     var selectedRow = SelectedItem as TreeGridRow<object>;
-                    expandSelectedItem.IsEnabled = selectedRow?.HasChildren == true && !selectedRow.IsExpanded;
-                    collapseSelectedItem.IsEnabled = selectedRow?.HasChildren == true && selectedRow.IsExpanded;
-                    
-                    expandAllItem.IsEnabled = _itemToRowMap.Values.Any(r => r.HasChildren && !r.IsExpanded);
-                    collapseAllItem.IsEnabled = _itemToRowMap.Values.Any(r => r.HasChildren && r.IsExpanded);
-                };
 
-                ContextMenu = contextMenu;
+                    // Find our menu items by tag
+                    foreach (var item in ContextMenu.Items)
+                    {
+                        if (item is MenuItem menuItem && menuItem.Tag as string == "TreeGridDefaultItem")
+                        {
+                            switch (menuItem.Header.ToString())
+                            {
+                                case "Expand Selected":
+                                    menuItem.IsEnabled = selectedRow?.HasChildren == true && !selectedRow.IsExpanded;
+                                    break;
+                                case "Collapse Selected":
+                                    menuItem.IsEnabled = selectedRow?.HasChildren == true && selectedRow.IsExpanded;
+                                    break;
+                                case "Expand All":
+                                    menuItem.IsEnabled = _itemToRowMap.Values.Any(r => r.HasChildren && !r.IsExpanded);
+                                    break;
+                                case "Collapse All":
+                                    menuItem.IsEnabled = _itemToRowMap.Values.Any(r => r.HasChildren && r.IsExpanded);
+                                    break;
+                            }
+                        }
+                    }
+                };
+            }
+        }
+
+        private void AddMenuItem(int position, MenuItem menuItem)
+        {
+            if (AddCustomMenusAtBottom)
+            {
+                ContextMenu.Items.Insert(position, menuItem);
+            }
+            else
+            {
+                ContextMenu.Items.Add(menuItem);
+            }
+        }
+
+        private void AddSeparator(int position)
+        {
+            if (AddCustomMenusAtBottom)
+            {
+                ContextMenu.Items.Insert(position, new Separator());
+            }
+            else
+            {
+                ContextMenu.Items.Add(new Separator());
             }
         }
 
@@ -892,18 +1009,20 @@ namespace DaxStudio.Controls
                         break;
                     case Key.Add:
                     case Key.OemPlus:
-                        if (!selectedRow.IsExpanded)
+
+                        if (Keyboard.Modifiers.HasFlag(ModifierKeys.Shift))
                         {
-                            if (Keyboard.Modifiers.HasFlag(ModifierKeys.Shift))
-                            {
-                                ExpandItemRecursively(selectedRow);
-                            }
-                            else
+                            ExecuteCustomDescendantFilter.Execute(null);
+                        }
+                        else
+                        {
+                            if (!selectedRow.IsExpanded)
                             {
                                 ToggleItem(selectedRow.Data);
                             }
-                            e.Handled = true;
                         }
+                        e.Handled = true;
+
                         break;
                     case Key.Subtract:
                     case Key.OemMinus:
@@ -926,5 +1045,219 @@ namespace DaxStudio.Controls
         }
 
         #endregion
+
+
+        // Add this method to handle collection change events
+        private void OnRootItemsCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            Debug.WriteLine($"Root collection changed: {e.Action}");
+
+            // For UI thread safety
+            if (!Dispatcher.CheckAccess())
+            {
+                Dispatcher.Invoke(() => OnRootItemsCollectionChanged(sender, e));
+                return;
+            }
+
+            switch (e.Action)
+            {
+                case NotifyCollectionChangedAction.Add:
+                    // Could optimize by only adding new items, but rebuild is safer
+                    RebuildHierarchy();
+                    RefreshData();
+                    break;
+
+                case NotifyCollectionChangedAction.Remove:
+                    // Remove items from internal structures
+                    if (e.OldItems != null)
+                    {
+                        foreach (var item in e.OldItems)
+                        {
+                            RemoveItemAndDescendants(item);
+                        }
+                    }
+                    RebuildHierarchy();
+                    RefreshData();
+                    break;
+
+                case NotifyCollectionChangedAction.Replace:
+                    // Could optimize, but rebuild is safer for complex hierarchies
+                    RebuildHierarchy();
+                    RefreshData();
+                    break;
+
+                case NotifyCollectionChangedAction.Reset:
+                    // Collection was cleared or drastically changed
+                    _itemToRowMap.Clear();
+                    _rootRows.Clear();
+                    _flattenedRows.Clear();
+                    _visibleRowsSet.Clear();
+                    break;
+            }
+        }
+        // Add this method to remove an item and its descendants
+        private void RemoveItemAndDescendants(object item)
+        {
+            if (_itemToRowMap.TryGetValue(item, out var row))
+            {
+                // Recursively unsubscribe from children collections
+                foreach (var child in row.Children)
+                {
+                    RemoveItemAndDescendants(child);
+                }
+
+                // Unsubscribe from any child collection change notifications
+                if (_childCollectionNotifiers.TryGetValue(item, out var notifier))
+                {
+                    notifier.CollectionChanged -= OnChildCollectionChanged;
+                    _childCollectionNotifiers.Remove(item);
+                }
+
+                // Finally remove from the map
+                _itemToRowMap.Remove(item);
+            }
+        }
+
+        // Add this method overload for our custom event handler
+        private void OnChildCollectionChanged(object parentItem, NotifyCollectionChangedEventArgs e)
+        {
+            // For UI thread safety
+            if (!Dispatcher.CheckAccess())
+            {
+                Dispatcher.Invoke(() => OnChildCollectionChanged(parentItem, e));
+                return;
+            }
+
+            if (_itemToRowMap.TryGetValue(parentItem, out var parentRow))
+            {
+                // Clear existing children
+                foreach (var child in parentRow.Children.ToList())
+                {
+                    RemoveItemAndDescendants(child);
+                }
+
+                // Rebuild just this branch
+                var children = GetChildren(parentItem);
+                if (children != null)
+                {
+                    foreach (var child in children)
+                    {
+                        BuildHierarchy(child, parentRow.Level + 1, parentRow);
+                    }
+                }
+
+                // Update ancestors
+                UpdateAncestorsRecursive(parentRow);
+
+                // Refresh the UI
+                RefreshData();
+            }
+        }
+
+        #region Cleanup
+
+        // Add this cleanup method to remove event handlers
+        public void Cleanup()
+        {
+            // Unsubscribe from root collection changes
+            if (_rootItemsCollectionNotifier != null)
+            {
+                _rootItemsCollectionNotifier.CollectionChanged -= OnRootItemsCollectionChanged;
+                _rootItemsCollectionNotifier = null;
+            }
+            
+            // Unsubscribe from all child collection changes
+            foreach (var kvp in _childCollectionNotifiers)
+            {
+                kvp.Value.CollectionChanged -= OnChildCollectionChanged;
+            }
+            _childCollectionNotifiers.Clear();
+        }
+
+        // Override OnUnloaded to call cleanup
+        protected void OnUnloaded(object sender, RoutedEventArgs e)
+        {
+            Cleanup();
+        }
+
+        #endregion
+
+        public void CustomTreeFilter(Func<object, object, bool> filterPredicate, object parameter)
+        {
+            if (filterPredicate == null)
+                return;
+
+            using (new OverrideCursor(Cursors.Wait))
+            {
+
+                // Store the currently selected item before filtering
+                var selectedRowBeforeFilter = SelectedItem as TreeGridRow<object>;
+
+                if (selectedRowBeforeFilter == null)
+                    return; // Nothing selected to filter against
+
+                // Apply filter to all rows (starting from the selected node)
+                ApplyCustomFilterRecursively(parameter, selectedRowBeforeFilter, filterPredicate);
+
+                    
+
+                // Rebuild display to reflect filter changes
+                RefreshData();
+
+                // Try to restore selection if possible
+                if (_flattenedRows.Contains(selectedRowBeforeFilter))
+                {
+                    SelectedItem = selectedRowBeforeFilter;
+                    ScrollIntoView(selectedRowBeforeFilter);
+                }
+
+            }
+        }
+
+        // Revised filter application method
+        private bool ApplyCustomFilterRecursively(object selectedItem, TreeGridRow<object> currentItem, Func<object, object, bool> filterPredicate)
+        {
+            // Check if the current item should be visible based on the filter
+            bool currentItemVisible = filterPredicate(selectedItem, currentItem);
+
+            // Process children
+            bool anyChildVisible = false;
+            foreach (var childRow in currentItem.Children)
+            {
+                bool childVisible = ApplyCustomFilterRecursively(selectedItem, childRow, filterPredicate);
+                anyChildVisible = anyChildVisible || childVisible;
+
+                // If child is visible, we need to expand current item
+                currentItem.IsExpanded = childVisible;
+
+            }
+
+            // An item should be expanded if any of its children are visible
+            currentItem.IsExpanded = anyChildVisible;
+            
+
+            // Return whether this node or any of its descendants should be visible
+            return currentItemVisible || anyChildVisible;
+        }
+
+        // Add a dependency property to allow binding a filter command
+        public static readonly DependencyProperty CustomDescendantFilterProperty =
+            DependencyProperty.Register(nameof(CustomDescendantFilter), typeof(Func<object,object,bool>), typeof(TreeGrid),
+                new PropertyMetadata(null));
+
+        public Func<object,object,bool> CustomDescendantFilter
+        {
+            get => (Func<object,object,bool>)GetValue(CustomDescendantFilterProperty);
+            set => SetValue(CustomDescendantFilterProperty, value);
+        }
+
+        private void ExecuteCustomDescendantsFilterAction(object parameter)
+        {
+            if (CustomDescendantFilter != null && SelectedItem is TreeGridRow<object> selectedRow)
+            {
+                CustomTreeFilter(CustomDescendantFilter, parameter);
+            }
+        }
+
     }
 }

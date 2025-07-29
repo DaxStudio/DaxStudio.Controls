@@ -5,6 +5,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Media;
 
+
 namespace DaxStudio.Controls
 {
     /// <summary>
@@ -91,6 +92,19 @@ namespace DaxStudio.Controls
         }
 
         /// <summary>
+        /// The line stroke brush for selected tree lines
+        /// </summary>
+        public static readonly DependencyProperty ForegroundProperty =
+            DependencyProperty.Register(nameof(Foreground), typeof(Brush), typeof(TreeGridTreeColumn),
+                new PropertyMetadata(new SolidColorBrush(SystemColors.ControlTextColor), OnTemplateChanged));
+
+        public Brush Foreground
+        {
+            get => (Brush)GetValue(ForegroundProperty);
+            set => SetValue(ForegroundProperty, value);
+        }
+
+        /// <summary>
         /// The icon content to display in the tree cell
         /// </summary>
         public static readonly DependencyProperty IconProperty =
@@ -155,6 +169,28 @@ namespace DaxStudio.Controls
             set => SetValue(TextPathProperty, value);
         }
 
+        /// <summary>
+        /// Controls the visibility of the expander
+        /// </summary>
+        public static readonly DependencyProperty ShowExpanderProperty =
+            DependencyProperty.Register(nameof(ShowExpander), typeof(bool), typeof(TreeGridTreeColumn),
+                new PropertyMetadata(true, OnShowExpanderChanged));
+
+        public bool ShowExpander
+        {
+            get => (bool)GetValue(ShowExpanderProperty);
+            set => SetValue(ShowExpanderProperty, value);
+        }
+
+        private static void OnShowExpanderChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (d is TreeGridTreeColumn column)
+            {
+                // Recreate the cell template when the property changes
+                column.CellTemplate = column.CreateCellTemplate();
+            }
+        }
+
         private static void OnShowTreeLinesChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             if (d is TreeGridTreeColumn column)
@@ -172,6 +208,7 @@ namespace DaxStudio.Controls
                 column.CellTemplate = column.CreateCellTemplate();
             }
         }
+
 
         public TreeGridTreeColumn()
         {
@@ -195,7 +232,7 @@ namespace DaxStudio.Controls
             cellFactory.SetBinding(TreeGridTreeCell.SelectedLineStrokeProperty, new Binding(nameof(SelectedLineStroke)) { Source = this });
             cellFactory.SetBinding(TreeGridTreeCell.LineThicknessProperty, new Binding(nameof(LineThickness)) { Source = this });
             cellFactory.SetBinding(TreeGridTreeCell.ShowTreeLinesProperty, new Binding(nameof(ShowTreeLines)) { Source = this });
-            
+            cellFactory.SetBinding(TreeGridTreeCell.ShowExpanderProperty, new Binding(nameof(ShowExpander)) { Source = this });
             // Handle Text binding - if Text property is set as a Binding, use it; otherwise use default
             if (BindingOperations.GetBinding(this, TextProperty) is Binding textBinding)
             {
@@ -209,7 +246,12 @@ namespace DaxStudio.Controls
             {
                 cellFactory.SetValue(TreeGridTreeCell.TextProperty, Text);
             }
-            
+
+            // Apply foreground if set
+            if (Foreground != null)
+            {
+                cellFactory.SetBinding(TreeGridTreeCell.TextForegroundProperty, new Binding(nameof(Foreground)) { Source = this });
+            }
             // Handle Icon binding - if Icon property is set as a Binding, use it; otherwise use default
             if (BindingOperations.GetBinding(this, IconProperty) is Binding iconBinding)
             {

@@ -32,28 +32,37 @@ The TreeGrid control is a DataGrid with a hierarchical column that supports expa
 
 | Property | Type | Default | Description |
 |---|---|---|---|
-| RootItems | IEnumerable | null | The root-level items to display in the hierarchy |
+| AddCustomMenusAtBottom | bool | true | Controls whether custom menu items appear at the bottom or top of context menu |
 | ChildrenBindingPath | string | "" | The path to the property containing child items (e.g., "Children") |
-| IndentWidth | double | 20.0 | The width in pixels for each level of indentation |
+| CustomDescendantFilter | Func<object,object,bool> | null | Custom filter predicate for tree filtering operations |
 | ExpandOnLoad | bool | false | Whether to expand all nodes when the control loads |
-| EnableLazyLoading | bool | false | Enables lazy loading of child nodes for better performance |
+| RootItems | IEnumerable | null | The root-level items to display in the hierarchy |
 | ShowDefaultContextMenu | bool | true | Shows/hides the built-in context menu with expand/collapse options |
+
+### TreeGrid Methods
+
+| Method | Type | Default | Description |
+|---|---|---|---|
+| ExecuteCustomDescendantFilter | ICommand | - | Command that executes the custom filter functionality |
 
 ### TreeGridTreeColumn Properties
 
 | Property | Type | Default | Description |
 |---|---|---|---|
-| TextPath | string | null | Path to the property for text content (e.g., "Data.Name") |
-| Text | string | null | Static text content for the tree cell |
+| ExpanderTemplate | ControlTemplate | null | Custom template for the expand/collapse button |
+| Foreground | Brush | SystemColors.ControlText | Text color for the tree cell content | 
 | Icon | ImageSource | null | Icon to display in the tree cell |
+| IconTemplate | DataTemplate | null | Custom template for displaying icon content |
 | IndentWidth | double | 16.0 | The width in pixels for each level of indentation |
-| ShowTreeLines | bool | true | Controls whether to display the tree lines |
 | LineStroke | Brush | Gray (#AAAAAA) | Sets the color of the brush used to draw the tree lines |
 | LineThickness | double | 1.0 | Sets the thickness of the tree lines |
 | SelectedLineStroke | Brush | Gray (#AAAAAA) | Sets the color for the tree line to the children of the currently selected row |
+| ShowExpander | bool | true | Controls the visibility of the expander control in the tree |
+| ShowTreeLines | bool | true | Controls whether to display the tree lines |
+| TextPath | string | null | Path to the property for text content (e.g., "Data.Name") |
+| Text | string | null | Static text content for the tree cell |
 | TextTemplate | DataTemplate | null | Custom template for displaying text content |
-| IconTemplate | DataTemplate | null | Custom template for displaying icon content |
-| ExpanderTemplate | ControlTemplate | null | Custom template for the expand/collapse button |
+
 
 ### Example Usage
 

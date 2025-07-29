@@ -14,18 +14,14 @@
     <conv:MultiplyValueConverter x:Key="MultiplyValueConverter" />
     <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
     <conv:NullToVisibilityConverter x:Key="NullToVisibilityConverter"/>
-
-
-
+    <conv:HideOrCollapseBoolToVisibilityConverter x:Key="HideOrCollapseBoolToVisibilityConverter"/>
 
     <!-- Tree Line Drawing Control -->
     <Style x:Key="TreeLineStyle" TargetType="Border">
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="IsHitTestVisible" Value="False"/>
     </Style>
-
-
-    
+   
     <ControlTemplate x:Key="ExpanderControlTemplate" TargetType="ToggleButton">
         <Border Background="Transparent" 
             BorderBrush="Transparent" 
@@ -83,11 +79,11 @@
     </ControlTemplate>
 
     <ControlTemplate x:Key="PlusMinusExpanderTemplate" TargetType="{x:Type ToggleButton}">
-        <Border x:Name="Border"
+        <Border x:Name="OuterBorder"
                             Width="19"
                             Height="13"
                             Background="{StaticResource DaxStudio.TreeGrid.Brushes.ExpanderBackground}">
-            <Border x:Name="Border1"
+            <Border x:Name="InnerBorder"
                                 Width="9"
                                 Height="9"
                                 BorderBrush="{StaticResource DaxStudio.TreeGrid.Brushes.ExpanderBorder}"
@@ -117,12 +113,12 @@
      <!--TreeGrid Style--> 
     <Style TargetType="ctrl:TreeGrid" BasedOn="{StaticResource {x:Type DataGrid}}">
         <Setter Property="Background" Value="{DynamicResource Theme.Brush.Content.Back}"/>
-        <Setter Property="Foreground" Value="{DynamicResource Theme.Brush.Default.Fore}"/>
+        <!--<Setter Property="Foreground" Value="{DynamicResource Theme.Brush.Default.Fore}"/>-->
         <Setter Property="BorderBrush" Value="{DynamicResource Theme.Brush.Control.Border}"/>
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="GridLinesVisibility" Value="None"/>
-        <Setter Property="AlternatingRowBackground" Value="{DynamicResource Theme.Brush.Table.Alternate}"/>
-        <Setter Property="RowBackground" Value="Transparent"/>
+        <!--<Setter Property="AlternatingRowBackground" Value="{DynamicResource Theme.Brush.Table.Alternate}"/>
+        <Setter Property="RowBackground" Value="Transparent"/>-->
         <Setter Property="HeadersVisibility" Value="Column"/>
         <Setter Property="SelectionMode" Value="Single"/>
         <Setter Property="SelectionUnit" Value="FullRow"/>
@@ -130,13 +126,12 @@
         <Setter Property="CanUserDeleteRows" Value="False"/>
         <Setter Property="CanUserReorderColumns" Value="False"/>
         <Setter Property="CanUserSortColumns" Value="False"/>
-        <Setter Property="IndentWidth" Value="20"/>
     </Style>
 
      <!--Row Style--> 
     <Style TargetType="DataGridRow" x:Key="TreeGridRowStyle">
         <Setter Property="Background" Value="Transparent"/>
-        <Setter Property="Foreground" Value="{DynamicResource Theme.Brush.Default.Fore}"/>
+        <!--<Setter Property="Foreground" Value="{DynamicResource Theme.Brush.Default.Fore}"/>-->
         <Style.Triggers>
             <Trigger Property="IsMouseOver" Value="True">
                 <Setter Property="Background" Value="{DynamicResource Theme.Brush.Table.Hover}"/>
@@ -171,6 +166,7 @@
 
     <!-- TreeGridNameCell Style -->
     <Style TargetType="ctrl:TreeGridTreeCell">
+        <!--<Setter Property="Foreground" Value="{Binding TextForeground, RelativeSource={RelativeSource TemplatedParent}}"/>-->
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="ctrl:TreeGridTreeCell">
@@ -192,7 +188,7 @@
                         <!-- Content -->
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                             <!-- Indentation -->
-                            <Border >
+                            <Border x:Name="IndentBorder">
                                 <Border.Width>
                                     <MultiBinding Converter="{StaticResource MultiplyValueConverter}">
                                         <Binding Path="RowData.Level" RelativeSource="{RelativeSource TemplatedParent}"/>
@@ -205,9 +201,13 @@
                             <ToggleButton x:Name="PART_Expander"
                                       Width="16" Height="16"
                                       IsChecked="{Binding RowData.IsExpanded, RelativeSource={RelativeSource TemplatedParent}, Mode=OneWay}"
-                                      Foreground="Black"
-                                      Visibility="{Binding RowData.HasChildren, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource BooleanToHiddenConverter}}"
-                                      >
+                                      Foreground="{Binding Foreground, RelativeSource={RelativeSource TemplatedParent}}">
+                                <ToggleButton.Visibility>
+                                    <MultiBinding Converter="{StaticResource HideOrCollapseBoolToVisibilityConverter}">
+                                        <Binding Path="RowData.HasChildren" RelativeSource="{RelativeSource TemplatedParent}"/>
+                                        <Binding Path="ShowExpander" RelativeSource="{RelativeSource TemplatedParent}"/>
+                                    </MultiBinding>
+                                </ToggleButton.Visibility>
                                 <ToggleButton.Style>
                                     <Style TargetType="ToggleButton" BasedOn="{StaticResource ExpanderToggleStyle}">
                                         <Style.Triggers>
@@ -256,6 +256,7 @@
                                           Content="{Binding Text, RelativeSource={RelativeSource TemplatedParent}}"
                                           ContentTemplate="{Binding TextTemplate, RelativeSource={RelativeSource TemplatedParent}}"
                                           Margin="2,0,0,0"
+                                          Foreground="{Binding TextForeground, RelativeSource={RelativeSource TemplatedParent}}"
                                           VerticalAlignment="Center">
                                 <ContentControl.Style>
                                     <Style TargetType="ContentControl">
@@ -265,7 +266,7 @@
                                                     <Setter.Value>
                                                         <DataTemplate>
                                                             <TextBlock Text="{Binding Text, RelativeSource={RelativeSource AncestorType=ctrl:TreeGridTreeCell}}" 
-                                                                     Foreground="{Binding TextForeground, RelativeSource={RelativeSource AncestorType=ctrl:TreeGridTreeCell}}"/>
+                                                                       Foreground="{Binding TextForeground, RelativeSource={RelativeSource AncestorType=ctrl:TreeGridTreeCell}}"/>
                                                         </DataTemplate>
                                                     </Setter.Value>
                                                 </Setter>

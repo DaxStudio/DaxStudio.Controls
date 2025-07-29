@@ -1,6 +1,4 @@
-using DaxStudio.Controls.Converters;
 using DaxStudio.Controls.Model;
-using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -109,8 +107,9 @@ namespace DaxStudio.Controls
         public Brush SelectedLineStroke
         {
             get => (Brush)GetValue(SelectedLineStrokeProperty);
-            set => SetValue(LineStrokeProperty, value);
+            set => SetValue(SelectedLineStrokeProperty, value); 
         }
+
 
         /// <summary>
         /// The line thickness for tree lines
@@ -130,12 +129,25 @@ namespace DaxStudio.Controls
         /// </summary>
         public static readonly DependencyProperty ShowTreeLinesProperty =
             DependencyProperty.Register(nameof(ShowTreeLines), typeof(bool), typeof(TreeGridTreeCell),
-                new PropertyMetadata(true, OnShowTreeLinesChanged));
+                new PropertyMetadata(true, RedrawCell));
 
         public bool ShowTreeLines
         {
             get => (bool)GetValue(ShowTreeLinesProperty);
             set => SetValue(ShowTreeLinesProperty, value);
+        }
+
+        /// <summary>
+        /// Controls the visibility of the expander
+        /// </summary>
+        public static readonly DependencyProperty ShowExpanderProperty =
+            DependencyProperty.Register(nameof(ShowExpander), typeof(bool), typeof(TreeGridTreeCell),
+                new PropertyMetadata(true, RedrawCell));
+
+        public bool ShowExpander
+        {
+            get => (bool)GetValue(ShowExpanderProperty);
+            set => SetValue(ShowExpanderProperty, value);
         }
 
         /// <summary>
@@ -190,7 +202,7 @@ namespace DaxStudio.Controls
             set => SetValue(IconTemplateProperty, value);
         }
 
-        private static void OnShowTreeLinesChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        private static void RedrawCell(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             if (d is TreeGridTreeCell control)
             {
@@ -253,12 +265,25 @@ namespace DaxStudio.Controls
                 }
 
                 // Set up binding for TextForeground property
-                var foregroundBinding = new Binding("Data.IsVisible") 
-                { 
-                    Source = row,
-                    Converter = new VisibilityToForegroundConverter()
-                };
-                SetBinding(TextForegroundProperty, foregroundBinding);
+                //var foregroundBinding = new Binding("Data.IsVisible") 
+                //{ 
+                //    Source = row,
+                //    Converter = new VisibilityToForegroundConverter()
+                //};
+                //SetBinding(TextForegroundProperty, foregroundBinding);
+
+                // Set up TextForeground binding from column's Foreground if not already set
+                if (GetValue(TextForegroundProperty) == null || 
+                    GetValue(TextForegroundProperty) == SystemColors.ControlTextBrush)
+                {
+                    // Get the owning column
+                    var dataGridCell = VisualTreeHelper.GetParent(this) as DataGridCell;
+                    var column = dataGridCell?.Column as TreeGridTreeColumn;
+                    if (column?.Foreground != null)
+                    {
+                        SetValue(TextForegroundProperty, column.Foreground);
+                    }
+                }
             }
         }
 
