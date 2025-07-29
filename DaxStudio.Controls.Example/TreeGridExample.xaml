@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="DaxStudio.UI.Views.TreeGridExample"
+﻿<UserControl x:Class="DaxStudio.Controls.Example.TreeGridExample"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:ctrl="clr-namespace:DaxStudio.Controls;assembly=DaxStudio.Controls"
@@ -88,7 +88,6 @@
                                    Grid.Row="1"
                                    RootItems="{Binding RootItems}"
                                    ChildrenBindingPath="Children"
-                                   IndentWidth="20"
                                    Margin="5">
 
             <!-- Define columns -->
@@ -110,18 +109,7 @@
                                         SelectedLineStroke="Red"
                                         LineThickness="1"
                                          >
-                    <!-- ExpanderTemplate="{StaticResource Expander2}"-->
-                    
-                    <!--<ctrl:TreeGridTreeColumn.TextTemplate>
-                        <DataTemplate>
-                            <TextBlock Text="{Binding}" 
-                                       Margin="2 0 0 0"
-                                       VerticalAlignment="Center"
-                                       Foreground="Red"/>
-                        </DataTemplate>
-                    </ctrl:TreeGridTreeColumn.TextTemplate>-->
-                    
-                    
+
                 </ctrl:TreeGridTreeColumn>
 
                 <DataGridTextColumn Header="Description" 

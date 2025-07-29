@@ -1,13 +1,12 @@
 ﻿using Caliburn.Micro;
+using DaxStudio.Controls.Model;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
-using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
-using System.Windows.Controls.Primitives;
+using System.Windows.Input;
 
 namespace DaxStudio.UI.ViewModels
 {
@@ -15,16 +14,16 @@ namespace DaxStudio.UI.ViewModels
     {
         public QueryPlanTreeExampleViewModel()
         {
-            var filePath = @"c:\temp\QueryPlan.json";
-            
+            var filePath = @"..\..\..\data\QueryPlan.json";
+
             if (File.Exists(filePath))
             {
                 try
                 {
                     var json = File.ReadAllText(filePath);
-                    
+
                     var loadedItems = JsonConvert.DeserializeObject<QueryPlan>(json);
-                   
+
                     if (loadedItems != null)
                     {
                         RootItems = LoadItemsRecursively(loadedItems.PhysicalQueryPlanRows);
@@ -39,6 +38,8 @@ namespace DaxStudio.UI.ViewModels
 
         }
 
+
+
         private ObservableCollection<QPTreeItem> LoadItemsRecursively(List<QPTreeItem> loadedItems)
         {
             ObservableCollection<QPTreeItem> items = new ObservableCollection<QPTreeItem>();
@@ -49,7 +50,7 @@ namespace DaxStudio.UI.ViewModels
                 {
                     if (item.Level == 0)
                         items.Add(item);
-                    else if (item.Level == (prevItem?.Level??0))
+                    else if (item.Level == (prevItem?.Level ?? 0))
                     {
                         parents.Peek().Children.Add(item);
                     }
@@ -74,6 +75,47 @@ namespace DaxStudio.UI.ViewModels
         }
 
         public ObservableCollection<QPTreeItem> RootItems { get; }
+
+        public Func<object,object,bool> FindDescendantsWithHigherRecordCountsFunc => FindDescendantsWithHigherRecordCounts;
+
+        public bool FindDescendantsWithHigherRecordCounts(object selectedItem, object item)
+        {
+            if (item is TreeGridRow<object> treeItem && selectedItem is TreeGridRow<object> seletedTreeItem)
+            {
+                var data = treeItem.Data as QPTreeItem;
+                var selectedData = seletedTreeItem.Data as QPTreeItem;
+                var records = data.Records ?? 0;
+
+                return data.Records > selectedData.Records; 
+
+            }
+
+            return false;
+        }
+
+        public bool FindDescendantsWithHigherRecordCountsRecursive(TreeGridRow<object> item, int records = 0)
+        {
+            var data = item.Data as QPTreeItem;
+            // Recursively check all children
+            if (item.Children != null)
+            {
+                foreach (var child in item.Children)
+                {
+                    if (FindDescendantsWithHigherRecordCountsRecursive(child, records))
+                    {
+                        return true;
+                    }
+                }
+            }
+            // Check if the current item's record count is higher than the specified item's
+            if (data.Records > records )
+            {
+                return true;
+            }
+
+            return false;
+        }
+
     }
 
     public class QueryPlan
@@ -141,6 +183,7 @@ namespace DaxStudio.UI.ViewModels
             }
         }
 
+        
 
     }
 }

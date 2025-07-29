@@ -1,6 +1,9 @@
-﻿using System;
+﻿using Caliburn.Micro;
+using System;
 using System.Collections.ObjectModel;
-using Caliburn.Micro;
+
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
 namespace DaxStudio.UI.ViewModels
 {

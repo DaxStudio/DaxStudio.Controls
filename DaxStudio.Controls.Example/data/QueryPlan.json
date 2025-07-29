@@ -1,0 +1,2237 @@
+{
+  "FileFormatVersion": 3,
+  "PhysicalQueryPlanRows": [
+    {
+      "Records": null,
+      "Operation": "PartitionIntoGroups: IterPhyOp LogOp=Order IterCols(0, 1, 2, 3)('Product'[Brand], ''[IsGrandTotalRowTotal], ''[L4], ''[]) #Groups=1 #Rows=12",
+      "IndentedOperation": "PartitionIntoGroups: IterPhyOp LogOp=Order IterCols(0, 1, 2, 3)('Product'[Brand], ''[IsGrandTotalRowTotal], ''[L4], ''[]) #Groups=1 #Rows=12",
+      "Level": 0,
+      "RowNumber": 1,
+      "NextSiblingRowNumber": 107,
+      "HighlightRow": false
+    },
+    {
+      "Records": 1,
+      "Operation": "AggregationSpool<Order>: SpoolPhyOp #Records=1",
+      "IndentedOperation": "    AggregationSpool<Order>: SpoolPhyOp #Records=1",
+      "Level": 1,
+      "RowNumber": 2,
+      "NextSiblingRowNumber": 107,
+      "HighlightRow": false
+    },
+    {
+      "Records": null,
+      "Operation": "Proxy: IterPhyOp LogOp=TableVarProxy IterCols(0, 1, 2, 3)('Product'[Brand], ''[IsGrandTotalRowTotal], ''[L4], ''[])",
+      "IndentedOperation": "        Proxy: IterPhyOp LogOp=TableVarProxy IterCols(0, 1, 2, 3)('Product'[Brand], ''[IsGrandTotalRowTotal], ''[L4], ''[])",
+      "Level": 2,
+      "RowNumber": 3,
+      "NextSiblingRowNumber": 105,
+      "HighlightRow": false
+    },
+    {
+      "Records": null,
+      "Operation": "Proxy: IterPhyOp LogOp=TableVarProxy IterCols(0, 1, 2, 3)('Product'[Brand], ''[IsGrandTotalRowTotal], ''[L4], ''[])",
+      "IndentedOperation": "            Proxy: IterPhyOp LogOp=TableVarProxy IterCols(0, 1, 2, 3)('Product'[Brand], ''[IsGrandTotalRowTotal], ''[L4], ''[])",
+      "Level": 3,
+      "RowNumber": 4,
+      "NextSiblingRowNumber": 105,
+      "HighlightRow": false
+    },
+    {
+      "Records": null,
+      "Operation": "Union: IterPhyOp LogOp=Union IterCols(0, 1, 2, 3)('Product'[Brand], ''[IsGrandTotalRowTotal], ''[L4], ''[])",
+      "IndentedOperation": "                Union: IterPhyOp LogOp=Union IterCols(0, 1, 2, 3)('Product'[Brand], ''[IsGrandTotalRowTotal], ''[L4], ''[])",
+      "Level": 4,
+      "RowNumber": 5,
+      "NextSiblingRowNumber": 105,
+      "HighlightRow": false
+    },
+    {
+      "Records": null,
+      "Operation": "GroupSemijoin: IterPhyOp LogOp=GroupSemiJoin IterCols(0, 1, 2)('Product'[Brand], ''[IsGrandTotalRowTotal], ''[L4])",
+      "IndentedOperation": "                    GroupSemijoin: IterPhyOp LogOp=GroupSemiJoin IterCols(0, 1, 2)('Product'[Brand], ''[IsGrandTotalRowTotal], ''[L4])",
+      "Level": 5,
+      "RowNumber": 6,
+      "NextSiblingRowNumber": 59,
+      "HighlightRow": false
+    },
+    {
+      "Records": 11,
+      "Operation": "Spool_Iterator<SpoolIterator>: IterPhyOp LogOp=SumX IterCols(0)('Product'[Brand]) #Records=11 #KeyCols=1 #ValueCols=1",
+      "IndentedOperation": "                        Spool_Iterator<SpoolIterator>: IterPhyOp LogOp=SumX IterCols(0)('Product'[Brand]) #Records=11 #KeyCols=1 #ValueCols=1",
+      "Level": 6,
+      "RowNumber": 7,
+      "NextSiblingRowNumber": 59,
+      "HighlightRow": false
+    },
+    {
+      "Records": 11,
+      "Operation": "AggregationSpool<Sum>: SpoolPhyOp #Records=11",
+      "IndentedOperation": "                            AggregationSpool<Sum>: SpoolPhyOp #Records=11",
+      "Level": 7,
+      "RowNumber": 8,
+      "NextSiblingRowNumber": 59,
+      "HighlightRow": false
+    },
+    {
+      "Records": null,
+      "Operation": "CrossApply: IterPhyOp LogOp=VarScope IterCols(1, 2, 3)('Product'[Brand], 'Date'[Year], ''[@Sales])",
+      "IndentedOperation": "                                CrossApply: IterPhyOp LogOp=VarScope IterCols(1, 2, 3)('Product'[Brand], 'Date'[Year], ''[@Sales])",
+      "Level": 8,
+      "RowNumber": 9,
+      "NextSiblingRowNumber": 59,
+      "HighlightRow": false
+    },
+    {
+      "Records": 44,
+      "Operation": "Spool_MultiValuedHashLookup: IterPhyOp LogOp=GroupSemiJoin LookupCols(1, 2, 3)('Product'[Brand], 'Date'[Year], ''[@Sales]) IterCols(0)('Product'[Brand]) #Records=44 #KeyCols=4 #ValueCols=0",
+      "IndentedOperation": "                                    Spool_MultiValuedHashLookup: IterPhyOp LogOp=GroupSemiJoin LookupCols(1, 2, 3)('Product'[Brand], 'Date'[Year], ''[@Sales]) IterCols(0)('Product'[Brand]) #Records=44 #KeyCols=4 #ValueCols=0",
+      "Level": 9,
+      "RowNumber": 10,
+      "NextSiblingRowNumber": 16,
+      "HighlightRow": false
+    },
+    {
+      "Records": 44,
+      "Operation": "AggregationSpool<GroupBy>: SpoolPhyOp #Records=44",
+      "IndentedOperation": "                                        AggregationSpool<GroupBy>: SpoolPhyOp #Records=44",
+      "Level": 10,
+      "RowNumber": 11,
+      "NextSiblingRowNumber": 16,
+      "HighlightRow": false
+    },
+    {
+      "Records": null,
+      "Operation": "GroupSemijoin: IterPhyOp LogOp=GroupSemiJoin IterCols(0, 1, 2, 3)('Product'[Brand], 'Product'[Brand], 'Date'[Year], ''[@Sales])",
+      "IndentedOperation": "                                            GroupSemijoin: IterPhyOp LogOp=GroupSemiJoin IterCols(0, 1, 2, 3)('Product'[Brand], 'Product'[Brand], 'Date'[Year], ''[@Sales])",
+      "Level": 11,
+      "RowNumber": 12,
+      "NextSiblingRowNumber": 16,
+      "HighlightRow": false
+    },
+    {
+      "Records": 44,
+      "Operation": "Spool_Iterator<SpoolIterator>: IterPhyOp LogOp=Sum_Vertipaq IterCols(0, 1, 2)('Product'[Brand], 'Product'[Brand], 'Date'[Year]) #Records=44 #KeyCols=76 #ValueCols=1",
+      "IndentedOperation": "                                                Spool_Iterator<SpoolIterator>: IterPhyOp LogOp=Sum_Vertipaq IterCols(0, 1, 2)('Product'[Brand], 'Product'[Brand], 'Date'[Year]) #Records=44 #KeyCols=76 #ValueCols=1",
+      "Level": 12,
+      "RowNumber": 13,
+      "NextSiblingRowNumber": 16,
+      "HighlightRow": false
+    },
+    {
+      "Records": 44,
+      "Operation": "ProjectionSpool<ProjectFusion<Copy>>: SpoolPhyOp #Records=44",
+      "IndentedOperation": "                                                    ProjectionSpool<ProjectFusion<Copy>>: SpoolPhyOp #Records=44",
+      "Level": 13,
+      "RowNumber": 14,
+      "NextSiblingRowNumber": 16,
+      "HighlightRow": false
+    },
+    {
+      "Records": null,
+      "Operation": "DataPostFilter: IterPhyOp #FieldCols=2 #ValueCols=1",
+      "IndentedOperation": "                                                        DataPostFilter: IterPhyOp #FieldCols=2 #ValueCols=1",
+      "Level": 14,
+      "RowNumber": 15,
+      "NextSiblingRowNumber": 15,
+      "HighlightRow": true
+    },
+    {
+      "Records": null,
+      "Operation": "Extend_Lookup: IterPhyOp LogOp=Multiply IterCols(1, 2, 3)('Product'[Brand], 'Date'[Year], ''[@Sales])",
+      "IndentedOperation": "                                    Extend_Lookup: IterPhyOp LogOp=Multiply IterCols(1, 2, 3)('Product'[Brand], 'Date'[Year], ''[@Sales])",
+      "Level": 9,
+      "RowNumber": 16,
+      "NextSiblingRowNumber": 59,
+      "HighlightRow": false
+    },
+    {
+      "Records": null,
+      "Operation": "CrossApply: IterPhyOp LogOp=Multiply IterCols(2, 3)('Date'[Year], ''[@Sales])",
+      "IndentedOperation": "                                        CrossApply: IterPhyOp LogOp=Multiply IterCols(2, 3)('Date'[Year], ''[@Sales])",
+      "Level": 10,
+      "RowNumber": 17,
+      "NextSiblingRowNumber": 46,
+      "HighlightRow": false
+    },
+    {
+      "Records": 44,
+      "Operation": "Spool_MultiValuedHashLookup: IterPhyOp LogOp=GroupSemiJoin LookupCols(2, 3)('Date'[Year], ''[@Sales]) IterCols(1)('Product'[Brand]) #Records=44 #KeyCols=3 #ValueCols=0",
+      "IndentedOperation": "                                            Spool_MultiValuedHashLookup: IterPhyOp LogOp=GroupSemiJoin LookupCols(2, 3)('Date'[Year], ''[@Sales]) IterCols(1)('Product'[Brand]) #Records=44 #KeyCols=3 #ValueCols=0",
+      "Level": 11,
+      "RowNumber": 18,
+      "NextSiblingRowNumber": 24,
+      "HighlightRow": false
+    },
+    {
+      "Records": 44,
+      "Operation": "AggregationSpool<GroupBy>: SpoolPhyOp #Records=44",
+      "IndentedOperation": "                                                AggregationSpool<GroupBy>: SpoolPhyOp #Records=44",
+      "Level": 12,
+      "RowNumber": 19,
+      "NextSiblingRowNumber": 24,
+      "HighlightRow": false
+    },
+    {
+      "Records": null,
+      "Operation": "GroupSemijoin: IterPhyOp LogOp=GroupSemiJoin IterCols(0, 1, 2, 3)('Product'[Brand], 'Product'[Brand], 'Date'[Year], ''[@Sales])",
+      "IndentedOperation": "                                                    GroupSemijoin: IterPhyOp LogOp=GroupSemiJoin IterCols(0, 1, 2, 3)('Product'[Brand], 'Product'[Brand], 'Date'[Year], ''[@Sales])",
+      "Level": 13,
+      "RowNumber": 20,
+      "NextSiblingRowNumber": 24,
+      "HighlightRow": false
+    },
+    {
+      "Records": 44,
+      "Operation": "Spool_Iterator<SpoolIterator>: IterPhyOp LogOp=Sum_Vertipaq IterCols(0, 1, 2)('Product'[Brand], 'Product'[Brand], 'Date'[Year]) #Records=44 #KeyCols=76 #ValueCols=1",
+      "IndentedOperation": "                                                        Spool_Iterator<SpoolIterator>: IterPhyOp LogOp=Sum_Vertipaq IterCols(0, 1, 2)('Product'[Brand], 'Product'[Brand], 'Date'[Year]) #Records=44 #KeyCols=76 #ValueCols=1",
+      "Level": 14,
+      "RowNumber": 21,
+      "NextSiblingRowNumber": 24,
+      "HighlightRow": false
+    },
+    {
+      "Records": 44,
+      "Operation": "ProjectionSpool<ProjectFusion<Copy>>: SpoolPhyOp #Records=44",
+      "IndentedOperation": "                                                            ProjectionSpool<ProjectFusion<Copy>>: SpoolPhyOp #Records=44",
+      "Level": 15,
+      "RowNumber": 22,
+      "NextSiblingRowNumber": 24,
+      "HighlightRow": false
+    },
+    {
+      "Records": null,
+      "Operation": "DataPostFilter: IterPhyOp #FieldCols=2 #ValueCols=1",
+      "IndentedOperation": "                                                                DataPostFilter: IterPhyOp #FieldCols=2 #ValueCols=1",
+      "Level": 16,
+      "RowNumber": 23,
+      "NextSiblingRowNumber": 23,
+      "HighlightRow": true
+    },
+    {
+      "Records": null,
+      "Operation": "Extend_Lookup: IterPhyOp LogOp=Multiply IterCols(2, 3)('Date'[Year], ''[@Sales])",
+      "IndentedOperation": "                                            Extend_Lookup: IterPhyOp LogOp=Multiply IterCols(2, 3)('Date'[Year], ''[@Sales])",
+      "Level": 11,
+      "RowNumber": 24,
+      "NextSiblingRowNumber": 46,
+      "HighlightRow": false
+    },
+    {
+      "Records": null,
+      "Operation": "Extend_Lookup: IterPhyOp LogOp=Extend_Lookup''[@Sales] IterCols(3)(''[@Sales])",
+      "IndentedOperation": "                                                Extend_Lookup: IterPhyOp LogOp=Extend_Lookup''[@Sales] IterCols(3)(''[@Sales])",
+      "Level": 12,
+      "RowNumber": 25,
+      "NextSiblingRowNumber": 33,
+      "HighlightRow": false
+    },
+    {
+      "Records": 44,
+      "Operation": "Spool_Iterator<SpoolIterator>: IterPhyOp LogOp=GroupSemiJoin IterCols(2, 3)('Date'[Year], ''[@Sales]) #Records=44 #KeyCols=2 #ValueCols=0",
+      "IndentedOperation": "                                                    Spool_Iterator<SpoolIterator>: IterPhyOp LogOp=GroupSemiJoin IterCols(2, 3)('Date'[Year], ''[@Sales]) #Records=44 #KeyCols=2 #ValueCols=0",
+      "Level": 13,
+      "RowNumber": 26,
+      "NextSiblingRowNumber": 32,
+      "HighlightRow": false
+    },
+    {
+      "Records": 44,
+      "Operation": "AggregationSpool<GroupBy>: SpoolPhyOp #Records=44",
+      "IndentedOperation": "                                                        AggregationSpool<GroupBy>: SpoolPhyOp #Records=44",
+      "Level": 14,
+      "RowNumber": 27,
+      "NextSiblingRowNumber": 32,
+      "HighlightRow": false
+    },
+    {
+      "Records": null,
+      "Operation": "GroupSemijoin: IterPhyOp LogOp=GroupSemiJoin IterCols(0, 1, 2, 3)('Product'[Brand], 'Product'[Brand], 'Date'[Year], ''[@Sales])",
+      "IndentedOperation": "                                                            GroupSemijoin: IterPhyOp LogOp=GroupSemiJoin IterCols(0, 1, 2, 3)('Product'[Brand], 'Product'[Brand], 'Date'[Year], ''[@Sales])",
+      "Level": 15,
+      "RowNumber": 28,
+      "NextSiblingRowNumber": 32,
+      "HighlightRow": false
+    },
+    {
+      "Records": 44,
+      "Operation": "Spool_Iterator<SpoolIterator>: IterPhyOp LogOp=Sum_Vertipaq IterCols(0, 1, 2)('Product'[Brand], 'Product'[Brand], 'Date'[Year]) #Records=44 #KeyCols=76 #ValueCols=1",
+      "IndentedOperation": "                                                                Spool_Iterator<SpoolIterator>: IterPhyOp LogOp=Sum_Vertipaq IterCols(0, 1, 2)('Product'[Brand], 'Product'[Brand], 'Date'[Year]) #Records=44 #KeyCols=76 #ValueCols=1",
+      "Level": 16,
+      "RowNumber": 29,
+      "NextSiblingRowNumber": 32,
+      "HighlightRow": false
+    },
+    {
+      "Records": 44,
+      "Operation": "ProjectionSpool<ProjectFusion<Copy>>: SpoolPhyOp #Records=44",
+      "IndentedOperation": "                                                                    ProjectionSpool<ProjectFusion<Copy>>: SpoolPhyOp #Records=44",
+      "Level": 17,
+      "RowNumber": 30,
+      "NextSiblingRowNumber": 32,
+      "HighlightRow": false
+    },
+    {
+      "Records": null,
+      "Operation": "DataPostFilter: IterPhyOp #FieldCols=2 #ValueCols=1",
+      "IndentedOperation": "                                                                        DataPostFilter: IterPhyOp #FieldCols=2 #ValueCols=1",
+      "Level": 18,
+      "RowNumber": 31,
+      "NextSiblingRowNumber": 31,
+      "HighlightRow": true
+    },
+    {
+      "Records": null,
+      "Operation": "ColValue<''[@Sales]>: LookupPhyOp LogOp=ColValue<''[@Sales]>''[@Sales] LookupCols(3)(''[@Sales]) Currency",
+      "IndentedOperation": "                                                    ColValue<''[@Sales]>: LookupPhyOp LogOp=ColValue<''[@Sales]>''[@Sales] LookupCols(3)(''[@Sales]) Currency",
+      "Level": 13,
+      "RowNumber": 32,
+      "NextSiblingRowNumber": 32,
+      "HighlightRow": false
+    },
+    {
+      "Records": null,
+      "Operation": "If: LookupPhyOp LogOp=Switch LookupCols(2)('Date'[Year]) Double",
+      "IndentedOperation": "                                                If: LookupPhyOp LogOp=Switch LookupCols(2)('Date'[Year]) Double",
+      "Level": 12,
+      "RowNumber": 33,
+      "NextSiblingRowNumber": 46,
+      "HighlightRow": false
+    },
+    {
+      "Records": null,
+      "Operation": "'Date'[Year] IS 2021: LookupPhyOp LogOp='Date'[Year] IS 2021'Date'[Year] IS 2021 LookupCols(2)('Date'[Year]) Boolean",
+      "IndentedOperation": "                                                    'Date'[Year] IS 2021: LookupPhyOp LogOp='Date'[Year] IS 2021'Date'[Year] IS 2021 LookupCols(2)('Date'[Year]) Boolean",
+      "Level": 13,
+      "RowNumber": 34,
+      "NextSiblingRowNumber": 34,
+      "HighlightRow": false
+    },
+    {
+      "Records": null,
+      "Operation": "Constant: LookupPhyOp LogOp=Constant Double 1.01",
+      "IndentedOperation": "                                                    Constant: LookupPhyOp LogOp=Constant Double 1.01",
+      "Level": 13,
+      "RowNumber": 35,
+      "NextSiblingRowNumber": 35,
+      "HighlightRow": false
+    },
+    {
+      "Records": null,
+      "Operation": "If: LookupPhyOp LogOp=Switch LookupCols(2)('Date'[Year]) Double",
+      "IndentedOperation": "                                                    If: LookupPhyOp LogOp=Switch LookupCols(2)('Date'[Year]) Double",
+      "Level": 13,
+      "RowNumber": 36,
+      "NextSiblingRowNumber": 46,
+      "HighlightRow": false
+    },
+    {
+      "Records": null,
+      "Operation": "'Date'[Year] IS 2022: LookupPhyOp LogOp='Date'[Year] IS 2022'Date'[Year] IS 2022 LookupCols(2)('Date'[Year]) Boolean",
+      "IndentedOperation": "                                                        'Date'[Year] IS 2022: LookupPhyOp LogOp='Date'[Year] IS 2022'Date'[Year] IS 2022 LookupCols(2)('Date'[Year]) Boolean",
+      "Level": 14,
+      "RowNumber": 37,
+      "NextSiblingRowNumber": 37,
+      "HighlightRow": false
+    },
+    {
+      "Records": null,
+      "Operation": "Constant: LookupPhyOp LogOp=Constant Double 1.03",
+      "IndentedOperation": "                                                        Constant: LookupPhyOp LogOp=Constant Double 1.03",
+      "Level": 14,
+      "RowNumber": 38,
+      "NextSiblingRowNumber": 38,
+      "HighlightRow": false
+    },
+    {
+      "Records": null,
+      "Operation": "If: LookupPhyOp LogOp=Switch LookupCols(2)('Date'[Year]) Double",
+      "IndentedOperation": "                                                        If: LookupPhyOp LogOp=Switch LookupCols(2)('Date'[Year]) Double",
+      "Level": 14,
+      "RowNumber": 39,
+      "NextSiblingRowNumber": 46,
+      "HighlightRow": false
+    },
+    {
+      "Records": null,
+      "Operation": "'Date'[Year] IS 2023: LookupPhyOp LogOp='Date'[Year] IS 2023'Date'[Year] IS 2023 LookupCols(2)('Date'[Year]) Boolean",
+      "IndentedOperation": "                                                            'Date'[Year] IS 2023: LookupPhyOp LogOp='Date'[Year] IS 2023'Date'[Year] IS 2023 LookupCols(2)('Date'[Year]) Boolean",
+      "Level": 15,
+      "RowNumber": 40,
+      "NextSiblingRowNumber": 40,
+      "HighlightRow": false
+    },
+    {
+      "Records": null,
+      "Operation": "Constant: LookupPhyOp LogOp=Constant Double 1.06",
+      "IndentedOperation": "                                                            Constant: LookupPhyOp LogOp=Constant Double 1.06",
+      "Level": 15,
+      "RowNumber": 41,
+      "NextSiblingRowNumber": 41,
+      "HighlightRow": false
+    },
+    {
+      "Records": null,
+      "Operation": "If: LookupPhyOp LogOp=Switch LookupCols(2)('Date'[Year]) Double",
+      "IndentedOperation": "                                                            If: LookupPhyOp LogOp=Switch LookupCols(2)('Date'[Year]) Double",
+      "Level": 15,
+      "RowNumber": 42,
+      "NextSiblingRowNumber": 46,
+      "HighlightRow": false
+    },
+    {
+      "Records": null,
+      "Operation": "'Date'[Year] IS 2024: LookupPhyOp LogOp='Date'[Year] IS 2024'Date'[Year] IS 2024 LookupCols(2)('Date'[Year]) Boolean",
+      "IndentedOperation": "                                                                'Date'[Year] IS 2024: LookupPhyOp LogOp='Date'[Year] IS 2024'Date'[Year] IS 2024 LookupCols(2)('Date'[Year]) Boolean",
+      "Level": 16,
+      "RowNumber": 43,
+      "NextSiblingRowNumber": 43,
+      "HighlightRow": false
+    },
+    {
+      "Records": null,
+      "Operation": "Constant: LookupPhyOp LogOp=Constant Double 1.07",
+      "IndentedOperation": "                                                                Constant: LookupPhyOp LogOp=Constant Double 1.07",
+      "Level": 16,
+      "RowNumber": 44,
+      "NextSiblingRowNumber": 44,
+      "HighlightRow": false
+    },
+    {
+      "Records": null,
+      "Operation": "Constant: LookupPhyOp LogOp=Constant Double 1",
+      "IndentedOperation": "                                                                Constant: LookupPhyOp LogOp=Constant Double 1",
+      "Level": 16,
+      "RowNumber": 45,
+      "NextSiblingRowNumber": 45,
+      "HighlightRow": false
+    },
+    {
+      "Records": null,
+      "Operation": "If: LookupPhyOp LogOp=Switch LookupCols(1)('Product'[Brand]) Double",
+      "IndentedOperation": "                                        If: LookupPhyOp LogOp=Switch LookupCols(1)('Product'[Brand]) Double",
+      "Level": 10,
+      "RowNumber": 46,
+      "NextSiblingRowNumber": 59,
+      "HighlightRow": false
+    },
+    {
+      "Records": null,
+      "Operation": "'Product'[Brand] IS Adventure Works: LookupPhyOp LogOp='Product'[Brand] IS Adventure Works'Product'[Brand] IS Adventure Works LookupCols(1)('Product'[Brand]) Boolean",
+      "IndentedOperation": "                                            'Product'[Brand] IS Adventure Works: LookupPhyOp LogOp='Product'[Brand] IS Adventure Works'Product'[Brand] IS Adventure Works LookupCols(1)('Product'[Brand]) Boolean",
+      "Level": 11,
+      "RowNumber": 47,
+      "NextSiblingRowNumber": 47,
+      "HighlightRow": false
+    },
+    {
+      "Records": null,
+      "Operation": "Constant: LookupPhyOp LogOp=Constant Double 0.7",
+      "IndentedOperation": "                                            Constant: LookupPhyOp LogOp=Constant Double 0.7",
+      "Level": 11,
+      "RowNumber": 48,
+      "NextSiblingRowNumber": 48,
+      "HighlightRow": false
+    },
+    {
+      "Records": null,
+      "Operation": "If: LookupPhyOp LogOp=Switch LookupCols(1)('Product'[Brand]) Double",
+      "IndentedOperation": "                                            If: LookupPhyOp LogOp=Switch LookupCols(1)('Product'[Brand]) Double",
+      "Level": 11,
+      "RowNumber": 49,
+      "NextSiblingRowNumber": 59,
+      "HighlightRow": false
+    },
+    {
+      "Records": null,
+      "Operation": "'Product'[Brand] IS Contoso: LookupPhyOp LogOp='Product'[Brand] IS Contoso'Product'[Brand] IS Contoso LookupCols(1)('Product'[Brand]) Boolean",
+      "IndentedOperation": "                                                'Product'[Brand] IS Contoso: LookupPhyOp LogOp='Product'[Brand] IS Contoso'Product'[Brand] IS Contoso LookupCols(1)('Product'[Brand]) Boolean",
+      "Level": 12,
+      "RowNumber": 50,
+      "NextSiblingRowNumber": 50,
+      "HighlightRow": false
+    },
+    {
+      "Records": null,
+      "Operation": "Constant: LookupPhyOp LogOp=Constant Double 0.8",
+      "IndentedOperation": "                                                Constant: LookupPhyOp LogOp=Constant Double 0.8",
+      "Level": 12,
+      "RowNumber": 51,
+      "NextSiblingRowNumber": 51,
+      "HighlightRow": false
+    },
+    {
+      "Records": null,
+      "Operation": "If: LookupPhyOp LogOp=Switch LookupCols(1)('Product'[Brand]) Double",
+      "IndentedOperation": "                                                If: LookupPhyOp LogOp=Switch LookupCols(1)('Product'[Brand]) Double",
+      "Level": 12,
+      "RowNumber": 52,
+      "NextSiblingRowNumber": 59,
+      "HighlightRow": false
+    },
+    {
+      "Records": null,
+      "Operation": "'Product'[Brand] IS Fabrikam: LookupPhyOp LogOp='Product'[Brand] IS Fabrikam'Product'[Brand] IS Fabrikam LookupCols(1)('Product'[Brand]) Boolean",
+      "IndentedOperation": "                                                    'Product'[Brand] IS Fabrikam: LookupPhyOp LogOp='Product'[Brand] IS Fabrikam'Product'[Brand] IS Fabrikam LookupCols(1)('Product'[Brand]) Boolean",
+      "Level": 13,
+      "RowNumber": 53,
+      "NextSiblingRowNumber": 53,
+      "HighlightRow": false
+    },
+    {
+      "Records": null,
+      "Operation": "Constant: LookupPhyOp LogOp=Constant Double 0.9",
+      "IndentedOperation": "                                                    Constant: LookupPhyOp LogOp=Constant Double 0.9",
+      "Level": 13,
+      "RowNumber": 54,
+      "NextSiblingRowNumber": 54,
+      "HighlightRow": false
+    },
+    {
+      "Records": null,
+      "Operation": "If: LookupPhyOp LogOp=Switch LookupCols(1)('Product'[Brand]) Double",
+      "IndentedOperation": "                                                    If: LookupPhyOp LogOp=Switch LookupCols(1)('Product'[Brand]) Double",
+      "Level": 13,
+      "RowNumber": 55,
+      "NextSiblingRowNumber": 59,
+      "HighlightRow": false
+    },
+    {
+      "Records": null,
+      "Operation": "'Product'[Brand] IS Litware: LookupPhyOp LogOp='Product'[Brand] IS Litware'Product'[Brand] IS Litware LookupCols(1)('Product'[Brand]) Boolean",
+      "IndentedOperation": "                                                        'Product'[Brand] IS Litware: LookupPhyOp LogOp='Product'[Brand] IS Litware'Product'[Brand] IS Litware LookupCols(1)('Product'[Brand]) Boolean",
+      "Level": 14,
+      "RowNumber": 56,
+      "NextSiblingRowNumber": 56,
+      "HighlightRow": false
+    },
+    {
+      "Records": null,
+      "Operation": "Constant: LookupPhyOp LogOp=Constant Double 0.95",
+      "IndentedOperation": "                                                        Constant: LookupPhyOp LogOp=Constant Double 0.95",
+      "Level": 14,
+      "RowNumber": 57,
+      "NextSiblingRowNumber": 57,
+      "HighlightRow": false
+    },
+    {
+      "Records": null,
+      "Operation": "Constant: LookupPhyOp LogOp=Constant Double 1",
+      "IndentedOperation": "                                                        Constant: LookupPhyOp LogOp=Constant Double 1",
+      "Level": 14,
+      "RowNumber": 58,
+      "NextSiblingRowNumber": 58,
+      "HighlightRow": false
+    },
+    {
+      "Records": null,
+      "Operation": "GroupSemijoin: IterPhyOp LogOp=GroupSemiJoin IterCols(0, 1, 2)('Product'[Brand], ''[IsGrandTotalRowTotal], ''[L4])",
+      "IndentedOperation": "                    GroupSemijoin: IterPhyOp LogOp=GroupSemiJoin IterCols(0, 1, 2)('Product'[Brand], ''[IsGrandTotalRowTotal], ''[L4])",
+      "Level": 5,
+      "RowNumber": 59,
+      "NextSiblingRowNumber": 105,
+      "HighlightRow": false
+    },
+    {
+      "Records": 1,
+      "Operation": "Spool_Iterator<SpoolIterator>: IterPhyOp LogOp=SumX #Records=1 #KeyCols=0 #ValueCols=1",
+      "IndentedOperation": "                        Spool_Iterator<SpoolIterator>: IterPhyOp LogOp=SumX #Records=1 #KeyCols=0 #ValueCols=1",
+      "Level": 6,
+      "RowNumber": 60,
+      "NextSiblingRowNumber": 105,
+      "HighlightRow": false
+    },
+    {
+      "Records": 1,
+      "Operation": "AggregationSpool<Sum>: SpoolPhyOp #Records=1",
+      "IndentedOperation": "                            AggregationSpool<Sum>: SpoolPhyOp #Records=1",
+      "Level": 7,
+      "RowNumber": 61,
+      "NextSiblingRowNumber": 105,
+      "HighlightRow": false
+    },
+    {
+      "Records": null,
+      "Operation": "Extend_Lookup: IterPhyOp LogOp=Multiply IterCols(0, 1, 2)('Product'[Brand], 'Date'[Year], ''[@Sales])",
+      "IndentedOperation": "                                Extend_Lookup: IterPhyOp LogOp=Multiply IterCols(0, 1, 2)('Product'[Brand], 'Date'[Year], ''[@Sales])",
+      "Level": 8,
+      "RowNumber": 62,
+      "NextSiblingRowNumber": 105,
+      "HighlightRow": false
+    },
+    {
+      "Records": null,
+      "Operation": "CrossApply: IterPhyOp LogOp=Multiply IterCols(1, 2)('Date'[Year], ''[@Sales])",
+      "IndentedOperation": "                                    CrossApply: IterPhyOp LogOp=Multiply IterCols(1, 2)('Date'[Year], ''[@Sales])",
+      "Level": 9,
+      "RowNumber": 63,
+      "NextSiblingRowNumber": 92,
+      "HighlightRow": false
+    },
+    {
+      "Records": 44,
+      "Operation": "Spool_MultiValuedHashLookup: IterPhyOp LogOp=GroupSemiJoin LookupCols(1, 2)('Date'[Year], ''[@Sales]) IterCols(0)('Product'[Brand]) #Records=44 #KeyCols=3 #ValueCols=0",
+      "IndentedOperation": "                                        Spool_MultiValuedHashLookup: IterPhyOp LogOp=GroupSemiJoin LookupCols(1, 2)('Date'[Year], ''[@Sales]) IterCols(0)('Product'[Brand]) #Records=44 #KeyCols=3 #ValueCols=0",
+      "Level": 10,
+      "RowNumber": 64,
+      "NextSiblingRowNumber": 70,
+      "HighlightRow": false
+    },
+    {
+      "Records": 44,
+      "Operation": "AggregationSpool<GroupBy>: SpoolPhyOp #Records=44",
+      "IndentedOperation": "                                            AggregationSpool<GroupBy>: SpoolPhyOp #Records=44",
+      "Level": 11,
+      "RowNumber": 65,
+      "NextSiblingRowNumber": 70,
+      "HighlightRow": false
+    },
+    {
+      "Records": null,
+      "Operation": "GroupSemijoin: IterPhyOp LogOp=GroupSemiJoin IterCols(0, 1, 2)('Product'[Brand], 'Date'[Year], ''[@Sales])",
+      "IndentedOperation": "                                                GroupSemijoin: IterPhyOp LogOp=GroupSemiJoin IterCols(0, 1, 2)('Product'[Brand], 'Date'[Year], ''[@Sales])",
+      "Level": 12,
+      "RowNumber": 66,
+      "NextSiblingRowNumber": 70,
+      "HighlightRow": false
+    },
+    {
+      "Records": 44,
+      "Operation": "Spool_Iterator<SpoolIterator>: IterPhyOp LogOp=Sum_Vertipaq IterCols(0, 1)('Product'[Brand], 'Date'[Year]) #Records=44 #KeyCols=76 #ValueCols=1",
+      "IndentedOperation": "                                                    Spool_Iterator<SpoolIterator>: IterPhyOp LogOp=Sum_Vertipaq IterCols(0, 1)('Product'[Brand], 'Date'[Year]) #Records=44 #KeyCols=76 #ValueCols=1",
+      "Level": 13,
+      "RowNumber": 67,
+      "NextSiblingRowNumber": 70,
+      "HighlightRow": false
+    },
+    {
+      "Records": 44,
+      "Operation": "ProjectionSpool<ProjectFusion<Copy>>: SpoolPhyOp #Records=44",
+      "IndentedOperation": "                                                        ProjectionSpool<ProjectFusion<Copy>>: SpoolPhyOp #Records=44",
+      "Level": 14,
+      "RowNumber": 68,
+      "NextSiblingRowNumber": 70,
+      "HighlightRow": false
+    },
+    {
+      "Records": null,
+      "Operation": "DataPostFilter: IterPhyOp #FieldCols=2 #ValueCols=1",
+      "IndentedOperation": "                                                            DataPostFilter: IterPhyOp #FieldCols=2 #ValueCols=1",
+      "Level": 15,
+      "RowNumber": 69,
+      "NextSiblingRowNumber": 69,
+      "HighlightRow": true
+    },
+    {
+      "Records": null,
+      "Operation": "Extend_Lookup: IterPhyOp LogOp=Multiply IterCols(1, 2)('Date'[Year], ''[@Sales])",
+      "IndentedOperation": "                                        Extend_Lookup: IterPhyOp LogOp=Multiply IterCols(1, 2)('Date'[Year], ''[@Sales])",
+      "Level": 10,
+      "RowNumber": 70,
+      "NextSiblingRowNumber": 92,
+      "HighlightRow": false
+    },
+    {
+      "Records": null,
+      "Operation": "Extend_Lookup: IterPhyOp LogOp=Extend_Lookup''[@Sales] IterCols(2)(''[@Sales])",
+      "IndentedOperation": "                                            Extend_Lookup: IterPhyOp LogOp=Extend_Lookup''[@Sales] IterCols(2)(''[@Sales])",
+      "Level": 11,
+      "RowNumber": 71,
+      "NextSiblingRowNumber": 79,
+      "HighlightRow": false
+    },
+    {
+      "Records": 44,
+      "Operation": "Spool_Iterator<SpoolIterator>: IterPhyOp LogOp=GroupSemiJoin IterCols(1, 2)('Date'[Year], ''[@Sales]) #Records=44 #KeyCols=2 #ValueCols=0",
+      "IndentedOperation": "                                                Spool_Iterator<SpoolIterator>: IterPhyOp LogOp=GroupSemiJoin IterCols(1, 2)('Date'[Year], ''[@Sales]) #Records=44 #KeyCols=2 #ValueCols=0",
+      "Level": 12,
+      "RowNumber": 72,
+      "NextSiblingRowNumber": 78,
+      "HighlightRow": false
+    },
+    {
+      "Records": 44,
+      "Operation": "AggregationSpool<GroupBy>: SpoolPhyOp #Records=44",
+      "IndentedOperation": "                                                    AggregationSpool<GroupBy>: SpoolPhyOp #Records=44",
+      "Level": 13,
+      "RowNumber": 73,
+      "NextSiblingRowNumber": 78,
+      "HighlightRow": false
+    },
+    {
+      "Records": null,
+      "Operation": "GroupSemijoin: IterPhyOp LogOp=GroupSemiJoin IterCols(0, 1, 2)('Product'[Brand], 'Date'[Year], ''[@Sales])",
+      "IndentedOperation": "                                                        GroupSemijoin: IterPhyOp LogOp=GroupSemiJoin IterCols(0, 1, 2)('Product'[Brand], 'Date'[Year], ''[@Sales])",
+      "Level": 14,
+      "RowNumber": 74,
+      "NextSiblingRowNumber": 78,
+      "HighlightRow": false
+    },
+    {
+      "Records": 44,
+      "Operation": "Spool_Iterator<SpoolIterator>: IterPhyOp LogOp=Sum_Vertipaq IterCols(0, 1)('Product'[Brand], 'Date'[Year]) #Records=44 #KeyCols=76 #ValueCols=1",
+      "IndentedOperation": "                                                            Spool_Iterator<SpoolIterator>: IterPhyOp LogOp=Sum_Vertipaq IterCols(0, 1)('Product'[Brand], 'Date'[Year]) #Records=44 #KeyCols=76 #ValueCols=1",
+      "Level": 15,
+      "RowNumber": 75,
+      "NextSiblingRowNumber": 78,
+      "HighlightRow": false
+    },
+    {
+      "Records": 44,
+      "Operation": "ProjectionSpool<ProjectFusion<Copy>>: SpoolPhyOp #Records=44",
+      "IndentedOperation": "                                                                ProjectionSpool<ProjectFusion<Copy>>: SpoolPhyOp #Records=44",
+      "Level": 16,
+      "RowNumber": 76,
+      "NextSiblingRowNumber": 78,
+      "HighlightRow": false
+    },
+    {
+      "Records": null,
+      "Operation": "DataPostFilter: IterPhyOp #FieldCols=2 #ValueCols=1",
+      "IndentedOperation": "                                                                    DataPostFilter: IterPhyOp #FieldCols=2 #ValueCols=1",
+      "Level": 17,
+      "RowNumber": 77,
+      "NextSiblingRowNumber": 77,
+      "HighlightRow": true
+    },
+    {
+      "Records": null,
+      "Operation": "ColValue<''[@Sales]>: LookupPhyOp LogOp=ColValue<''[@Sales]>''[@Sales] LookupCols(2)(''[@Sales]) Currency",
+      "IndentedOperation": "                                                ColValue<''[@Sales]>: LookupPhyOp LogOp=ColValue<''[@Sales]>''[@Sales] LookupCols(2)(''[@Sales]) Currency",
+      "Level": 12,
+      "RowNumber": 78,
+      "NextSiblingRowNumber": 78,
+      "HighlightRow": false
+    },
+    {
+      "Records": null,
+      "Operation": "If: LookupPhyOp LogOp=Switch LookupCols(1)('Date'[Year]) Double",
+      "IndentedOperation": "                                            If: LookupPhyOp LogOp=Switch LookupCols(1)('Date'[Year]) Double",
+      "Level": 11,
+      "RowNumber": 79,
+      "NextSiblingRowNumber": 92,
+      "HighlightRow": false
+    },
+    {
+      "Records": null,
+      "Operation": "'Date'[Year] IS 2021: LookupPhyOp LogOp='Date'[Year] IS 2021'Date'[Year] IS 2021 LookupCols(1)('Date'[Year]) Boolean",
+      "IndentedOperation": "                                                'Date'[Year] IS 2021: LookupPhyOp LogOp='Date'[Year] IS 2021'Date'[Year] IS 2021 LookupCols(1)('Date'[Year]) Boolean",
+      "Level": 12,
+      "RowNumber": 80,
+      "NextSiblingRowNumber": 80,
+      "HighlightRow": false
+    },
+    {
+      "Records": null,
+      "Operation": "Constant: LookupPhyOp LogOp=Constant Double 1.01",
+      "IndentedOperation": "                                                Constant: LookupPhyOp LogOp=Constant Double 1.01",
+      "Level": 12,
+      "RowNumber": 81,
+      "NextSiblingRowNumber": 81,
+      "HighlightRow": false
+    },
+    {
+      "Records": null,
+      "Operation": "If: LookupPhyOp LogOp=Switch LookupCols(1)('Date'[Year]) Double",
+      "IndentedOperation": "                                                If: LookupPhyOp LogOp=Switch LookupCols(1)('Date'[Year]) Double",
+      "Level": 12,
+      "RowNumber": 82,
+      "NextSiblingRowNumber": 92,
+      "HighlightRow": false
+    },
+    {
+      "Records": null,
+      "Operation": "'Date'[Year] IS 2022: LookupPhyOp LogOp='Date'[Year] IS 2022'Date'[Year] IS 2022 LookupCols(1)('Date'[Year]) Boolean",
+      "IndentedOperation": "                                                    'Date'[Year] IS 2022: LookupPhyOp LogOp='Date'[Year] IS 2022'Date'[Year] IS 2022 LookupCols(1)('Date'[Year]) Boolean",
+      "Level": 13,
+      "RowNumber": 83,
+      "NextSiblingRowNumber": 83,
+      "HighlightRow": false
+    },
+    {
+      "Records": null,
+      "Operation": "Constant: LookupPhyOp LogOp=Constant Double 1.03",
+      "IndentedOperation": "                                                    Constant: LookupPhyOp LogOp=Constant Double 1.03",
+      "Level": 13,
+      "RowNumber": 84,
+      "NextSiblingRowNumber": 84,
+      "HighlightRow": false
+    },
+    {
+      "Records": null,
+      "Operation": "If: LookupPhyOp LogOp=Switch LookupCols(1)('Date'[Year]) Double",
+      "IndentedOperation": "                                                    If: LookupPhyOp LogOp=Switch LookupCols(1)('Date'[Year]) Double",
+      "Level": 13,
+      "RowNumber": 85,
+      "NextSiblingRowNumber": 92,
+      "HighlightRow": false
+    },
+    {
+      "Records": null,
+      "Operation": "'Date'[Year] IS 2023: LookupPhyOp LogOp='Date'[Year] IS 2023'Date'[Year] IS 2023 LookupCols(1)('Date'[Year]) Boolean",
+      "IndentedOperation": "                                                        'Date'[Year] IS 2023: LookupPhyOp LogOp='Date'[Year] IS 2023'Date'[Year] IS 2023 LookupCols(1)('Date'[Year]) Boolean",
+      "Level": 14,
+      "RowNumber": 86,
+      "NextSiblingRowNumber": 86,
+      "HighlightRow": false
+    },
+    {
+      "Records": null,
+      "Operation": "Constant: LookupPhyOp LogOp=Constant Double 1.06",
+      "IndentedOperation": "                                                        Constant: LookupPhyOp LogOp=Constant Double 1.06",
+      "Level": 14,
+      "RowNumber": 87,
+      "NextSiblingRowNumber": 87,
+      "HighlightRow": false
+    },
+    {
+      "Records": null,
+      "Operation": "If: LookupPhyOp LogOp=Switch LookupCols(1)('Date'[Year]) Double",
+      "IndentedOperation": "                                                        If: LookupPhyOp LogOp=Switch LookupCols(1)('Date'[Year]) Double",
+      "Level": 14,
+      "RowNumber": 88,
+      "NextSiblingRowNumber": 92,
+      "HighlightRow": false
+    },
+    {
+      "Records": null,
+      "Operation": "'Date'[Year] IS 2024: LookupPhyOp LogOp='Date'[Year] IS 2024'Date'[Year] IS 2024 LookupCols(1)('Date'[Year]) Boolean",
+      "IndentedOperation": "                                                            'Date'[Year] IS 2024: LookupPhyOp LogOp='Date'[Year] IS 2024'Date'[Year] IS 2024 LookupCols(1)('Date'[Year]) Boolean",
+      "Level": 15,
+      "RowNumber": 89,
+      "NextSiblingRowNumber": 89,
+      "HighlightRow": false
+    },
+    {
+      "Records": null,
+      "Operation": "Constant: LookupPhyOp LogOp=Constant Double 1.07",
+      "IndentedOperation": "                                                            Constant: LookupPhyOp LogOp=Constant Double 1.07",
+      "Level": 15,
+      "RowNumber": 90,
+      "NextSiblingRowNumber": 90,
+      "HighlightRow": false
+    },
+    {
+      "Records": null,
+      "Operation": "Constant: LookupPhyOp LogOp=Constant Double 1",
+      "IndentedOperation": "                                                            Constant: LookupPhyOp LogOp=Constant Double 1",
+      "Level": 15,
+      "RowNumber": 91,
+      "NextSiblingRowNumber": 91,
+      "HighlightRow": false
+    },
+    {
+      "Records": null,
+      "Operation": "If: LookupPhyOp LogOp=Switch LookupCols(0)('Product'[Brand]) Double",
+      "IndentedOperation": "                                    If: LookupPhyOp LogOp=Switch LookupCols(0)('Product'[Brand]) Double",
+      "Level": 9,
+      "RowNumber": 92,
+      "NextSiblingRowNumber": 105,
+      "HighlightRow": false
+    },
+    {
+      "Records": null,
+      "Operation": "'Product'[Brand] IS Adventure Works: LookupPhyOp LogOp='Product'[Brand] IS Adventure Works'Product'[Brand] IS Adventure Works LookupCols(0)('Product'[Brand]) Boolean",
+      "IndentedOperation": "                                        'Product'[Brand] IS Adventure Works: LookupPhyOp LogOp='Product'[Brand] IS Adventure Works'Product'[Brand] IS Adventure Works LookupCols(0)('Product'[Brand]) Boolean",
+      "Level": 10,
+      "RowNumber": 93,
+      "NextSiblingRowNumber": 93,
+      "HighlightRow": false
+    },
+    {
+      "Records": null,
+      "Operation": "Constant: LookupPhyOp LogOp=Constant Double 0.7",
+      "IndentedOperation": "                                        Constant: LookupPhyOp LogOp=Constant Double 0.7",
+      "Level": 10,
+      "RowNumber": 94,
+      "NextSiblingRowNumber": 94,
+      "HighlightRow": false
+    },
+    {
+      "Records": null,
+      "Operation": "If: LookupPhyOp LogOp=Switch LookupCols(0)('Product'[Brand]) Double",
+      "IndentedOperation": "                                        If: LookupPhyOp LogOp=Switch LookupCols(0)('Product'[Brand]) Double",
+      "Level": 10,
+      "RowNumber": 95,
+      "NextSiblingRowNumber": 105,
+      "HighlightRow": false
+    },
+    {
+      "Records": null,
+      "Operation": "'Product'[Brand] IS Contoso: LookupPhyOp LogOp='Product'[Brand] IS Contoso'Product'[Brand] IS Contoso LookupCols(0)('Product'[Brand]) Boolean",
+      "IndentedOperation": "                                            'Product'[Brand] IS Contoso: LookupPhyOp LogOp='Product'[Brand] IS Contoso'Product'[Brand] IS Contoso LookupCols(0)('Product'[Brand]) Boolean",
+      "Level": 11,
+      "RowNumber": 96,
+      "NextSiblingRowNumber": 96,
+      "HighlightRow": false
+    },
+    {
+      "Records": null,
+      "Operation": "Constant: LookupPhyOp LogOp=Constant Double 0.8",
+      "IndentedOperation": "                                            Constant: LookupPhyOp LogOp=Constant Double 0.8",
+      "Level": 11,
+      "RowNumber": 97,
+      "NextSiblingRowNumber": 97,
+      "HighlightRow": false
+    },
+    {
+      "Records": null,
+      "Operation": "If: LookupPhyOp LogOp=Switch LookupCols(0)('Product'[Brand]) Double",
+      "IndentedOperation": "                                            If: LookupPhyOp LogOp=Switch LookupCols(0)('Product'[Brand]) Double",
+      "Level": 11,
+      "RowNumber": 98,
+      "NextSiblingRowNumber": 105,
+      "HighlightRow": false
+    },
+    {
+      "Records": null,
+      "Operation": "'Product'[Brand] IS Fabrikam: LookupPhyOp LogOp='Product'[Brand] IS Fabrikam'Product'[Brand] IS Fabrikam LookupCols(0)('Product'[Brand]) Boolean",
+      "IndentedOperation": "                                                'Product'[Brand] IS Fabrikam: LookupPhyOp LogOp='Product'[Brand] IS Fabrikam'Product'[Brand] IS Fabrikam LookupCols(0)('Product'[Brand]) Boolean",
+      "Level": 12,
+      "RowNumber": 99,
+      "NextSiblingRowNumber": 99,
+      "HighlightRow": false
+    },
+    {
+      "Records": null,
+      "Operation": "Constant: LookupPhyOp LogOp=Constant Double 0.9",
+      "IndentedOperation": "                                                Constant: LookupPhyOp LogOp=Constant Double 0.9",
+      "Level": 12,
+      "RowNumber": 100,
+      "NextSiblingRowNumber": 100,
+      "HighlightRow": false
+    },
+    {
+      "Records": null,
+      "Operation": "If: LookupPhyOp LogOp=Switch LookupCols(0)('Product'[Brand]) Double",
+      "IndentedOperation": "                                                If: LookupPhyOp LogOp=Switch LookupCols(0)('Product'[Brand]) Double",
+      "Level": 12,
+      "RowNumber": 101,
+      "NextSiblingRowNumber": 105,
+      "HighlightRow": false
+    },
+    {
+      "Records": null,
+      "Operation": "'Product'[Brand] IS Litware: LookupPhyOp LogOp='Product'[Brand] IS Litware'Product'[Brand] IS Litware LookupCols(0)('Product'[Brand]) Boolean",
+      "IndentedOperation": "                                                    'Product'[Brand] IS Litware: LookupPhyOp LogOp='Product'[Brand] IS Litware'Product'[Brand] IS Litware LookupCols(0)('Product'[Brand]) Boolean",
+      "Level": 13,
+      "RowNumber": 102,
+      "NextSiblingRowNumber": 102,
+      "HighlightRow": false
+    },
+    {
+      "Records": null,
+      "Operation": "Constant: LookupPhyOp LogOp=Constant Double 0.95",
+      "IndentedOperation": "                                                    Constant: LookupPhyOp LogOp=Constant Double 0.95",
+      "Level": 13,
+      "RowNumber": 103,
+      "NextSiblingRowNumber": 103,
+      "HighlightRow": false
+    },
+    {
+      "Records": null,
+      "Operation": "Constant: LookupPhyOp LogOp=Constant Double 1",
+      "IndentedOperation": "                                                    Constant: LookupPhyOp LogOp=Constant Double 1",
+      "Level": 13,
+      "RowNumber": 104,
+      "NextSiblingRowNumber": 104,
+      "HighlightRow": false
+    },
+    {
+      "Records": null,
+      "Operation": "ColValue<''[IsGrandTotalRowTotal]>: LookupPhyOp LogOp=ColValue<''[IsGrandTotalRowTotal]>''[IsGrandTotalRowTotal] LookupCols(1)(''[IsGrandTotalRowTotal]) Boolean",
+      "IndentedOperation": "        ColValue<''[IsGrandTotalRowTotal]>: LookupPhyOp LogOp=ColValue<''[IsGrandTotalRowTotal]>''[IsGrandTotalRowTotal] LookupCols(1)(''[IsGrandTotalRowTotal]) Boolean",
+      "Level": 2,
+      "RowNumber": 105,
+      "NextSiblingRowNumber": 105,
+      "HighlightRow": false
+    },
+    {
+      "Records": null,
+      "Operation": "ColPosition<'Product'[Brand]>: LookupPhyOp LogOp=ColPosition<'Product'[Brand]>ColPosition<'Product'[Brand]> LookupCols(0)('Product'[Brand]) String",
+      "IndentedOperation": "        ColPosition<'Product'[Brand]>: LookupPhyOp LogOp=ColPosition<'Product'[Brand]>ColPosition<'Product'[Brand]> LookupCols(0)('Product'[Brand]) String",
+      "Level": 2,
+      "RowNumber": 106,
+      "NextSiblingRowNumber": 107,
+      "HighlightRow": false
+    }
+  ],
+  "LogicalQueryPlanRows": [
+    {
+      "Operation": "__DS0Core: Union: RelLogOp VarName=__DS0Core DependOnCols()() 0-3 RequiredCols(0, 1, 2, 3)('Product'[Brand], ''[IsGrandTotalRowTotal], ''[L4], ''[])",
+      "IndentedOperation": "__DS0Core: Union: RelLogOp VarName=__DS0Core DependOnCols()() 0-3 RequiredCols(0, 1, 2, 3)('Product'[Brand], ''[IsGrandTotalRowTotal], ''[L4], ''[])",
+      "Level": 0,
+      "RowNumber": 1,
+      "NextSiblingRowNumber": 151,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "GroupSemiJoin: RelLogOp DependOnCols()() 0-2 RequiredCols(0, 1, 2)('Product'[Brand], ''[IsGrandTotalRowTotal], ''[L4])",
+      "IndentedOperation": "    GroupSemiJoin: RelLogOp DependOnCols()() 0-2 RequiredCols(0, 1, 2)('Product'[Brand], ''[IsGrandTotalRowTotal], ''[L4])",
+      "Level": 1,
+      "RowNumber": 2,
+      "NextSiblingRowNumber": 77,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "Scan_Vertipaq: RelLogOp DependOnCols()() 0-0 RequiredCols(0)('Product'[Brand])",
+      "IndentedOperation": "        Scan_Vertipaq: RelLogOp DependOnCols()() 0-0 RequiredCols(0)('Product'[Brand])",
+      "Level": 2,
+      "RowNumber": 3,
+      "NextSiblingRowNumber": 3,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "Constant: ScaLogOp DependOnCols()() Boolean DominantValue=false",
+      "IndentedOperation": "        Constant: ScaLogOp DependOnCols()() Boolean DominantValue=false",
+      "Level": 2,
+      "RowNumber": 4,
+      "NextSiblingRowNumber": 4,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "SumX: ScaLogOp MeasureRef=[L4 Optimized] DependOnCols(0)('Product'[Brand]) Currency DominantValue=BLANK",
+      "IndentedOperation": "        SumX: ScaLogOp MeasureRef=[L4 Optimized] DependOnCols(0)('Product'[Brand]) Currency DominantValue=BLANK",
+      "Level": 2,
+      "RowNumber": 5,
+      "NextSiblingRowNumber": 77,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "GroupSemiJoin: RelLogOp DependOnCols(0)('Product'[Brand]) 1-3 RequiredCols(0, 1, 2, 3)('Product'[Brand], 'Product'[Brand], 'Date'[Year], ''[@Sales])",
+      "IndentedOperation": "            GroupSemiJoin: RelLogOp DependOnCols(0)('Product'[Brand]) 1-3 RequiredCols(0, 1, 2, 3)('Product'[Brand], 'Product'[Brand], 'Date'[Year], ''[@Sales])",
+      "Level": 3,
+      "RowNumber": 6,
+      "NextSiblingRowNumber": 14,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "Scan_Vertipaq: RelLogOp DependOnCols(0)('Product'[Brand]) 1-1 RequiredCols(0, 1)('Product'[Brand], 'Product'[Brand])",
+      "IndentedOperation": "                Scan_Vertipaq: RelLogOp DependOnCols(0)('Product'[Brand]) 1-1 RequiredCols(0, 1)('Product'[Brand], 'Product'[Brand])",
+      "Level": 4,
+      "RowNumber": 7,
+      "NextSiblingRowNumber": 7,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "Scan_Vertipaq: RelLogOp DependOnCols()() 2-2 RequiredCols(2)('Date'[Year])",
+      "IndentedOperation": "                Scan_Vertipaq: RelLogOp DependOnCols()() 2-2 RequiredCols(2)('Date'[Year])",
+      "Level": 4,
+      "RowNumber": 8,
+      "NextSiblingRowNumber": 8,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "Sum_Vertipaq: ScaLogOp MeasureRef=[Sales Amount] DependOnCols(0, 1, 2)('Product'[Brand], 'Product'[Brand], 'Date'[Year]) Currency DominantValue=BLANK",
+      "IndentedOperation": "                Sum_Vertipaq: ScaLogOp MeasureRef=[Sales Amount] DependOnCols(0, 1, 2)('Product'[Brand], 'Product'[Brand], 'Date'[Year]) Currency DominantValue=BLANK",
+      "Level": 4,
+      "RowNumber": 9,
+      "NextSiblingRowNumber": 14,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "Scan_Vertipaq: RelLogOp DependOnCols(0, 1, 2)('Product'[Brand], 'Product'[Brand], 'Date'[Year]) 3-73 RequiredCols(0, 1, 2, 58, 60)('Product'[Brand], 'Product'[Brand], 'Date'[Year], 'Sales'[Quantity], 'Sales'[Net Price])",
+      "IndentedOperation": "                    Scan_Vertipaq: RelLogOp DependOnCols(0, 1, 2)('Product'[Brand], 'Product'[Brand], 'Date'[Year]) 3-73 RequiredCols(0, 1, 2, 58, 60)('Product'[Brand], 'Product'[Brand], 'Date'[Year], 'Sales'[Quantity], 'Sales'[Net Price])",
+      "Level": 5,
+      "RowNumber": 10,
+      "NextSiblingRowNumber": 10,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "Multiply: ScaLogOp DependOnCols(58, 60)('Sales'[Quantity], 'Sales'[Net Price]) Currency DominantValue=NONE",
+      "IndentedOperation": "                    Multiply: ScaLogOp DependOnCols(58, 60)('Sales'[Quantity], 'Sales'[Net Price]) Currency DominantValue=NONE",
+      "Level": 5,
+      "RowNumber": 11,
+      "NextSiblingRowNumber": 14,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "'Sales'[Quantity]: ScaLogOp DependOnCols(58)('Sales'[Quantity]) Integer DominantValue=NONE",
+      "IndentedOperation": "                        'Sales'[Quantity]: ScaLogOp DependOnCols(58)('Sales'[Quantity]) Integer DominantValue=NONE",
+      "Level": 6,
+      "RowNumber": 12,
+      "NextSiblingRowNumber": 12,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "'Sales'[Net Price]: ScaLogOp DependOnCols(60)('Sales'[Net Price]) Currency DominantValue=NONE",
+      "IndentedOperation": "                        'Sales'[Net Price]: ScaLogOp DependOnCols(60)('Sales'[Net Price]) Currency DominantValue=NONE",
+      "Level": 6,
+      "RowNumber": 13,
+      "NextSiblingRowNumber": 13,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "VarScope: ScaLogOp DependOnCols(1, 2, 3)('Product'[Brand], 'Date'[Year], ''[@Sales]) Currency DominantValue=BLANK",
+      "IndentedOperation": "            VarScope: ScaLogOp DependOnCols(1, 2, 3)('Product'[Brand], 'Date'[Year], ''[@Sales]) Currency DominantValue=BLANK",
+      "Level": 3,
+      "RowNumber": 14,
+      "NextSiblingRowNumber": 77,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "VarScope: ScaLogOp VarName=YearFactor DependOnCols(2)('Date'[Year]) Double DominantValue=1",
+      "IndentedOperation": "                VarScope: ScaLogOp VarName=YearFactor DependOnCols(2)('Date'[Year]) Double DominantValue=1",
+      "Level": 4,
+      "RowNumber": 15,
+      "NextSiblingRowNumber": 43,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "'Date'[Year]: ScaLogOp VarName=<0000023FB3946910> DependOnCols(2)('Date'[Year]) Integer DominantValue=NONE",
+      "IndentedOperation": "                    'Date'[Year]: ScaLogOp VarName=<0000023FB3946910> DependOnCols(2)('Date'[Year]) Integer DominantValue=NONE",
+      "Level": 5,
+      "RowNumber": 16,
+      "NextSiblingRowNumber": 16,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "Switch: ScaLogOp DependOnCols(2)('Date'[Year]) Double DominantValue=1",
+      "IndentedOperation": "                    Switch: ScaLogOp DependOnCols(2)('Date'[Year]) Double DominantValue=1",
+      "Level": 5,
+      "RowNumber": 17,
+      "NextSiblingRowNumber": 43,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "'Date'[Year] IS 2021: ScaLogOp DependOnCols(2)('Date'[Year]) Boolean DominantValue=false",
+      "IndentedOperation": "                        'Date'[Year] IS 2021: ScaLogOp DependOnCols(2)('Date'[Year]) Boolean DominantValue=false",
+      "Level": 6,
+      "RowNumber": 18,
+      "NextSiblingRowNumber": 18,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "'Date'[Year] IS 2022: ScaLogOp DependOnCols(2)('Date'[Year]) Boolean DominantValue=false",
+      "IndentedOperation": "                        'Date'[Year] IS 2022: ScaLogOp DependOnCols(2)('Date'[Year]) Boolean DominantValue=false",
+      "Level": 6,
+      "RowNumber": 19,
+      "NextSiblingRowNumber": 19,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "'Date'[Year] IS 2023: ScaLogOp DependOnCols(2)('Date'[Year]) Boolean DominantValue=false",
+      "IndentedOperation": "                        'Date'[Year] IS 2023: ScaLogOp DependOnCols(2)('Date'[Year]) Boolean DominantValue=false",
+      "Level": 6,
+      "RowNumber": 20,
+      "NextSiblingRowNumber": 20,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "'Date'[Year] IS 2024: ScaLogOp DependOnCols(2)('Date'[Year]) Boolean DominantValue=false",
+      "IndentedOperation": "                        'Date'[Year] IS 2024: ScaLogOp DependOnCols(2)('Date'[Year]) Boolean DominantValue=false",
+      "Level": 6,
+      "RowNumber": 21,
+      "NextSiblingRowNumber": 21,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "PredicateCheck: RelLogOp DependOnCols(2)('Date'[Year]) RequiredCols(2)('Date'[Year])",
+      "IndentedOperation": "                        PredicateCheck: RelLogOp DependOnCols(2)('Date'[Year]) RequiredCols(2)('Date'[Year])",
+      "Level": 6,
+      "RowNumber": 22,
+      "NextSiblingRowNumber": 24,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "'Date'[Year] IS 2021: ScaLogOp DependOnCols(2)('Date'[Year]) Boolean DominantValue=false",
+      "IndentedOperation": "                            'Date'[Year] IS 2021: ScaLogOp DependOnCols(2)('Date'[Year]) Boolean DominantValue=false",
+      "Level": 7,
+      "RowNumber": 23,
+      "NextSiblingRowNumber": 23,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "PredicateCheck: RelLogOp DependOnCols(2)('Date'[Year]) RequiredCols(2)('Date'[Year])",
+      "IndentedOperation": "                        PredicateCheck: RelLogOp DependOnCols(2)('Date'[Year]) RequiredCols(2)('Date'[Year])",
+      "Level": 6,
+      "RowNumber": 24,
+      "NextSiblingRowNumber": 26,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "'Date'[Year] IS 2021: ScaLogOp DependOnCols(2)('Date'[Year]) Boolean DominantValue=false",
+      "IndentedOperation": "                            'Date'[Year] IS 2021: ScaLogOp DependOnCols(2)('Date'[Year]) Boolean DominantValue=false",
+      "Level": 7,
+      "RowNumber": 25,
+      "NextSiblingRowNumber": 25,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "PredicateCheck: RelLogOp DependOnCols(2)('Date'[Year]) RequiredCols(2)('Date'[Year])",
+      "IndentedOperation": "                        PredicateCheck: RelLogOp DependOnCols(2)('Date'[Year]) RequiredCols(2)('Date'[Year])",
+      "Level": 6,
+      "RowNumber": 26,
+      "NextSiblingRowNumber": 28,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "'Date'[Year] IS 2022: ScaLogOp DependOnCols(2)('Date'[Year]) Boolean DominantValue=false",
+      "IndentedOperation": "                            'Date'[Year] IS 2022: ScaLogOp DependOnCols(2)('Date'[Year]) Boolean DominantValue=false",
+      "Level": 7,
+      "RowNumber": 27,
+      "NextSiblingRowNumber": 27,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "PredicateCheck: RelLogOp DependOnCols(2)('Date'[Year]) RequiredCols(2)('Date'[Year])",
+      "IndentedOperation": "                        PredicateCheck: RelLogOp DependOnCols(2)('Date'[Year]) RequiredCols(2)('Date'[Year])",
+      "Level": 6,
+      "RowNumber": 28,
+      "NextSiblingRowNumber": 30,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "'Date'[Year] IS 2022: ScaLogOp DependOnCols(2)('Date'[Year]) Boolean DominantValue=false",
+      "IndentedOperation": "                            'Date'[Year] IS 2022: ScaLogOp DependOnCols(2)('Date'[Year]) Boolean DominantValue=false",
+      "Level": 7,
+      "RowNumber": 29,
+      "NextSiblingRowNumber": 29,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "PredicateCheck: RelLogOp DependOnCols(2)('Date'[Year]) RequiredCols(2)('Date'[Year])",
+      "IndentedOperation": "                        PredicateCheck: RelLogOp DependOnCols(2)('Date'[Year]) RequiredCols(2)('Date'[Year])",
+      "Level": 6,
+      "RowNumber": 30,
+      "NextSiblingRowNumber": 32,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "'Date'[Year] IS 2023: ScaLogOp DependOnCols(2)('Date'[Year]) Boolean DominantValue=false",
+      "IndentedOperation": "                            'Date'[Year] IS 2023: ScaLogOp DependOnCols(2)('Date'[Year]) Boolean DominantValue=false",
+      "Level": 7,
+      "RowNumber": 31,
+      "NextSiblingRowNumber": 31,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "PredicateCheck: RelLogOp DependOnCols(2)('Date'[Year]) RequiredCols(2)('Date'[Year])",
+      "IndentedOperation": "                        PredicateCheck: RelLogOp DependOnCols(2)('Date'[Year]) RequiredCols(2)('Date'[Year])",
+      "Level": 6,
+      "RowNumber": 32,
+      "NextSiblingRowNumber": 34,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "'Date'[Year] IS 2023: ScaLogOp DependOnCols(2)('Date'[Year]) Boolean DominantValue=false",
+      "IndentedOperation": "                            'Date'[Year] IS 2023: ScaLogOp DependOnCols(2)('Date'[Year]) Boolean DominantValue=false",
+      "Level": 7,
+      "RowNumber": 33,
+      "NextSiblingRowNumber": 33,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "PredicateCheck: RelLogOp DependOnCols(2)('Date'[Year]) RequiredCols(2)('Date'[Year])",
+      "IndentedOperation": "                        PredicateCheck: RelLogOp DependOnCols(2)('Date'[Year]) RequiredCols(2)('Date'[Year])",
+      "Level": 6,
+      "RowNumber": 34,
+      "NextSiblingRowNumber": 36,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "'Date'[Year] IS 2024: ScaLogOp DependOnCols(2)('Date'[Year]) Boolean DominantValue=false",
+      "IndentedOperation": "                            'Date'[Year] IS 2024: ScaLogOp DependOnCols(2)('Date'[Year]) Boolean DominantValue=false",
+      "Level": 7,
+      "RowNumber": 35,
+      "NextSiblingRowNumber": 35,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "PredicateCheck: RelLogOp DependOnCols(2)('Date'[Year]) RequiredCols(2)('Date'[Year])",
+      "IndentedOperation": "                        PredicateCheck: RelLogOp DependOnCols(2)('Date'[Year]) RequiredCols(2)('Date'[Year])",
+      "Level": 6,
+      "RowNumber": 36,
+      "NextSiblingRowNumber": 38,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "'Date'[Year] IS 2024: ScaLogOp DependOnCols(2)('Date'[Year]) Boolean DominantValue=false",
+      "IndentedOperation": "                            'Date'[Year] IS 2024: ScaLogOp DependOnCols(2)('Date'[Year]) Boolean DominantValue=false",
+      "Level": 7,
+      "RowNumber": 37,
+      "NextSiblingRowNumber": 37,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "Constant: ScaLogOp DependOnCols()() Double DominantValue=1.01",
+      "IndentedOperation": "                        Constant: ScaLogOp DependOnCols()() Double DominantValue=1.01",
+      "Level": 6,
+      "RowNumber": 38,
+      "NextSiblingRowNumber": 38,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "Constant: ScaLogOp DependOnCols()() Double DominantValue=1.03",
+      "IndentedOperation": "                        Constant: ScaLogOp DependOnCols()() Double DominantValue=1.03",
+      "Level": 6,
+      "RowNumber": 39,
+      "NextSiblingRowNumber": 39,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "Constant: ScaLogOp DependOnCols()() Double DominantValue=1.06",
+      "IndentedOperation": "                        Constant: ScaLogOp DependOnCols()() Double DominantValue=1.06",
+      "Level": 6,
+      "RowNumber": 40,
+      "NextSiblingRowNumber": 40,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "Constant: ScaLogOp DependOnCols()() Double DominantValue=1.07",
+      "IndentedOperation": "                        Constant: ScaLogOp DependOnCols()() Double DominantValue=1.07",
+      "Level": 6,
+      "RowNumber": 41,
+      "NextSiblingRowNumber": 41,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "Constant: ScaLogOp DependOnCols()() Double DominantValue=1",
+      "IndentedOperation": "                        Constant: ScaLogOp DependOnCols()() Double DominantValue=1",
+      "Level": 6,
+      "RowNumber": 42,
+      "NextSiblingRowNumber": 42,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "VarScope: ScaLogOp VarName=BrandFactor DependOnCols(1)('Product'[Brand]) Double DominantValue=1",
+      "IndentedOperation": "                VarScope: ScaLogOp VarName=BrandFactor DependOnCols(1)('Product'[Brand]) Double DominantValue=1",
+      "Level": 4,
+      "RowNumber": 43,
+      "NextSiblingRowNumber": 71,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "'Product'[Brand]: ScaLogOp VarName=<0000023FB3946440> DependOnCols(1)('Product'[Brand]) String DominantValue=NONE",
+      "IndentedOperation": "                    'Product'[Brand]: ScaLogOp VarName=<0000023FB3946440> DependOnCols(1)('Product'[Brand]) String DominantValue=NONE",
+      "Level": 5,
+      "RowNumber": 44,
+      "NextSiblingRowNumber": 44,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "Switch: ScaLogOp DependOnCols(1)('Product'[Brand]) Double DominantValue=1",
+      "IndentedOperation": "                    Switch: ScaLogOp DependOnCols(1)('Product'[Brand]) Double DominantValue=1",
+      "Level": 5,
+      "RowNumber": 45,
+      "NextSiblingRowNumber": 71,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "'Product'[Brand] IS Adventure Works: ScaLogOp DependOnCols(1)('Product'[Brand]) Boolean DominantValue=false",
+      "IndentedOperation": "                        'Product'[Brand] IS Adventure Works: ScaLogOp DependOnCols(1)('Product'[Brand]) Boolean DominantValue=false",
+      "Level": 6,
+      "RowNumber": 46,
+      "NextSiblingRowNumber": 46,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "'Product'[Brand] IS Contoso: ScaLogOp DependOnCols(1)('Product'[Brand]) Boolean DominantValue=false",
+      "IndentedOperation": "                        'Product'[Brand] IS Contoso: ScaLogOp DependOnCols(1)('Product'[Brand]) Boolean DominantValue=false",
+      "Level": 6,
+      "RowNumber": 47,
+      "NextSiblingRowNumber": 47,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "'Product'[Brand] IS Fabrikam: ScaLogOp DependOnCols(1)('Product'[Brand]) Boolean DominantValue=false",
+      "IndentedOperation": "                        'Product'[Brand] IS Fabrikam: ScaLogOp DependOnCols(1)('Product'[Brand]) Boolean DominantValue=false",
+      "Level": 6,
+      "RowNumber": 48,
+      "NextSiblingRowNumber": 48,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "'Product'[Brand] IS Litware: ScaLogOp DependOnCols(1)('Product'[Brand]) Boolean DominantValue=false",
+      "IndentedOperation": "                        'Product'[Brand] IS Litware: ScaLogOp DependOnCols(1)('Product'[Brand]) Boolean DominantValue=false",
+      "Level": 6,
+      "RowNumber": 49,
+      "NextSiblingRowNumber": 49,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "PredicateCheck: RelLogOp DependOnCols(1)('Product'[Brand]) RequiredCols(1)('Product'[Brand])",
+      "IndentedOperation": "                        PredicateCheck: RelLogOp DependOnCols(1)('Product'[Brand]) RequiredCols(1)('Product'[Brand])",
+      "Level": 6,
+      "RowNumber": 50,
+      "NextSiblingRowNumber": 52,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "'Product'[Brand] IS Adventure Works: ScaLogOp DependOnCols(1)('Product'[Brand]) Boolean DominantValue=false",
+      "IndentedOperation": "                            'Product'[Brand] IS Adventure Works: ScaLogOp DependOnCols(1)('Product'[Brand]) Boolean DominantValue=false",
+      "Level": 7,
+      "RowNumber": 51,
+      "NextSiblingRowNumber": 51,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "PredicateCheck: RelLogOp DependOnCols(1)('Product'[Brand]) RequiredCols(1)('Product'[Brand])",
+      "IndentedOperation": "                        PredicateCheck: RelLogOp DependOnCols(1)('Product'[Brand]) RequiredCols(1)('Product'[Brand])",
+      "Level": 6,
+      "RowNumber": 52,
+      "NextSiblingRowNumber": 54,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "'Product'[Brand] IS Adventure Works: ScaLogOp DependOnCols(1)('Product'[Brand]) Boolean DominantValue=false",
+      "IndentedOperation": "                            'Product'[Brand] IS Adventure Works: ScaLogOp DependOnCols(1)('Product'[Brand]) Boolean DominantValue=false",
+      "Level": 7,
+      "RowNumber": 53,
+      "NextSiblingRowNumber": 53,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "PredicateCheck: RelLogOp DependOnCols(1)('Product'[Brand]) RequiredCols(1)('Product'[Brand])",
+      "IndentedOperation": "                        PredicateCheck: RelLogOp DependOnCols(1)('Product'[Brand]) RequiredCols(1)('Product'[Brand])",
+      "Level": 6,
+      "RowNumber": 54,
+      "NextSiblingRowNumber": 56,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "'Product'[Brand] IS Contoso: ScaLogOp DependOnCols(1)('Product'[Brand]) Boolean DominantValue=false",
+      "IndentedOperation": "                            'Product'[Brand] IS Contoso: ScaLogOp DependOnCols(1)('Product'[Brand]) Boolean DominantValue=false",
+      "Level": 7,
+      "RowNumber": 55,
+      "NextSiblingRowNumber": 55,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "PredicateCheck: RelLogOp DependOnCols(1)('Product'[Brand]) RequiredCols(1)('Product'[Brand])",
+      "IndentedOperation": "                        PredicateCheck: RelLogOp DependOnCols(1)('Product'[Brand]) RequiredCols(1)('Product'[Brand])",
+      "Level": 6,
+      "RowNumber": 56,
+      "NextSiblingRowNumber": 58,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "'Product'[Brand] IS Contoso: ScaLogOp DependOnCols(1)('Product'[Brand]) Boolean DominantValue=false",
+      "IndentedOperation": "                            'Product'[Brand] IS Contoso: ScaLogOp DependOnCols(1)('Product'[Brand]) Boolean DominantValue=false",
+      "Level": 7,
+      "RowNumber": 57,
+      "NextSiblingRowNumber": 57,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "PredicateCheck: RelLogOp DependOnCols(1)('Product'[Brand]) RequiredCols(1)('Product'[Brand])",
+      "IndentedOperation": "                        PredicateCheck: RelLogOp DependOnCols(1)('Product'[Brand]) RequiredCols(1)('Product'[Brand])",
+      "Level": 6,
+      "RowNumber": 58,
+      "NextSiblingRowNumber": 60,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "'Product'[Brand] IS Fabrikam: ScaLogOp DependOnCols(1)('Product'[Brand]) Boolean DominantValue=false",
+      "IndentedOperation": "                            'Product'[Brand] IS Fabrikam: ScaLogOp DependOnCols(1)('Product'[Brand]) Boolean DominantValue=false",
+      "Level": 7,
+      "RowNumber": 59,
+      "NextSiblingRowNumber": 59,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "PredicateCheck: RelLogOp DependOnCols(1)('Product'[Brand]) RequiredCols(1)('Product'[Brand])",
+      "IndentedOperation": "                        PredicateCheck: RelLogOp DependOnCols(1)('Product'[Brand]) RequiredCols(1)('Product'[Brand])",
+      "Level": 6,
+      "RowNumber": 60,
+      "NextSiblingRowNumber": 62,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "'Product'[Brand] IS Fabrikam: ScaLogOp DependOnCols(1)('Product'[Brand]) Boolean DominantValue=false",
+      "IndentedOperation": "                            'Product'[Brand] IS Fabrikam: ScaLogOp DependOnCols(1)('Product'[Brand]) Boolean DominantValue=false",
+      "Level": 7,
+      "RowNumber": 61,
+      "NextSiblingRowNumber": 61,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "PredicateCheck: RelLogOp DependOnCols(1)('Product'[Brand]) RequiredCols(1)('Product'[Brand])",
+      "IndentedOperation": "                        PredicateCheck: RelLogOp DependOnCols(1)('Product'[Brand]) RequiredCols(1)('Product'[Brand])",
+      "Level": 6,
+      "RowNumber": 62,
+      "NextSiblingRowNumber": 64,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "'Product'[Brand] IS Litware: ScaLogOp DependOnCols(1)('Product'[Brand]) Boolean DominantValue=false",
+      "IndentedOperation": "                            'Product'[Brand] IS Litware: ScaLogOp DependOnCols(1)('Product'[Brand]) Boolean DominantValue=false",
+      "Level": 7,
+      "RowNumber": 63,
+      "NextSiblingRowNumber": 63,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "PredicateCheck: RelLogOp DependOnCols(1)('Product'[Brand]) RequiredCols(1)('Product'[Brand])",
+      "IndentedOperation": "                        PredicateCheck: RelLogOp DependOnCols(1)('Product'[Brand]) RequiredCols(1)('Product'[Brand])",
+      "Level": 6,
+      "RowNumber": 64,
+      "NextSiblingRowNumber": 66,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "'Product'[Brand] IS Litware: ScaLogOp DependOnCols(1)('Product'[Brand]) Boolean DominantValue=false",
+      "IndentedOperation": "                            'Product'[Brand] IS Litware: ScaLogOp DependOnCols(1)('Product'[Brand]) Boolean DominantValue=false",
+      "Level": 7,
+      "RowNumber": 65,
+      "NextSiblingRowNumber": 65,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "Constant: ScaLogOp DependOnCols()() Double DominantValue=0.7",
+      "IndentedOperation": "                        Constant: ScaLogOp DependOnCols()() Double DominantValue=0.7",
+      "Level": 6,
+      "RowNumber": 66,
+      "NextSiblingRowNumber": 66,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "Constant: ScaLogOp DependOnCols()() Double DominantValue=0.8",
+      "IndentedOperation": "                        Constant: ScaLogOp DependOnCols()() Double DominantValue=0.8",
+      "Level": 6,
+      "RowNumber": 67,
+      "NextSiblingRowNumber": 67,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "Constant: ScaLogOp DependOnCols()() Double DominantValue=0.9",
+      "IndentedOperation": "                        Constant: ScaLogOp DependOnCols()() Double DominantValue=0.9",
+      "Level": 6,
+      "RowNumber": 68,
+      "NextSiblingRowNumber": 68,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "Constant: ScaLogOp DependOnCols()() Double DominantValue=0.95",
+      "IndentedOperation": "                        Constant: ScaLogOp DependOnCols()() Double DominantValue=0.95",
+      "Level": 6,
+      "RowNumber": 69,
+      "NextSiblingRowNumber": 69,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "Constant: ScaLogOp DependOnCols()() Double DominantValue=1",
+      "IndentedOperation": "                        Constant: ScaLogOp DependOnCols()() Double DominantValue=1",
+      "Level": 6,
+      "RowNumber": 70,
+      "NextSiblingRowNumber": 70,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "Multiply: ScaLogOp VarName=Result DependOnCols(1, 2, 3)('Product'[Brand], 'Date'[Year], ''[@Sales]) Currency DominantValue=BLANK",
+      "IndentedOperation": "                Multiply: ScaLogOp VarName=Result DependOnCols(1, 2, 3)('Product'[Brand], 'Date'[Year], ''[@Sales]) Currency DominantValue=BLANK",
+      "Level": 4,
+      "RowNumber": 71,
+      "NextSiblingRowNumber": 76,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "Multiply: ScaLogOp DependOnCols(2, 3)('Date'[Year], ''[@Sales]) Currency DominantValue=BLANK",
+      "IndentedOperation": "                    Multiply: ScaLogOp DependOnCols(2, 3)('Date'[Year], ''[@Sales]) Currency DominantValue=BLANK",
+      "Level": 5,
+      "RowNumber": 72,
+      "NextSiblingRowNumber": 75,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "''[@Sales]: ScaLogOp DependOnCols(3)(''[@Sales]) Currency DominantValue=BLANK",
+      "IndentedOperation": "                        ''[@Sales]: ScaLogOp DependOnCols(3)(''[@Sales]) Currency DominantValue=BLANK",
+      "Level": 6,
+      "RowNumber": 73,
+      "NextSiblingRowNumber": 73,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "ScalarVarProxy: ScaLogOp DependOnCols(2)('Date'[Year]) Double DominantValue=1 RefVarName=YearFactor",
+      "IndentedOperation": "                        ScalarVarProxy: ScaLogOp DependOnCols(2)('Date'[Year]) Double DominantValue=1 RefVarName=YearFactor",
+      "Level": 6,
+      "RowNumber": 74,
+      "NextSiblingRowNumber": 74,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "ScalarVarProxy: ScaLogOp DependOnCols(1)('Product'[Brand]) Double DominantValue=1 RefVarName=BrandFactor",
+      "IndentedOperation": "                    ScalarVarProxy: ScaLogOp DependOnCols(1)('Product'[Brand]) Double DominantValue=1 RefVarName=BrandFactor",
+      "Level": 5,
+      "RowNumber": 75,
+      "NextSiblingRowNumber": 75,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "ScalarVarProxy: ScaLogOp DependOnCols(1, 2, 3)('Product'[Brand], 'Date'[Year], ''[@Sales]) Currency DominantValue=BLANK RefVarName=Result",
+      "IndentedOperation": "                ScalarVarProxy: ScaLogOp DependOnCols(1, 2, 3)('Product'[Brand], 'Date'[Year], ''[@Sales]) Currency DominantValue=BLANK RefVarName=Result",
+      "Level": 4,
+      "RowNumber": 76,
+      "NextSiblingRowNumber": 76,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "GroupSemiJoin: RelLogOp DependOnCols()() 0-2 RequiredCols(0, 1, 2)('Product'[Brand], ''[IsGrandTotalRowTotal], ''[L4])",
+      "IndentedOperation": "    GroupSemiJoin: RelLogOp DependOnCols()() 0-2 RequiredCols(0, 1, 2)('Product'[Brand], ''[IsGrandTotalRowTotal], ''[L4])",
+      "Level": 1,
+      "RowNumber": 77,
+      "NextSiblingRowNumber": 151,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "Constant: ScaLogOp DependOnCols()() Boolean DominantValue=true",
+      "IndentedOperation": "        Constant: ScaLogOp DependOnCols()() Boolean DominantValue=true",
+      "Level": 2,
+      "RowNumber": 78,
+      "NextSiblingRowNumber": 78,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "SumX: ScaLogOp MeasureRef=[L4 Optimized] DependOnCols()() Currency DominantValue=BLANK",
+      "IndentedOperation": "        SumX: ScaLogOp MeasureRef=[L4 Optimized] DependOnCols()() Currency DominantValue=BLANK",
+      "Level": 2,
+      "RowNumber": 79,
+      "NextSiblingRowNumber": 151,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "GroupSemiJoin: RelLogOp DependOnCols()() 0-2 RequiredCols(0, 1, 2)('Product'[Brand], 'Date'[Year], ''[@Sales])",
+      "IndentedOperation": "            GroupSemiJoin: RelLogOp DependOnCols()() 0-2 RequiredCols(0, 1, 2)('Product'[Brand], 'Date'[Year], ''[@Sales])",
+      "Level": 3,
+      "RowNumber": 80,
+      "NextSiblingRowNumber": 88,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "Scan_Vertipaq: RelLogOp DependOnCols()() 0-0 RequiredCols(0)('Product'[Brand])",
+      "IndentedOperation": "                Scan_Vertipaq: RelLogOp DependOnCols()() 0-0 RequiredCols(0)('Product'[Brand])",
+      "Level": 4,
+      "RowNumber": 81,
+      "NextSiblingRowNumber": 81,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "Scan_Vertipaq: RelLogOp DependOnCols()() 1-1 RequiredCols(1)('Date'[Year])",
+      "IndentedOperation": "                Scan_Vertipaq: RelLogOp DependOnCols()() 1-1 RequiredCols(1)('Date'[Year])",
+      "Level": 4,
+      "RowNumber": 82,
+      "NextSiblingRowNumber": 82,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "Sum_Vertipaq: ScaLogOp MeasureRef=[Sales Amount] DependOnCols(0, 1)('Product'[Brand], 'Date'[Year]) Currency DominantValue=BLANK",
+      "IndentedOperation": "                Sum_Vertipaq: ScaLogOp MeasureRef=[Sales Amount] DependOnCols(0, 1)('Product'[Brand], 'Date'[Year]) Currency DominantValue=BLANK",
+      "Level": 4,
+      "RowNumber": 83,
+      "NextSiblingRowNumber": 88,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "Scan_Vertipaq: RelLogOp DependOnCols(0, 1)('Product'[Brand], 'Date'[Year]) 2-72 RequiredCols(0, 1, 57, 59)('Product'[Brand], 'Date'[Year], 'Sales'[Quantity], 'Sales'[Net Price])",
+      "IndentedOperation": "                    Scan_Vertipaq: RelLogOp DependOnCols(0, 1)('Product'[Brand], 'Date'[Year]) 2-72 RequiredCols(0, 1, 57, 59)('Product'[Brand], 'Date'[Year], 'Sales'[Quantity], 'Sales'[Net Price])",
+      "Level": 5,
+      "RowNumber": 84,
+      "NextSiblingRowNumber": 84,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "Multiply: ScaLogOp DependOnCols(57, 59)('Sales'[Quantity], 'Sales'[Net Price]) Currency DominantValue=NONE",
+      "IndentedOperation": "                    Multiply: ScaLogOp DependOnCols(57, 59)('Sales'[Quantity], 'Sales'[Net Price]) Currency DominantValue=NONE",
+      "Level": 5,
+      "RowNumber": 85,
+      "NextSiblingRowNumber": 88,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "'Sales'[Quantity]: ScaLogOp DependOnCols(57)('Sales'[Quantity]) Integer DominantValue=NONE",
+      "IndentedOperation": "                        'Sales'[Quantity]: ScaLogOp DependOnCols(57)('Sales'[Quantity]) Integer DominantValue=NONE",
+      "Level": 6,
+      "RowNumber": 86,
+      "NextSiblingRowNumber": 86,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "'Sales'[Net Price]: ScaLogOp DependOnCols(59)('Sales'[Net Price]) Currency DominantValue=NONE",
+      "IndentedOperation": "                        'Sales'[Net Price]: ScaLogOp DependOnCols(59)('Sales'[Net Price]) Currency DominantValue=NONE",
+      "Level": 6,
+      "RowNumber": 87,
+      "NextSiblingRowNumber": 87,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "VarScope: ScaLogOp DependOnCols(0, 1, 2)('Product'[Brand], 'Date'[Year], ''[@Sales]) Currency DominantValue=BLANK",
+      "IndentedOperation": "            VarScope: ScaLogOp DependOnCols(0, 1, 2)('Product'[Brand], 'Date'[Year], ''[@Sales]) Currency DominantValue=BLANK",
+      "Level": 3,
+      "RowNumber": 88,
+      "NextSiblingRowNumber": 151,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "VarScope: ScaLogOp VarName=YearFactor DependOnCols(1)('Date'[Year]) Double DominantValue=1",
+      "IndentedOperation": "                VarScope: ScaLogOp VarName=YearFactor DependOnCols(1)('Date'[Year]) Double DominantValue=1",
+      "Level": 4,
+      "RowNumber": 89,
+      "NextSiblingRowNumber": 117,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "'Date'[Year]: ScaLogOp VarName=<0000023FB3946910> DependOnCols(1)('Date'[Year]) Integer DominantValue=NONE",
+      "IndentedOperation": "                    'Date'[Year]: ScaLogOp VarName=<0000023FB3946910> DependOnCols(1)('Date'[Year]) Integer DominantValue=NONE",
+      "Level": 5,
+      "RowNumber": 90,
+      "NextSiblingRowNumber": 90,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "Switch: ScaLogOp DependOnCols(1)('Date'[Year]) Double DominantValue=1",
+      "IndentedOperation": "                    Switch: ScaLogOp DependOnCols(1)('Date'[Year]) Double DominantValue=1",
+      "Level": 5,
+      "RowNumber": 91,
+      "NextSiblingRowNumber": 117,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "'Date'[Year] IS 2021: ScaLogOp DependOnCols(1)('Date'[Year]) Boolean DominantValue=false",
+      "IndentedOperation": "                        'Date'[Year] IS 2021: ScaLogOp DependOnCols(1)('Date'[Year]) Boolean DominantValue=false",
+      "Level": 6,
+      "RowNumber": 92,
+      "NextSiblingRowNumber": 92,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "'Date'[Year] IS 2022: ScaLogOp DependOnCols(1)('Date'[Year]) Boolean DominantValue=false",
+      "IndentedOperation": "                        'Date'[Year] IS 2022: ScaLogOp DependOnCols(1)('Date'[Year]) Boolean DominantValue=false",
+      "Level": 6,
+      "RowNumber": 93,
+      "NextSiblingRowNumber": 93,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "'Date'[Year] IS 2023: ScaLogOp DependOnCols(1)('Date'[Year]) Boolean DominantValue=false",
+      "IndentedOperation": "                        'Date'[Year] IS 2023: ScaLogOp DependOnCols(1)('Date'[Year]) Boolean DominantValue=false",
+      "Level": 6,
+      "RowNumber": 94,
+      "NextSiblingRowNumber": 94,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "'Date'[Year] IS 2024: ScaLogOp DependOnCols(1)('Date'[Year]) Boolean DominantValue=false",
+      "IndentedOperation": "                        'Date'[Year] IS 2024: ScaLogOp DependOnCols(1)('Date'[Year]) Boolean DominantValue=false",
+      "Level": 6,
+      "RowNumber": 95,
+      "NextSiblingRowNumber": 95,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "PredicateCheck: RelLogOp DependOnCols(1)('Date'[Year]) RequiredCols(1)('Date'[Year])",
+      "IndentedOperation": "                        PredicateCheck: RelLogOp DependOnCols(1)('Date'[Year]) RequiredCols(1)('Date'[Year])",
+      "Level": 6,
+      "RowNumber": 96,
+      "NextSiblingRowNumber": 98,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "'Date'[Year] IS 2021: ScaLogOp DependOnCols(1)('Date'[Year]) Boolean DominantValue=false",
+      "IndentedOperation": "                            'Date'[Year] IS 2021: ScaLogOp DependOnCols(1)('Date'[Year]) Boolean DominantValue=false",
+      "Level": 7,
+      "RowNumber": 97,
+      "NextSiblingRowNumber": 97,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "PredicateCheck: RelLogOp DependOnCols(1)('Date'[Year]) RequiredCols(1)('Date'[Year])",
+      "IndentedOperation": "                        PredicateCheck: RelLogOp DependOnCols(1)('Date'[Year]) RequiredCols(1)('Date'[Year])",
+      "Level": 6,
+      "RowNumber": 98,
+      "NextSiblingRowNumber": 100,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "'Date'[Year] IS 2021: ScaLogOp DependOnCols(1)('Date'[Year]) Boolean DominantValue=false",
+      "IndentedOperation": "                            'Date'[Year] IS 2021: ScaLogOp DependOnCols(1)('Date'[Year]) Boolean DominantValue=false",
+      "Level": 7,
+      "RowNumber": 99,
+      "NextSiblingRowNumber": 99,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "PredicateCheck: RelLogOp DependOnCols(1)('Date'[Year]) RequiredCols(1)('Date'[Year])",
+      "IndentedOperation": "                        PredicateCheck: RelLogOp DependOnCols(1)('Date'[Year]) RequiredCols(1)('Date'[Year])",
+      "Level": 6,
+      "RowNumber": 100,
+      "NextSiblingRowNumber": 102,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "'Date'[Year] IS 2022: ScaLogOp DependOnCols(1)('Date'[Year]) Boolean DominantValue=false",
+      "IndentedOperation": "                            'Date'[Year] IS 2022: ScaLogOp DependOnCols(1)('Date'[Year]) Boolean DominantValue=false",
+      "Level": 7,
+      "RowNumber": 101,
+      "NextSiblingRowNumber": 101,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "PredicateCheck: RelLogOp DependOnCols(1)('Date'[Year]) RequiredCols(1)('Date'[Year])",
+      "IndentedOperation": "                        PredicateCheck: RelLogOp DependOnCols(1)('Date'[Year]) RequiredCols(1)('Date'[Year])",
+      "Level": 6,
+      "RowNumber": 102,
+      "NextSiblingRowNumber": 104,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "'Date'[Year] IS 2022: ScaLogOp DependOnCols(1)('Date'[Year]) Boolean DominantValue=false",
+      "IndentedOperation": "                            'Date'[Year] IS 2022: ScaLogOp DependOnCols(1)('Date'[Year]) Boolean DominantValue=false",
+      "Level": 7,
+      "RowNumber": 103,
+      "NextSiblingRowNumber": 103,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "PredicateCheck: RelLogOp DependOnCols(1)('Date'[Year]) RequiredCols(1)('Date'[Year])",
+      "IndentedOperation": "                        PredicateCheck: RelLogOp DependOnCols(1)('Date'[Year]) RequiredCols(1)('Date'[Year])",
+      "Level": 6,
+      "RowNumber": 104,
+      "NextSiblingRowNumber": 106,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "'Date'[Year] IS 2023: ScaLogOp DependOnCols(1)('Date'[Year]) Boolean DominantValue=false",
+      "IndentedOperation": "                            'Date'[Year] IS 2023: ScaLogOp DependOnCols(1)('Date'[Year]) Boolean DominantValue=false",
+      "Level": 7,
+      "RowNumber": 105,
+      "NextSiblingRowNumber": 105,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "PredicateCheck: RelLogOp DependOnCols(1)('Date'[Year]) RequiredCols(1)('Date'[Year])",
+      "IndentedOperation": "                        PredicateCheck: RelLogOp DependOnCols(1)('Date'[Year]) RequiredCols(1)('Date'[Year])",
+      "Level": 6,
+      "RowNumber": 106,
+      "NextSiblingRowNumber": 108,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "'Date'[Year] IS 2023: ScaLogOp DependOnCols(1)('Date'[Year]) Boolean DominantValue=false",
+      "IndentedOperation": "                            'Date'[Year] IS 2023: ScaLogOp DependOnCols(1)('Date'[Year]) Boolean DominantValue=false",
+      "Level": 7,
+      "RowNumber": 107,
+      "NextSiblingRowNumber": 107,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "PredicateCheck: RelLogOp DependOnCols(1)('Date'[Year]) RequiredCols(1)('Date'[Year])",
+      "IndentedOperation": "                        PredicateCheck: RelLogOp DependOnCols(1)('Date'[Year]) RequiredCols(1)('Date'[Year])",
+      "Level": 6,
+      "RowNumber": 108,
+      "NextSiblingRowNumber": 110,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "'Date'[Year] IS 2024: ScaLogOp DependOnCols(1)('Date'[Year]) Boolean DominantValue=false",
+      "IndentedOperation": "                            'Date'[Year] IS 2024: ScaLogOp DependOnCols(1)('Date'[Year]) Boolean DominantValue=false",
+      "Level": 7,
+      "RowNumber": 109,
+      "NextSiblingRowNumber": 109,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "PredicateCheck: RelLogOp DependOnCols(1)('Date'[Year]) RequiredCols(1)('Date'[Year])",
+      "IndentedOperation": "                        PredicateCheck: RelLogOp DependOnCols(1)('Date'[Year]) RequiredCols(1)('Date'[Year])",
+      "Level": 6,
+      "RowNumber": 110,
+      "NextSiblingRowNumber": 112,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "'Date'[Year] IS 2024: ScaLogOp DependOnCols(1)('Date'[Year]) Boolean DominantValue=false",
+      "IndentedOperation": "                            'Date'[Year] IS 2024: ScaLogOp DependOnCols(1)('Date'[Year]) Boolean DominantValue=false",
+      "Level": 7,
+      "RowNumber": 111,
+      "NextSiblingRowNumber": 111,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "Constant: ScaLogOp DependOnCols()() Double DominantValue=1.01",
+      "IndentedOperation": "                        Constant: ScaLogOp DependOnCols()() Double DominantValue=1.01",
+      "Level": 6,
+      "RowNumber": 112,
+      "NextSiblingRowNumber": 112,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "Constant: ScaLogOp DependOnCols()() Double DominantValue=1.03",
+      "IndentedOperation": "                        Constant: ScaLogOp DependOnCols()() Double DominantValue=1.03",
+      "Level": 6,
+      "RowNumber": 113,
+      "NextSiblingRowNumber": 113,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "Constant: ScaLogOp DependOnCols()() Double DominantValue=1.06",
+      "IndentedOperation": "                        Constant: ScaLogOp DependOnCols()() Double DominantValue=1.06",
+      "Level": 6,
+      "RowNumber": 114,
+      "NextSiblingRowNumber": 114,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "Constant: ScaLogOp DependOnCols()() Double DominantValue=1.07",
+      "IndentedOperation": "                        Constant: ScaLogOp DependOnCols()() Double DominantValue=1.07",
+      "Level": 6,
+      "RowNumber": 115,
+      "NextSiblingRowNumber": 115,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "Constant: ScaLogOp DependOnCols()() Double DominantValue=1",
+      "IndentedOperation": "                        Constant: ScaLogOp DependOnCols()() Double DominantValue=1",
+      "Level": 6,
+      "RowNumber": 116,
+      "NextSiblingRowNumber": 116,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "VarScope: ScaLogOp VarName=BrandFactor DependOnCols(0)('Product'[Brand]) Double DominantValue=1",
+      "IndentedOperation": "                VarScope: ScaLogOp VarName=BrandFactor DependOnCols(0)('Product'[Brand]) Double DominantValue=1",
+      "Level": 4,
+      "RowNumber": 117,
+      "NextSiblingRowNumber": 145,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "'Product'[Brand]: ScaLogOp VarName=<0000023FB3946440> DependOnCols(0)('Product'[Brand]) String DominantValue=NONE",
+      "IndentedOperation": "                    'Product'[Brand]: ScaLogOp VarName=<0000023FB3946440> DependOnCols(0)('Product'[Brand]) String DominantValue=NONE",
+      "Level": 5,
+      "RowNumber": 118,
+      "NextSiblingRowNumber": 118,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "Switch: ScaLogOp DependOnCols(0)('Product'[Brand]) Double DominantValue=1",
+      "IndentedOperation": "                    Switch: ScaLogOp DependOnCols(0)('Product'[Brand]) Double DominantValue=1",
+      "Level": 5,
+      "RowNumber": 119,
+      "NextSiblingRowNumber": 145,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "'Product'[Brand] IS Adventure Works: ScaLogOp DependOnCols(0)('Product'[Brand]) Boolean DominantValue=false",
+      "IndentedOperation": "                        'Product'[Brand] IS Adventure Works: ScaLogOp DependOnCols(0)('Product'[Brand]) Boolean DominantValue=false",
+      "Level": 6,
+      "RowNumber": 120,
+      "NextSiblingRowNumber": 120,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "'Product'[Brand] IS Contoso: ScaLogOp DependOnCols(0)('Product'[Brand]) Boolean DominantValue=false",
+      "IndentedOperation": "                        'Product'[Brand] IS Contoso: ScaLogOp DependOnCols(0)('Product'[Brand]) Boolean DominantValue=false",
+      "Level": 6,
+      "RowNumber": 121,
+      "NextSiblingRowNumber": 121,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "'Product'[Brand] IS Fabrikam: ScaLogOp DependOnCols(0)('Product'[Brand]) Boolean DominantValue=false",
+      "IndentedOperation": "                        'Product'[Brand] IS Fabrikam: ScaLogOp DependOnCols(0)('Product'[Brand]) Boolean DominantValue=false",
+      "Level": 6,
+      "RowNumber": 122,
+      "NextSiblingRowNumber": 122,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "'Product'[Brand] IS Litware: ScaLogOp DependOnCols(0)('Product'[Brand]) Boolean DominantValue=false",
+      "IndentedOperation": "                        'Product'[Brand] IS Litware: ScaLogOp DependOnCols(0)('Product'[Brand]) Boolean DominantValue=false",
+      "Level": 6,
+      "RowNumber": 123,
+      "NextSiblingRowNumber": 123,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "PredicateCheck: RelLogOp DependOnCols(0)('Product'[Brand]) RequiredCols(0)('Product'[Brand])",
+      "IndentedOperation": "                        PredicateCheck: RelLogOp DependOnCols(0)('Product'[Brand]) RequiredCols(0)('Product'[Brand])",
+      "Level": 6,
+      "RowNumber": 124,
+      "NextSiblingRowNumber": 126,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "'Product'[Brand] IS Adventure Works: ScaLogOp DependOnCols(0)('Product'[Brand]) Boolean DominantValue=false",
+      "IndentedOperation": "                            'Product'[Brand] IS Adventure Works: ScaLogOp DependOnCols(0)('Product'[Brand]) Boolean DominantValue=false",
+      "Level": 7,
+      "RowNumber": 125,
+      "NextSiblingRowNumber": 125,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "PredicateCheck: RelLogOp DependOnCols(0)('Product'[Brand]) RequiredCols(0)('Product'[Brand])",
+      "IndentedOperation": "                        PredicateCheck: RelLogOp DependOnCols(0)('Product'[Brand]) RequiredCols(0)('Product'[Brand])",
+      "Level": 6,
+      "RowNumber": 126,
+      "NextSiblingRowNumber": 128,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "'Product'[Brand] IS Adventure Works: ScaLogOp DependOnCols(0)('Product'[Brand]) Boolean DominantValue=false",
+      "IndentedOperation": "                            'Product'[Brand] IS Adventure Works: ScaLogOp DependOnCols(0)('Product'[Brand]) Boolean DominantValue=false",
+      "Level": 7,
+      "RowNumber": 127,
+      "NextSiblingRowNumber": 127,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "PredicateCheck: RelLogOp DependOnCols(0)('Product'[Brand]) RequiredCols(0)('Product'[Brand])",
+      "IndentedOperation": "                        PredicateCheck: RelLogOp DependOnCols(0)('Product'[Brand]) RequiredCols(0)('Product'[Brand])",
+      "Level": 6,
+      "RowNumber": 128,
+      "NextSiblingRowNumber": 130,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "'Product'[Brand] IS Contoso: ScaLogOp DependOnCols(0)('Product'[Brand]) Boolean DominantValue=false",
+      "IndentedOperation": "                            'Product'[Brand] IS Contoso: ScaLogOp DependOnCols(0)('Product'[Brand]) Boolean DominantValue=false",
+      "Level": 7,
+      "RowNumber": 129,
+      "NextSiblingRowNumber": 129,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "PredicateCheck: RelLogOp DependOnCols(0)('Product'[Brand]) RequiredCols(0)('Product'[Brand])",
+      "IndentedOperation": "                        PredicateCheck: RelLogOp DependOnCols(0)('Product'[Brand]) RequiredCols(0)('Product'[Brand])",
+      "Level": 6,
+      "RowNumber": 130,
+      "NextSiblingRowNumber": 132,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "'Product'[Brand] IS Contoso: ScaLogOp DependOnCols(0)('Product'[Brand]) Boolean DominantValue=false",
+      "IndentedOperation": "                            'Product'[Brand] IS Contoso: ScaLogOp DependOnCols(0)('Product'[Brand]) Boolean DominantValue=false",
+      "Level": 7,
+      "RowNumber": 131,
+      "NextSiblingRowNumber": 131,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "PredicateCheck: RelLogOp DependOnCols(0)('Product'[Brand]) RequiredCols(0)('Product'[Brand])",
+      "IndentedOperation": "                        PredicateCheck: RelLogOp DependOnCols(0)('Product'[Brand]) RequiredCols(0)('Product'[Brand])",
+      "Level": 6,
+      "RowNumber": 132,
+      "NextSiblingRowNumber": 134,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "'Product'[Brand] IS Fabrikam: ScaLogOp DependOnCols(0)('Product'[Brand]) Boolean DominantValue=false",
+      "IndentedOperation": "                            'Product'[Brand] IS Fabrikam: ScaLogOp DependOnCols(0)('Product'[Brand]) Boolean DominantValue=false",
+      "Level": 7,
+      "RowNumber": 133,
+      "NextSiblingRowNumber": 133,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "PredicateCheck: RelLogOp DependOnCols(0)('Product'[Brand]) RequiredCols(0)('Product'[Brand])",
+      "IndentedOperation": "                        PredicateCheck: RelLogOp DependOnCols(0)('Product'[Brand]) RequiredCols(0)('Product'[Brand])",
+      "Level": 6,
+      "RowNumber": 134,
+      "NextSiblingRowNumber": 136,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "'Product'[Brand] IS Fabrikam: ScaLogOp DependOnCols(0)('Product'[Brand]) Boolean DominantValue=false",
+      "IndentedOperation": "                            'Product'[Brand] IS Fabrikam: ScaLogOp DependOnCols(0)('Product'[Brand]) Boolean DominantValue=false",
+      "Level": 7,
+      "RowNumber": 135,
+      "NextSiblingRowNumber": 135,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "PredicateCheck: RelLogOp DependOnCols(0)('Product'[Brand]) RequiredCols(0)('Product'[Brand])",
+      "IndentedOperation": "                        PredicateCheck: RelLogOp DependOnCols(0)('Product'[Brand]) RequiredCols(0)('Product'[Brand])",
+      "Level": 6,
+      "RowNumber": 136,
+      "NextSiblingRowNumber": 138,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "'Product'[Brand] IS Litware: ScaLogOp DependOnCols(0)('Product'[Brand]) Boolean DominantValue=false",
+      "IndentedOperation": "                            'Product'[Brand] IS Litware: ScaLogOp DependOnCols(0)('Product'[Brand]) Boolean DominantValue=false",
+      "Level": 7,
+      "RowNumber": 137,
+      "NextSiblingRowNumber": 137,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "PredicateCheck: RelLogOp DependOnCols(0)('Product'[Brand]) RequiredCols(0)('Product'[Brand])",
+      "IndentedOperation": "                        PredicateCheck: RelLogOp DependOnCols(0)('Product'[Brand]) RequiredCols(0)('Product'[Brand])",
+      "Level": 6,
+      "RowNumber": 138,
+      "NextSiblingRowNumber": 140,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "'Product'[Brand] IS Litware: ScaLogOp DependOnCols(0)('Product'[Brand]) Boolean DominantValue=false",
+      "IndentedOperation": "                            'Product'[Brand] IS Litware: ScaLogOp DependOnCols(0)('Product'[Brand]) Boolean DominantValue=false",
+      "Level": 7,
+      "RowNumber": 139,
+      "NextSiblingRowNumber": 139,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "Constant: ScaLogOp DependOnCols()() Double DominantValue=0.7",
+      "IndentedOperation": "                        Constant: ScaLogOp DependOnCols()() Double DominantValue=0.7",
+      "Level": 6,
+      "RowNumber": 140,
+      "NextSiblingRowNumber": 140,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "Constant: ScaLogOp DependOnCols()() Double DominantValue=0.8",
+      "IndentedOperation": "                        Constant: ScaLogOp DependOnCols()() Double DominantValue=0.8",
+      "Level": 6,
+      "RowNumber": 141,
+      "NextSiblingRowNumber": 141,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "Constant: ScaLogOp DependOnCols()() Double DominantValue=0.9",
+      "IndentedOperation": "                        Constant: ScaLogOp DependOnCols()() Double DominantValue=0.9",
+      "Level": 6,
+      "RowNumber": 142,
+      "NextSiblingRowNumber": 142,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "Constant: ScaLogOp DependOnCols()() Double DominantValue=0.95",
+      "IndentedOperation": "                        Constant: ScaLogOp DependOnCols()() Double DominantValue=0.95",
+      "Level": 6,
+      "RowNumber": 143,
+      "NextSiblingRowNumber": 143,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "Constant: ScaLogOp DependOnCols()() Double DominantValue=1",
+      "IndentedOperation": "                        Constant: ScaLogOp DependOnCols()() Double DominantValue=1",
+      "Level": 6,
+      "RowNumber": 144,
+      "NextSiblingRowNumber": 144,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "Multiply: ScaLogOp VarName=Result DependOnCols(0, 1, 2)('Product'[Brand], 'Date'[Year], ''[@Sales]) Currency DominantValue=BLANK",
+      "IndentedOperation": "                Multiply: ScaLogOp VarName=Result DependOnCols(0, 1, 2)('Product'[Brand], 'Date'[Year], ''[@Sales]) Currency DominantValue=BLANK",
+      "Level": 4,
+      "RowNumber": 145,
+      "NextSiblingRowNumber": 150,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "Multiply: ScaLogOp DependOnCols(1, 2)('Date'[Year], ''[@Sales]) Currency DominantValue=BLANK",
+      "IndentedOperation": "                    Multiply: ScaLogOp DependOnCols(1, 2)('Date'[Year], ''[@Sales]) Currency DominantValue=BLANK",
+      "Level": 5,
+      "RowNumber": 146,
+      "NextSiblingRowNumber": 149,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "''[@Sales]: ScaLogOp DependOnCols(2)(''[@Sales]) Currency DominantValue=BLANK",
+      "IndentedOperation": "                        ''[@Sales]: ScaLogOp DependOnCols(2)(''[@Sales]) Currency DominantValue=BLANK",
+      "Level": 6,
+      "RowNumber": 147,
+      "NextSiblingRowNumber": 147,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "ScalarVarProxy: ScaLogOp DependOnCols(1)('Date'[Year]) Double DominantValue=1 RefVarName=YearFactor",
+      "IndentedOperation": "                        ScalarVarProxy: ScaLogOp DependOnCols(1)('Date'[Year]) Double DominantValue=1 RefVarName=YearFactor",
+      "Level": 6,
+      "RowNumber": 148,
+      "NextSiblingRowNumber": 148,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "ScalarVarProxy: ScaLogOp DependOnCols(0)('Product'[Brand]) Double DominantValue=1 RefVarName=BrandFactor",
+      "IndentedOperation": "                    ScalarVarProxy: ScaLogOp DependOnCols(0)('Product'[Brand]) Double DominantValue=1 RefVarName=BrandFactor",
+      "Level": 5,
+      "RowNumber": 149,
+      "NextSiblingRowNumber": 149,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "ScalarVarProxy: ScaLogOp DependOnCols(0, 1, 2)('Product'[Brand], 'Date'[Year], ''[@Sales]) Currency DominantValue=BLANK RefVarName=Result",
+      "IndentedOperation": "                ScalarVarProxy: ScaLogOp DependOnCols(0, 1, 2)('Product'[Brand], 'Date'[Year], ''[@Sales]) Currency DominantValue=BLANK RefVarName=Result",
+      "Level": 4,
+      "RowNumber": 150,
+      "NextSiblingRowNumber": 150,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "__DS0PrimaryWindowed: TopN: RelLogOp VarName=__DS0PrimaryWindowed DependOnCols()() 0-3 RequiredCols(0, 1, 2, 3)('Product'[Brand], ''[IsGrandTotalRowTotal], ''[L4], ''[])",
+      "IndentedOperation": "__DS0PrimaryWindowed: TopN: RelLogOp VarName=__DS0PrimaryWindowed DependOnCols()() 0-3 RequiredCols(0, 1, 2, 3)('Product'[Brand], ''[IsGrandTotalRowTotal], ''[L4], ''[])",
+      "Level": 0,
+      "RowNumber": 151,
+      "NextSiblingRowNumber": 156,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "TableVarProxy: RelLogOp DependOnCols()() 0-3 RequiredCols(0, 1, 2, 3)('Product'[Brand], ''[IsGrandTotalRowTotal], ''[L4], ''[]) RefVarName=__DS0Core",
+      "IndentedOperation": "    TableVarProxy: RelLogOp DependOnCols()() 0-3 RequiredCols(0, 1, 2, 3)('Product'[Brand], ''[IsGrandTotalRowTotal], ''[L4], ''[]) RefVarName=__DS0Core",
+      "Level": 1,
+      "RowNumber": 152,
+      "NextSiblingRowNumber": 152,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "Constant: ScaLogOp DependOnCols()() Integer DominantValue=502",
+      "IndentedOperation": "    Constant: ScaLogOp DependOnCols()() Integer DominantValue=502",
+      "Level": 1,
+      "RowNumber": 153,
+      "NextSiblingRowNumber": 153,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "''[IsGrandTotalRowTotal]: ScaLogOp DependOnCols(1)(''[IsGrandTotalRowTotal]) Boolean DominantValue=NONE",
+      "IndentedOperation": "    ''[IsGrandTotalRowTotal]: ScaLogOp DependOnCols(1)(''[IsGrandTotalRowTotal]) Boolean DominantValue=NONE",
+      "Level": 1,
+      "RowNumber": 154,
+      "NextSiblingRowNumber": 154,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "ColPosition<'Product'[Brand]>: ScaLogOp DependOnCols(0)('Product'[Brand]) String DominantValue=NONE",
+      "IndentedOperation": "    ColPosition<'Product'[Brand]>: ScaLogOp DependOnCols(0)('Product'[Brand]) String DominantValue=NONE",
+      "Level": 1,
+      "RowNumber": 155,
+      "NextSiblingRowNumber": 155,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "Order: RelLogOp DependOnCols()() 0-3 RequiredCols(0, 1, 2, 3)('Product'[Brand], ''[IsGrandTotalRowTotal], ''[L4], ''[])",
+      "IndentedOperation": "Order: RelLogOp DependOnCols()() 0-3 RequiredCols(0, 1, 2, 3)('Product'[Brand], ''[IsGrandTotalRowTotal], ''[L4], ''[])",
+      "Level": 0,
+      "RowNumber": 156,
+      "NextSiblingRowNumber": 160,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "TableVarProxy: RelLogOp DependOnCols()() 0-3 RequiredCols(0, 1, 2, 3)('Product'[Brand], ''[IsGrandTotalRowTotal], ''[L4], ''[]) RefVarName=__DS0PrimaryWindowed",
+      "IndentedOperation": "    TableVarProxy: RelLogOp DependOnCols()() 0-3 RequiredCols(0, 1, 2, 3)('Product'[Brand], ''[IsGrandTotalRowTotal], ''[L4], ''[]) RefVarName=__DS0PrimaryWindowed",
+      "Level": 1,
+      "RowNumber": 157,
+      "NextSiblingRowNumber": 157,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "''[IsGrandTotalRowTotal]: ScaLogOp DependOnCols(1)(''[IsGrandTotalRowTotal]) Boolean DominantValue=NONE",
+      "IndentedOperation": "    ''[IsGrandTotalRowTotal]: ScaLogOp DependOnCols(1)(''[IsGrandTotalRowTotal]) Boolean DominantValue=NONE",
+      "Level": 1,
+      "RowNumber": 158,
+      "NextSiblingRowNumber": 158,
+      "HighlightRow": false
+    },
+    {
+      "Operation": "ColPosition<'Product'[Brand]>: ScaLogOp DependOnCols(0)('Product'[Brand]) String DominantValue=NONE",
+      "IndentedOperation": "    ColPosition<'Product'[Brand]>: ScaLogOp DependOnCols(0)('Product'[Brand]) String DominantValue=NONE",
+      "Level": 1,
+      "RowNumber": 159,
+      "NextSiblingRowNumber": 160,
+      "HighlightRow": false
+    }
+  ],
+  "ActivityID": "2A0C682F-5559-4935-A2B7-B955028B2863",
+  "CommandText": "DEFINE\n    ---- MODEL MEASURES BEGIN ----\n    MEASURE Sales[L1] =\n        SWITCH (\n            SELECTEDVALUE ( 'Product'[Brand] ),\n            \"Adventure Works\", [L1 - Adventure Works],\n            \"Contoso\", [L1 - Contoso],\n            \"Fabrikam\", [L1 - Fabrikam] * .9,\n            \"Litware\", [L1 - Litware] * .95,\n            [Sales Amount]\n        )\n    MEASURE Sales[L1 - Adventure Works] =\n        CALCULATE (\n            [Sales Amount] * .7,\n            KEEPFILTERS ( 'Product'[Brand] = \"Adventure Works\" )\n        )\n    MEASURE Sales[L1 - Contoso] =\n        CALCULATE ( [Sales Amount] * .8, KEEPFILTERS ( 'Product'[Brand] = \"Contoso\" ) )\n    MEASURE Sales[L1 - Fabrikam] =\n        CALCULATE ( [Sales Amount] * .9, KEEPFILTERS ( 'Product'[Brand] = \"Fabrikam\" ) )\n    MEASURE Sales[L1 - Litware] =\n        CALCULATE ( [Sales Amount] * .95, KEEPFILTERS ( 'Product'[Brand] = \"Litware\" ) )\n    MEASURE Sales[L2] =\n        SUMX ( VALUES ( 'Product'[Brand] ), [L1] )\n    MEASURE Sales[L3] =\n        SWITCH (\n            SELECTEDVALUE ( 'Date'[Year] ),\n            2021, [L3 - 2021],\n            2022, [L3 - 2022],\n            2023, [L3 - 2023],\n            2024, [L3 - 2024],\n            [L2]\n        )\n    MEASURE Sales[L3 - 2021] =\n        CALCULATE ( [Sales Amount] * 1.01, KEEPFILTERS ( 'Date'[Year] = 2021 ) )\n    MEASURE Sales[L3 - 2022] =\n        CALCULATE ( [Sales Amount] * 1.03, KEEPFILTERS ( 'Date'[Year] = 2022 ) )\n    MEASURE Sales[L3 - 2023] =\n        CALCULATE ( [Sales Amount] * 1.06, KEEPFILTERS ( 'Date'[Year] = 2023 ) )\n    MEASURE Sales[L3 - 2024] =\n        CALCULATE ( [Sales Amount] * 1.07, KEEPFILTERS ( 'Date'[Year] = 2024 ) )\n    MEASURE Sales[L4] =\n        SUMX ( VALUES ( 'Date'[Year] ), [L3] )\n\n\n    -- This is the measure optimized using functions\n//    MEASURE Sales[L4 Functions] =\n//        SUMX (\n//            SUMMARIZECOLUMNS ( 'Product'[Brand], 'Date'[Year], \"@Sales\", [Sales Amount] ),\n//            BrandFactor ( YearFactor ( [@Sales], 'Date'[Year] ), 'Product'[Brand] )\n//        )\n        \n        \n    -- This is the measure optimized without using functions:\n    -- the logic for BrandFactor and YearFactor must be included in the iterator\n    MEASURE Sales[L4 Optimized] =\n        SUMX (\n            SUMMARIZECOLUMNS ( 'Product'[Brand], 'Date'[Year], \"@Sales\", [Sales Amount] ),\n            VAR YearFactor =\n                SWITCH ( 'Date'[Year], 2021, 1.01, 2022, 1.03, 2023, 1.06, 2024, 1.07, 1 )\n            VAR BrandFactor =\n                SWITCH (\n                    'Product'[Brand],\n                    \"Adventure Works\", .7,\n                    \"Contoso\", .8,\n                    \"Fabrikam\", .9,\n                    \"Litware\", .95,\n                    1\n                )\n            VAR Result = [@Sales] * YearFactor * BrandFactor\n            RETURN\n                Result\n        )\n    ---- MODEL MEASURES END ----\n    VAR __DS0Core =\n        SUMMARIZECOLUMNS (\n            ROLLUPADDISSUBTOTAL ( 'Product'[Brand], \"IsGrandTotalRowTotal\" ),\n            \"L4\", 'Sales'[L4 Optimized]\n        )\n    VAR __DS0PrimaryWindowed =\n        TOPN ( 502, __DS0Core, [IsGrandTotalRowTotal], 0, 'Product'[Brand], 1 )\n\nEVALUATE\n__DS0PrimaryWindowed\nORDER BY\n    [IsGrandTotalRowTotal] DESC,\n    'Product'[Brand]",
+  "Parameters": null,
+  "StartDatetime": "2025-07-28T20:48:12.25+10:00"
+}

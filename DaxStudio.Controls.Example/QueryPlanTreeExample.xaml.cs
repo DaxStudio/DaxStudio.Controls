@@ -4,7 +4,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 
-namespace DaxStudio.UI.Views
+namespace DaxStudio.Controls.Example
 {
     public partial class QueryPlanTreeExample : UserControl
     {
@@ -31,6 +31,11 @@ namespace DaxStudio.UI.Views
             {
                 HierarchicalGrid.ToggleItem(row.Data);
             }
+        }
+
+        private void HierarchicalGrid_Sorting(object sender, DataGridSortingEventArgs e)
+        {
+            
         }
     }
 }

@@ -4,7 +4,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 
-namespace DaxStudio.UI.Views
+namespace DaxStudio.Controls.Example
 {
     public partial class TreeGridExample : UserControl
     {

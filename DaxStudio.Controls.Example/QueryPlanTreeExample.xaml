@@ -1,112 +1,121 @@
-﻿<UserControl x:Class="DaxStudio.UI.Views.QueryPlanTreeExample"
-             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:ctrl="clr-namespace:DaxStudio.Controls;assembly=DaxStudio.Controls"
-             xmlns:conv="clr-namespace:DaxStudio.Controls.Converters;assembly=DaxStudio.Controls">
-
-    <UserControl.Resources>
-        <ResourceDictionary>
-
-            <SolidColorBrush x:Key="Theme.Brush.Default.Fore" Color="Black"/>
-            <SolidColorBrush x:Key="Theme.Brush.Control.Border" Color="#CCCCCC"/>
-            <SolidColorBrush x:Key="Theme.Brush.Control.Hover" Color="#F0F0F0"/>
-            <SolidColorBrush x:Key="Theme.Brush.Control.Pressed" Color="#E0E0E0"/>
-            <SolidColorBrush x:Key="Theme.Brush.Control.Disabled" Color="#A0A0A0"/>
-            <SolidColorBrush x:Key="Theme.Brush.Accent" Color="#007ACC"/>
-
-
-            <ControlTemplate x:Key="SnoopExpanderTemplate" TargetType="{x:Type ToggleButton}">
-                <Border x:Name="Border"
-                            Width="19"
-                            Height="13"
-                            Background="#00FFFFFF">
-                    <Border x:Name="Border1"
-                                Width="9"
-                                Height="9"
-                                BorderBrush="#FF9495A2"
-                                BorderThickness="1 1 1 1"
-                                CornerRadius="1,1,1,1"
-                                SnapsToDevicePixels="True">
-                        <Border.Background>
-                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                                <GradientStop Color="#FFFFFFFF" Offset="0.4" />
-                                <GradientStop Color="#FFC6CEDA" Offset="1" />
-                            </LinearGradientBrush>
-                        </Border.Background>
-                        <Path x:Name="ExpandPath"
-                                  Margin="1 1 1 1"
-                                  Data="M0,2L0,3 2,3 2,5 3,5 3,3 5,3 5,2 3,2 3,0 2,0 2,2z"
-                                  Fill="#FF000000" />
-                    </Border>
-                </Border>
-                <ControlTemplate.Triggers>
-                    <Trigger Property="IsChecked" Value="True">
-                        <Setter TargetName="ExpandPath" Property="Data" Value="M0,2L0,3 5,3 5,2z" />
-                    </Trigger>
-                </ControlTemplate.Triggers>
-            </ControlTemplate>
-
-        </ResourceDictionary>
-    </UserControl.Resources>
-
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
-
-        <!-- Toolbar -->
-        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="5">
-            <Button Content="Expand All" Click="ExpandAll_Click" Margin="0,0,5,0"/>
-            <Button Content="Collapse All" Click="CollapseAll_Click" Margin="0,0,5,0"/>
-        </StackPanel>
-
-        <!-- Tree Grid -->
-        <ctrl:TreeGrid x:Name="HierarchicalGrid" 
-                       EnableRowVirtualization="True"
-                       Grid.Row="1"
-                       AlternatingRowBackground="#eeeeee"
-                       RootItems="{Binding RootItems}"
-                       ChildrenBindingPath="Children"
-                       ExpandOnLoad="True"
-                       IndentWidth="20"
-                       Margin="5">
-
-            <!-- Define columns -->
-            <ctrl:TreeGrid.Columns>
-
-                <!-- Additional columns -->
-                <DataGridTextColumn Header="RowNumber" 
-                                   Binding="{Binding Data.RowNumber}" 
-                                   Width="100"/>
-
-                <!-- Additional columns -->
-                <DataGridTextColumn Header="Records" 
-                   Binding="{Binding Data.Records}" 
-                   Width="100">
-                    <DataGridTextColumn.ElementStyle>
-                        <Style TargetType="TextBlock">
-                            <Setter Property="HorizontalAlignment" Value="Right"/>
-                        </Style>
-                    </DataGridTextColumn.ElementStyle>
-                </DataGridTextColumn>
-                
-                <!-- Tree Column using custom control -->
-                <ctrl:TreeGridTreeColumn Header="Operation" 
-                    Width="*"
-                    TextPath="Data.Operation"
-                    IndentWidth="16"
-                    ExpanderTemplate="{StaticResource SnoopExpanderTemplate}"                     
-                    LineStroke="#AAAAAA"
-                    SelectedLineStroke="Red"
-                    LineThickness="0.8">
-                </ctrl:TreeGridTreeColumn>
-
-
-
-
-
-            </ctrl:TreeGrid.Columns>
-        </ctrl:TreeGrid>
-    </Grid>
+﻿<UserControl x:Class="DaxStudio.Controls.Example.QueryPlanTreeExample"  
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"  
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"  
+             xmlns:ctrl="clr-namespace:DaxStudio.Controls;assembly=DaxStudio.Controls"  
+             xmlns:conv="clr-namespace:DaxStudio.Controls.Converters;assembly=DaxStudio.Controls"
+             xmlns:cal="http://caliburnmicro.com">  
+  
+    <UserControl.Resources>  
+        <ResourceDictionary>  
+  
+            <SolidColorBrush x:Key="Theme.Brush.Default.Fore" Color="Black"/>  
+            <SolidColorBrush x:Key="Theme.Brush.Control.Border" Color="#CCCCCC"/>  
+            <SolidColorBrush x:Key="Theme.Brush.Control.Hover" Color="#F0F0F0"/>  
+            <SolidColorBrush x:Key="Theme.Brush.Control.Pressed" Color="#E0E0E0"/>  
+            <SolidColorBrush x:Key="Theme.Brush.Control.Disabled" Color="#A0A0A0"/>  
+            <SolidColorBrush x:Key="Theme.Brush.Accent" Color="#007ACC"/>  
+  
+            <ControlTemplate x:Key="SnoopExpanderTemplate" TargetType="{x:Type ToggleButton}">  
+                <Border x:Name="Border"  
+                            Width="19"  
+                            Height="13"  
+                            Background="#00FFFFFF">  
+                    <Border x:Name="Border1"  
+                                Width="9"  
+                                Height="9"  
+                                BorderBrush="#FF9495A2"  
+                                BorderThickness="1 1 1 1"  
+                                CornerRadius="1,1,1,1"  
+                                SnapsToDevicePixels="True">  
+                        <Border.Background>  
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">  
+                                <GradientStop Color="#FFFFFFFF" Offset="0.4" />  
+                                <GradientStop Color="#FFC6CEDA" Offset="1" />  
+                            </LinearGradientBrush>  
+                        </Border.Background>  
+                        <Path x:Name="ExpandPath"  
+                                  Margin="1 1 1 1"  
+                                  Data="M0,2L0,3 2,3 2,5 3,5 3,3 5,3 5,2 3,2 3,0 2,0 2,2z"  
+                                  Fill="#FF000000" />  
+                    </Border>  
+                </Border>  
+                <ControlTemplate.Triggers>  
+                    <Trigger Property="IsChecked" Value="True">  
+                        <Setter TargetName="ExpandPath" Property="Data" Value="M0,2L0,3 5,3 5,2z" />  
+                    </Trigger>  
+                </ControlTemplate.Triggers>  
+            </ControlTemplate>  
+  
+        </ResourceDictionary>  
+    </UserControl.Resources>  
+  
+    <Grid>  
+        <Grid.RowDefinitions>  
+            <RowDefinition Height="Auto"/>  
+            <RowDefinition Height="*"/>  
+        </Grid.RowDefinitions>  
+  
+        <!-- Toolbar -->  
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="5">  
+            <Button Content="Expand All" Click="ExpandAll_Click" Margin="0,0,5,0"/>  
+            <Button Content="Collapse All" Click="CollapseAll_Click" Margin="0,0,5,0"/>  
+        </StackPanel>  
+  
+        <!-- Tree Grid -->  
+        <ctrl:TreeGrid x:Name="HierarchicalGrid"   
+                       EnableRowVirtualization="True"  
+                       Grid.Row="1"  
+                       AlternatingRowBackground="#eeeeee"  
+                       RootItems="{Binding RootItems}"  
+                       ChildrenBindingPath="Children"  
+                       Sorting="HierarchicalGrid_Sorting"
+                       ExpandOnLoad="True"  
+                       CustomDescendantFilter="{Binding FindDescendantsWithHigherRecordCountsFunc}"  
+                       ShowDefaultContextMenu="True"
+                       Margin="5">  
+            <ctrl:TreeGrid.ContextMenu>  
+                <ContextMenu>  
+                    <Separator/>  
+                    <MenuItem Header="Show Descendants with Higher Record Counts" 
+                              Command="{Binding PlacementTarget.ExecuteCustomDescendantFilter, 
+                                  RelativeSource={RelativeSource FindAncestor, 
+                                  AncestorType={x:Type ContextMenu}}}"
+                              CommandParameter="{Binding PlacementTarget.SelectedItem, 
+                                  RelativeSource={RelativeSource FindAncestor, 
+                                  AncestorType={x:Type ContextMenu}}}"/>
+                </ContextMenu>  
+            </ctrl:TreeGrid.ContextMenu>  
+            <!-- Define columns -->  
+            <ctrl:TreeGrid.Columns>  
+  
+                <!-- Additional columns -->  
+                <DataGridTextColumn Header="RowNumber"   
+                                   Binding="{Binding Data.RowNumber}"   
+                                   Width="100"/>  
+  
+                <!-- Additional columns -->  
+                <DataGridTextColumn Header="Records"   
+                   Binding="{Binding Data.Records}"   
+                   Width="100">  
+                    <DataGridTextColumn.ElementStyle>  
+                        <Style TargetType="TextBlock">  
+                            <Setter Property="HorizontalAlignment" Value="Right"/>  
+                        </Style>  
+                    </DataGridTextColumn.ElementStyle>  
+                </DataGridTextColumn>  
+                  
+                <!-- Tree Column using custom control -->  
+                <ctrl:TreeGridTreeColumn Header="Operation"   
+                    Width="*"  
+                    TextPath="Data.Operation"  
+                    IndentWidth="16"  
+                    ExpanderTemplate="{StaticResource SnoopExpanderTemplate}"                                          
+                    LineStroke="#AAAAAA"  
+                    SelectedLineStroke="Red"  
+                    LineThickness="0.8">  
+                </ctrl:TreeGridTreeColumn>  
+  
+            </ctrl:TreeGrid.Columns>  
+        </ctrl:TreeGrid>  
+    </Grid>  
 </UserControl>
