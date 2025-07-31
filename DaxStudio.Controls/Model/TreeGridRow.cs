@@ -61,6 +61,7 @@ namespace DaxStudio.Controls.Model
                 if (_isExpanded != value)
                 {
                     _isExpanded = value;
+                    if (_isExpanded) IsCollapsing = false;
                     NotifyOfPropertyChange();
                 }
             }
