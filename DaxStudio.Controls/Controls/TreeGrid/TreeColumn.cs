@@ -232,8 +232,6 @@ namespace DaxStudio.Controls
             }
         }
 
-        private FrameworkElement _resourceHost;
-
         private DataGrid FindDataGridInWindow(DependencyObject parent)
         {
             for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)

@@ -32,7 +32,7 @@
   <PropertyGroup>
     <PackageReadmeFile>readme.md</PackageReadmeFile>
     <Authors>DAX Studio</Authors>
-    <Description>Contains control developed for use in DAX Studio which have bee</Description>
+    <Description>Contains control developed for use in DAX Studio which have been made available in this package so that others may use them if they wish</Description>
     <Copyright>Copyright $([System.DateTime]::Now.Year) $(Company)</Copyright>
     <RepositoryUrl>https://github.com/DaxStudio/DaxStudio.Controls</RepositoryUrl>
   </PropertyGroup>

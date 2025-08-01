@@ -1,11 +1,7 @@
 ﻿using Caliburn.Micro;
-using System;
 using System.Collections.ObjectModel;
 
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
-
-namespace DaxStudio.UI.ViewModels
+namespace DaxStudio.Controls.Example
 {
     public class TreeGridExampleViewModel : PropertyChangedBase
     {
@@ -21,13 +17,22 @@ namespace DaxStudio.UI.ViewModels
             {
                 RootItems.Add(item);
             }
-            //RootItems.Add(newItems[1]);
         }
 
         public void Clear()
         {
             RootItems.Clear();
 
+        }
+
+        private bool _showExpanders = true;
+        public bool ShowExpanders
+        {   get => _showExpanders;
+            set
+            {
+                _showExpanders = value;
+                NotifyOfPropertyChange();
+            }
         }
 
         public void AddChild()
@@ -168,6 +173,7 @@ namespace DaxStudio.UI.ViewModels
             }
         }
 
+        public int Count { get => Children?.Count??0; }
         public string Icon => Type switch
         {
             "Table" => "tableDrawingImage",

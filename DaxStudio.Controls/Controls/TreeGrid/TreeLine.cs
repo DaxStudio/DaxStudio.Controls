@@ -186,8 +186,7 @@ namespace DaxStudio.Controls
 
         // Add these fields for caching
         private Pen _cachedPen;
-        private Brush _cachedLineStroke;
-        private double _cachedLineThickness;
+        private Pen _cachedSelectedPen;
 
         protected override void OnRender(DrawingContext drawingContext)
         {
@@ -196,20 +195,22 @@ namespace DaxStudio.Controls
             if (Level == 0) return;
 
             // Cache frequently used objects
-            if (_cachedPen == null || !_cachedLineStroke.Equals(LineStroke) || _cachedLineThickness != LineThickness)
+            if (_cachedPen == null )
             {
-                _cachedPen?.Freeze(); // Freeze old pen
                 _cachedPen = new Pen(LineStroke, LineThickness);
-                _cachedPen.DashStyle = new DashStyle(new double[] { 2, 1 }, 2);
+                //_cachedPen.DashStyle = new DashStyle(new double[] { 2, 1 }, 2);
                 _cachedPen.Freeze(); // Freeze for better performance
-                _cachedLineStroke = LineStroke;
-                _cachedLineThickness = LineThickness;
             }
 
-            // ... rest of rendering code using _cachedPen
+            if (_cachedSelectedPen == null)
+            {
 
-            var pen = _cachedPen;
-            var centerY = ActualHeight / 2;
+                _cachedSelectedPen = new Pen(SelectedLineStroke, LineThickness);
+                //_cachedPen.DashStyle = new DashStyle(new double[] { 2, 1 }, 2);
+                _cachedSelectedPen.Freeze(); // Freeze for better performance
+
+            }
+
             var selectedLevels = SelectedLineLevels?.ToArray();
 
             // Draw vertical lines for all ancestor levels
@@ -226,16 +227,17 @@ namespace DaxStudio.Controls
                     {
                         // Use highlight if selected
                         bool isAncestorSelected = selectedLevels != null && i < selectedLevels.Length && selectedLevels[i];
-                        var ancestorLinePen = isAncestorSelected ? new Pen(SelectedLineStroke ?? Brushes.Red, LineThickness) { DashStyle = pen.DashStyle } : pen;
+                        var ancestorLinePen = isAncestorSelected ? _cachedSelectedPen : _cachedPen;
                         drawingContext.DrawLine(ancestorLinePen, new Point(x, 0), new Point(x, ActualHeight));
                     }
                 }
             }
 
             // Draw lines for current level
+            var centerY = ActualHeight / 2;
             var currentX = Level * IndentWidth - IndentWidth / 2;
             bool isSelected = selectedLevels[Level-1];
-            var linePen = isSelected ? new Pen(SelectedLineStroke ?? Brushes.Red, LineThickness) { DashStyle = pen.DashStyle } : pen;
+            var linePen = isSelected ? _cachedSelectedPen : _cachedPen;
 
             // Vertical line (up to center or full height)
             if (!IsLastChild)

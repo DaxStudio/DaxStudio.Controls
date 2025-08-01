@@ -1,5 +1,4 @@
 ﻿using DaxStudio.Controls.Model;
-using DaxStudio.UI.ViewModels;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;

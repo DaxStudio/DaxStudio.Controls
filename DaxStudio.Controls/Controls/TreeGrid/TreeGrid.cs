@@ -20,16 +20,6 @@ namespace DaxStudio.Controls
 {
     public class TreeGrid : DataGrid
     {
-        // Add these dependency properties for context menu configuration
-        public static readonly DependencyProperty ShowDefaultContextMenuProperty =
-            DependencyProperty.Register(nameof(ShowDefaultContextMenu), typeof(bool), typeof(TreeGrid),
-                new PropertyMetadata(true, OnShowDefaultContextMenuChanged));
-
-        public bool ShowDefaultContextMenu
-        {
-            get => (bool)GetValue(ShowDefaultContextMenuProperty);
-            set => SetValue(ShowDefaultContextMenuProperty, value);
-        }
 
         // Cache for the root rows of the hierarchy
         private readonly List<TreeGridRow<object>> _rootRows = new List<TreeGridRow<object>>();
@@ -37,12 +27,9 @@ namespace DaxStudio.Controls
         private readonly ObservableCollection<TreeGridRow<object>> _flattenedRows = new ObservableCollection<TreeGridRow<object>>();
 
         // Fields for refresh management
-        private readonly SemaphoreSlim _refreshSemaphore = new SemaphoreSlim(1, 1);
-        private CancellationTokenSource _refreshCancellation;
         private bool _isUpdatingFlattenedRows = false;
         private readonly HashSet<TreeGridRow<object>> _visibleRowsSet = new HashSet<TreeGridRow<object>>();
         private readonly Stopwatch _refreshTimer = new Stopwatch();
-        private int _lastRefreshRowCount = 0;
         private readonly object _selectionChangeLock = new object();
         public ICommand ExecuteCustomDescendantFilter { get; private set; }
         // Add these fields to track bound collections
@@ -64,23 +51,16 @@ namespace DaxStudio.Controls
             this.SelectionUnit = DataGridSelectionUnit.FullRow;
             this.HeadersVisibility = DataGridHeadersVisibility.Column;
             this.GridLinesVisibility = DataGridGridLinesVisibility.None;
-            this.AlternatingRowBackground = new SolidColorBrush(Color.FromArgb(25, 0, 0, 0));
-
-            // Enable virtualization for better performance with large datasets
-            //this.EnableRowVirtualization = true;
-            //this.EnableColumnVirtualization = true;
             
             // Use recycling mode for even better performance
-            VirtualizingPanel.SetVirtualizationMode(this, VirtualizationMode.Recycling);
-            VirtualizingPanel.SetScrollUnit(this, ScrollUnit.Item);
+            //VirtualizingPanel.SetVirtualizationMode(this, VirtualizationMode.Recycling);
+            //VirtualizingPanel.SetScrollUnit(this, ScrollUnit.Item);
 
             ExecuteCustomDescendantFilter = new RelayCommand(ExecuteCustomDescendantsFilterAction);
 
             Loaded += OnLoaded;
             Unloaded += OnUnloaded;
         }
-
-        // Dependency Properties
 
         public static readonly DependencyProperty ChildrenBindingPathProperty =
             DependencyProperty.Register(nameof(ChildrenBindingPath), typeof(string), typeof(TreeGrid),
@@ -91,16 +71,6 @@ namespace DaxStudio.Controls
             get => (string)GetValue(ChildrenBindingPathProperty);
             set => SetValue(ChildrenBindingPathProperty, value);
         }
-
-        //public static readonly DependencyProperty IndentWidthProperty =
-        //    DependencyProperty.Register(nameof(IndentWidth), typeof(double), typeof(TreeGrid),
-        //        new PropertyMetadata(20.0));
-
-        //public double IndentWidth
-        //{
-        //    get => (double)GetValue(IndentWidthProperty);
-        //    set => SetValue(IndentWidthProperty, value);
-        //}
 
         public static readonly DependencyProperty RootItemsProperty =
             DependencyProperty.Register(nameof(RootItems), typeof(IEnumerable), typeof(TreeGrid),
@@ -132,7 +102,16 @@ namespace DaxStudio.Controls
             set => SetValue(AddCustomMenusAtBottomProperty, value);
         }
 
-        #region Event Handlers for Dependency Properties
+        // Add these dependency properties for context menu configuration
+        public static readonly DependencyProperty ShowDefaultContextMenuProperty =
+            DependencyProperty.Register(nameof(ShowDefaultContextMenu), typeof(bool), typeof(TreeGrid),
+                new PropertyMetadata(true, OnShowDefaultContextMenuChanged));
+
+        public bool ShowDefaultContextMenu
+        {
+            get => (bool)GetValue(ShowDefaultContextMenuProperty);
+            set => SetValue(ShowDefaultContextMenuProperty, value);
+        }
 
         private static void OnShowDefaultContextMenuChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
@@ -187,9 +166,6 @@ namespace DaxStudio.Controls
             }
         }
 
-        #endregion
-
-        #region Initialization
 
         private void OnLoaded(object sender, RoutedEventArgs e)
         {
@@ -207,9 +183,9 @@ namespace DaxStudio.Controls
                 {
                     Debug.WriteLine($"OnLoaded: Checking column of type {column.GetType().Name}");
                     
-                    if (column is TreeGridTreeColumn treeColumn)
+                    if (column is TreeColumn treeColumn)
                     {
-                        Debug.WriteLine($"OnLoaded: Found TreeGridTreeColumn");
+                        Debug.WriteLine($"OnLoaded: Found TreeColumn");
                         Debug.WriteLine($"OnLoaded: SelectedLineStroke={treeColumn.SelectedLineStroke}");
                         Debug.WriteLine($"OnLoaded: ShowTreeLines={treeColumn.ShowTreeLines}");
                         
@@ -217,7 +193,7 @@ namespace DaxStudio.Controls
                         {
                             Debug.WriteLine($"OnLoaded: SelectedLineStroke color={selectedBrush.Color}");
                             
-                            if (treeColumn.ShowTreeLines && selectedBrush.Color != Colors.Transparent)
+                            if (treeColumn.ShowTreeLines) // && selectedBrush.Color != Colors.Transparent)
                             {
                                 Debug.WriteLine($"OnLoaded: Attaching OnSelectionChanged handler");
                                 SelectionChanged += this.OnSelectionChanged;
@@ -236,12 +212,9 @@ namespace DaxStudio.Controls
             Debug.WriteLine($"OnLoaded: Complete");
         }
 
-        #endregion
-
-        #region Hierarchy Management
-
         private void RebuildHierarchy()
         {
+            
             _itemToRowMap.Clear();
             _rootRows.Clear();
 
@@ -258,7 +231,6 @@ namespace DaxStudio.Controls
             UpdateAncestorsForAllRows(_rootRows);
         }
 
-        // Modify BuildHierarchy to track child collection notifications
         private TreeGridRow<object> BuildHierarchy(object item, int level, TreeGridRow<object> parent)
         {
             if (item == null) return null;
@@ -299,13 +271,12 @@ namespace DaxStudio.Controls
             try
             {
                 var property = item.GetType().GetProperty(ChildrenBindingPath);
-                var childCollection = property?.GetValue(item) as INotifyCollectionChanged;
-                
-                if (childCollection != null && !_childCollectionNotifiers.ContainsKey(item))
+
+                if (property?.GetValue(item) is INotifyCollectionChanged childCollection && !_childCollectionNotifiers.ContainsKey(item))
                 {
                     childCollection.CollectionChanged += OnChildCollectionChanged;
                     _childCollectionNotifiers[item] = childCollection;
-                    
+
                     // Store the parent item as a tag on the event subscription
                     // so we know which item to update when children change
                     childCollection.CollectionChanged += (s, e) => OnChildCollectionChanged(item, e);
@@ -326,7 +297,7 @@ namespace DaxStudio.Controls
             return property?.GetValue(item) as IEnumerable;
         }
 
-        private void UpdateAncestorsForAllRows(List<TreeGridRow<object>> rootRows)
+        private static void UpdateAncestorsForAllRows(List<TreeGridRow<object>> rootRows)
         {
             foreach (var rootRow in rootRows)
             {
@@ -358,13 +329,12 @@ namespace DaxStudio.Controls
             }
         }
 
-        #endregion
 
-        #region Refresh and Selection Management
-
-        // Modified RefreshData with more robust selection handling
         private void RefreshData()
         {
+            _refreshTimer.Reset();
+            _refreshTimer.Start();
+            Debug.WriteLine(">> RefreshData Started");
             if (_rootRows == null || _rootRows.Count == 0 || _isUpdatingFlattenedRows)
                 return;
 
@@ -392,10 +362,12 @@ namespace DaxStudio.Controls
                     BuildVisibleRowsListOptimized(row, newFlattenedRows);
                 }
 
-                Debug.WriteLine($"RefreshData: Collection rebuilt with {newFlattenedRows.Count} rows");
+                Debug.WriteLine($"RefreshData: Collection rebuilt with {newFlattenedRows.Count} rows ({_refreshTimer.ElapsedMilliseconds}ms)");
 
                 // Update collection efficiently with minimum changes
                 SynchronizeCollections(_flattenedRows, newFlattenedRows);
+                Debug.WriteLine($"RefreshData collections synchronized ({_refreshTimer.ElapsedMilliseconds}ms)");
+                Items.Refresh();
                 
                 // Restore selection immediately
                 if (selectedRowBeforeRefresh != null)
@@ -414,6 +386,8 @@ namespace DaxStudio.Controls
             {
                 // Ensure flag is always properly reset to its original state
                 _isUpdatingFlattenedRows = wasUpdatingRows;
+                Debug.WriteLine($">> RefreshData Stopped {_refreshTimer.ElapsedMilliseconds}ms");
+                _refreshTimer.Stop();
             }
         }
 
@@ -504,7 +478,7 @@ namespace DaxStudio.Controls
         }
 
         // Add this new helper method for efficient collection synchronization
-        private void SynchronizeCollections(ObservableCollection<TreeGridRow<object>> target, 
+        private static void SynchronizeCollections(ObservableCollection<TreeGridRow<object>> target, 
                                    List<TreeGridRow<object>> source)
         {
             // Using a direct synchronization approach to minimize UI updates
@@ -539,7 +513,7 @@ namespace DaxStudio.Controls
             }
         }
 
-        // Improved RestoreSelectionAfterRefresh for more reliable selection restoration
+
         private void RestoreSelectionAfterRefresh(TreeGridRow<object> originalSelection)
         {
             Debug.WriteLine($"RestoreSelectionAfterRefresh: Restoring selection for row at level {originalSelection.Level}");
@@ -611,51 +585,48 @@ namespace DaxStudio.Controls
             }
         }
 
-        #endregion
-
-        #region Selection Event Handling
 
         private void OnSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             Debug.WriteLine($"OnSelectionChanged: Entry - Added={e.AddedItems.Count}, Removed={e.RemovedItems.Count}");
-    Debug.WriteLine($"OnSelectionChanged: _isUpdatingFlattenedRows={_isUpdatingFlattenedRows}");
+            Debug.WriteLine($"OnSelectionChanged: _isUpdatingFlattenedRows={_isUpdatingFlattenedRows}");
     
-    // Skip if called during collection update
-    if (_isUpdatingFlattenedRows)
-    {
-        Debug.WriteLine("OnSelectionChanged: Skipping during collection update");
-        return;
-    }
-    
-    // Use a lock to prevent concurrent execution
-    lock (_selectionChangeLock)
-    {
-        try
-        {
-            // Update line selection visuals
-            foreach (TreeGridRow<object> row in e.RemovedItems)
+            // Skip if called during collection update
+            if (_isUpdatingFlattenedRows)
             {
-                ClearSelectedLineRecursive(row);
+                Debug.WriteLine("OnSelectionChanged: Skipping during collection update");
+                return;
             }
+    
+            // Use a lock to prevent concurrent execution
+            lock (_selectionChangeLock)
+            {
+                try
+                {
+                    // Update line selection visuals
+                    foreach (TreeGridRow<object> row in e.RemovedItems)
+                    {
+                        ClearSelectedLineRecursive(row);
+                    }
             
-            foreach (TreeGridRow<object> row in e.AddedItems)
-            {
-                if (!row.IsCollapsing) // Skip if collapsing to avoid visual artifacts
-                {
-                    SetSelectedLineRecursive(row, row.Level, true);
+                    foreach (TreeGridRow<object> row in e.AddedItems)
+                    {
+                        if (!row.IsCollapsing) // Skip if collapsing to avoid visual artifacts
+                        {
+                            SetSelectedLineRecursive(row, row.Level, true);
+                        }
+                        else
+                        {
+                            row.IsCollapsing = false; // Reset flag
+                        }
+                    }
                 }
-                else
+                catch (Exception ex)
                 {
-                    row.IsCollapsing = false; // Reset flag
+                    Debug.WriteLine($"Error in OnSelectionChanged: {ex.Message}");
                 }
             }
-        }
-        catch (Exception ex)
-        {
-            Debug.WriteLine($"Error in OnSelectionChanged: {ex.Message}");
-        }
-    }
-    Debug.WriteLine($"OnSelectionChanged: Exit");
+            Debug.WriteLine($"OnSelectionChanged: Exit");
         }
 
         private static void ClearSelectedLineRecursive(TreeGridRow<object> row)
@@ -695,18 +666,13 @@ namespace DaxStudio.Controls
             }
         }
 
-        #endregion
-
-        #region Public Operations
 
         public void ToggleItem(object item)
         {
             if (_itemToRowMap.TryGetValue(item, out var row))
             {
-                if (row.IsExpanded)
-                {
-                    row.IsCollapsing = true;
-                }
+
+                row.IsCollapsing = row.IsExpanded;
 
                 row.IsExpanded = !row.IsExpanded;
                 RefreshData();
@@ -819,10 +785,6 @@ namespace DaxStudio.Controls
                 row.IsExpanded = false;
             }
         }
-
-        #endregion
-
-        #region Context Menu
 
         private void SetupDefaultContextMenu()
         {
@@ -939,10 +901,6 @@ namespace DaxStudio.Controls
             }
         }
 
-        #endregion
-
-        #region Default Template
-
         private void CreateDefaultExpanderColumn()
         {
             var expanderColumn = new DataGridTemplateColumn
@@ -991,9 +949,7 @@ namespace DaxStudio.Controls
             e.Handled = true;
         }
 
-        #endregion
-
-        #region Keyboard Handling
+      
 
         protected override void OnPreviewKeyUp(KeyEventArgs e)
         {
@@ -1044,10 +1000,7 @@ namespace DaxStudio.Controls
             }
         }
 
-        #endregion
 
-
-        // Add this method to handle collection change events
         private void OnRootItemsCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
             Debug.WriteLine($"Root collection changed: {e.Action}");
@@ -1095,7 +1048,7 @@ namespace DaxStudio.Controls
                     break;
             }
         }
-        // Add this method to remove an item and its descendants
+
         private void RemoveItemAndDescendants(object item)
         {
             if (_itemToRowMap.TryGetValue(item, out var row))
@@ -1118,7 +1071,7 @@ namespace DaxStudio.Controls
             }
         }
 
-        // Add this method overload for our custom event handler
+
         private void OnChildCollectionChanged(object parentItem, NotifyCollectionChangedEventArgs e)
         {
             // For UI thread safety
@@ -1154,9 +1107,6 @@ namespace DaxStudio.Controls
             }
         }
 
-        #region Cleanup
-
-        // Add this cleanup method to remove event handlers
         public void Cleanup()
         {
             // Unsubscribe from root collection changes
@@ -1180,7 +1130,6 @@ namespace DaxStudio.Controls
             Cleanup();
         }
 
-        #endregion
 
         public void CustomTreeFilter(Func<object, object, bool> filterPredicate, object parameter)
         {
@@ -1189,11 +1138,9 @@ namespace DaxStudio.Controls
 
             using (new OverrideCursor(Cursors.Wait))
             {
-
                 // Store the currently selected item before filtering
-                var selectedRowBeforeFilter = SelectedItem as TreeGridRow<object>;
 
-                if (selectedRowBeforeFilter == null)
+                if (!(SelectedItem is TreeGridRow<object> selectedRowBeforeFilter))
                     return; // Nothing selected to filter against
 
                 // Apply filter to all rows (starting from the selected node)
@@ -1215,7 +1162,7 @@ namespace DaxStudio.Controls
         }
 
         // Revised filter application method
-        private bool ApplyCustomFilterRecursively(object selectedItem, TreeGridRow<object> currentItem, Func<object, object, bool> filterPredicate)
+        private static bool ApplyCustomFilterRecursively(object selectedItem, TreeGridRow<object> currentItem, Func<object, object, bool> filterPredicate)
         {
             // Check if the current item should be visible based on the filter
             bool currentItemVisible = filterPredicate(selectedItem, currentItem);

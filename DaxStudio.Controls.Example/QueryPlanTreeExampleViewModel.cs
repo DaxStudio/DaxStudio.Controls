@@ -6,16 +6,15 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Runtime.Serialization;
-using System.Windows.Input;
 
-namespace DaxStudio.UI.ViewModels
+namespace DaxStudio.Controls.Example
 {
     public class QueryPlanTreeExampleViewModel : PropertyChangedBase
     {
         public QueryPlanTreeExampleViewModel()
         {
             var filePath = @"..\..\..\data\QueryPlan.json";
-            filePath = @"c:\temp\QueryPlan.json";
+            //filePath = @"c:\temp\QueryPlan.json";
             if (File.Exists(filePath))
             {
                 try

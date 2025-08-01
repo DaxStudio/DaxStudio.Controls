@@ -44,7 +44,7 @@ Currently this libarary contains the following main components:
 |---|---|---|---|
 | ExecuteCustomDescendantFilter | ICommand | - | Command that executes the custom filter functionality |
 
-### TreeGridTreeColumn Properties
+### TreeColumn Properties
 
 | Property            | Type              | Default                | Description                                                        |
 |---------------------|-------------------|------------------------|--------------------------------------------------------------------|
