@@ -62,13 +62,13 @@
         </StackPanel>  
   
         <!-- Tree Grid -->  
-        <ctrl:TreeGrid x:Name="HierarchicalGrid"   
+        <ctrl:TreeGrid x:Name="TreeGrid"   
                        EnableRowVirtualization="True"  
                        Grid.Row="1"  
                        AlternatingRowBackground="#eeeeee"  
                        RootItems="{Binding RootItems}"  
                        ChildrenBindingPath="Children"  
-                       Sorting="HierarchicalGrid_Sorting"
+                       Sorting="TreeGrid_Sorting"
                        ExpandOnLoad="True"  
                        CustomDescendantFilter="{Binding FindDescendantsWithHigherRecordCountsFunc}"  
                        ShowDefaultContextMenu="True"
@@ -105,7 +105,7 @@
                 </DataGridTextColumn>  
                   
                 <!-- Tree Column using custom control -->  
-                <ctrl:TreeGridTreeColumn Header="Operation"   
+                <ctrl:TreeColumn Header="Operation"   
                     Width="*"  
                     TextPath="Data.Operation"  
                     IndentWidth="16"  
@@ -113,7 +113,7 @@
                     LineStroke="#AAAAAA"  
                     SelectedLineStroke="Red"  
                     LineThickness="0.8">  
-                </ctrl:TreeGridTreeColumn>  
+                </ctrl:TreeColumn>  
   
             </ctrl:TreeGrid.Columns>  
         </ctrl:TreeGrid>  

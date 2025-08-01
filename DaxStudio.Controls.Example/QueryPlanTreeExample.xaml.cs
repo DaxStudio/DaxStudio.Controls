@@ -17,23 +17,23 @@ namespace DaxStudio.Controls.Example
 
         private void ExpandAll_Click(object sender, RoutedEventArgs e)
         {
-            HierarchicalGrid.ExpandAll();
+            TreeGrid.ExpandAll();
         }
 
         private void CollapseAll_Click(object sender, RoutedEventArgs e)
         {
-            HierarchicalGrid.CollapseAll();
+            TreeGrid.CollapseAll();
         }
 
         private void Expander_Click(object sender, RoutedEventArgs e)
         {
             if (sender is ToggleButton toggleButton && toggleButton.DataContext is TreeGridRow<object> row)
             {
-                HierarchicalGrid.ToggleItem(row.Data);
+                TreeGrid.ToggleItem(row.Data);
             }
         }
 
-        private void HierarchicalGrid_Sorting(object sender, DataGridSortingEventArgs e)
+        private void TreeGrid_Sorting(object sender, DataGridSortingEventArgs e)
         {
             
         }

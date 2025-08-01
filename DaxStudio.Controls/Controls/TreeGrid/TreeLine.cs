@@ -11,16 +11,16 @@ using System.Windows.Threading;
 
 namespace DaxStudio.Controls
 {
-    public class TreeLineControl : Control
+    public class TreeLine : Control
     {
-        static TreeLineControl()
+        static TreeLine()
         {
-            DefaultStyleKeyProperty.OverrideMetadata(typeof(TreeLineControl), 
-                new FrameworkPropertyMetadata(typeof(TreeLineControl)));
+            DefaultStyleKeyProperty.OverrideMetadata(typeof(TreeLine), 
+                new FrameworkPropertyMetadata(typeof(TreeLine)));
         }
 
         public static readonly DependencyProperty LevelProperty =
-            DependencyProperty.Register(nameof(Level), typeof(int), typeof(TreeLineControl),
+            DependencyProperty.Register(nameof(Level), typeof(int), typeof(TreeLine),
                 new PropertyMetadata(0, OnLevelChanged));
 
         public int Level
@@ -30,7 +30,7 @@ namespace DaxStudio.Controls
         }
 
         public static readonly DependencyProperty IndentWidthProperty =
-            DependencyProperty.Register(nameof(IndentWidth), typeof(double), typeof(TreeLineControl),
+            DependencyProperty.Register(nameof(IndentWidth), typeof(double), typeof(TreeLine),
                 new PropertyMetadata(20.0, OnIndentWidthChanged));
 
         public double IndentWidth
@@ -40,7 +40,7 @@ namespace DaxStudio.Controls
         }
 
         public static readonly DependencyProperty IsLastChildProperty =
-            DependencyProperty.Register(nameof(IsLastChild), typeof(bool), typeof(TreeLineControl),
+            DependencyProperty.Register(nameof(IsLastChild), typeof(bool), typeof(TreeLine),
                 new PropertyMetadata(false, OnIsLastChildChanged));
 
         public bool IsLastChild
@@ -50,7 +50,7 @@ namespace DaxStudio.Controls
         }
 
         public static readonly DependencyProperty HasChildrenProperty =
-            DependencyProperty.Register(nameof(HasChildren), typeof(bool), typeof(TreeLineControl),
+            DependencyProperty.Register(nameof(HasChildren), typeof(bool), typeof(TreeLine),
                 new PropertyMetadata(false, OnHasChildrenChanged));
 
         public bool HasChildren
@@ -60,7 +60,7 @@ namespace DaxStudio.Controls
         }
 
         public static readonly DependencyProperty AncestorLevelsProperty =
-            DependencyProperty.Register(nameof(AncestorLevels), typeof(IEnumerable<bool>), typeof(TreeLineControl),
+            DependencyProperty.Register(nameof(AncestorLevels), typeof(IEnumerable<bool>), typeof(TreeLine),
                 new PropertyMetadata(null, OnAncestorLevelsChanged));
 
         public IEnumerable<bool> AncestorLevels
@@ -70,7 +70,7 @@ namespace DaxStudio.Controls
         }
 
         public static readonly DependencyProperty SelectedLineLevelsProperty =
-            DependencyProperty.Register(nameof(SelectedLineLevels), typeof(IEnumerable<bool>), typeof(TreeLineControl),
+            DependencyProperty.Register(nameof(SelectedLineLevels), typeof(IEnumerable<bool>), typeof(TreeLine),
                 new PropertyMetadata(null, OnSelectedLineLevelsChanged));
 
         public IEnumerable<bool> SelectedLineLevels
@@ -80,7 +80,7 @@ namespace DaxStudio.Controls
         }
 
         public static readonly DependencyProperty LineStrokeProperty =
-            DependencyProperty.Register(nameof(LineStroke), typeof(Brush), typeof(TreeLineControl),
+            DependencyProperty.Register(nameof(LineStroke), typeof(Brush), typeof(TreeLine),
                 new PropertyMetadata(new SolidColorBrush(Colors.Gray), OnLineStrokeChanged));
 
         public Brush LineStroke
@@ -90,7 +90,7 @@ namespace DaxStudio.Controls
         }
 
         public static readonly DependencyProperty LineThicknessProperty =
-            DependencyProperty.Register(nameof(LineThickness), typeof(double), typeof(TreeLineControl),
+            DependencyProperty.Register(nameof(LineThickness), typeof(double), typeof(TreeLine),
                 new PropertyMetadata(1.0, OnLineThicknessChanged));
 
         public double LineThickness
@@ -100,7 +100,7 @@ namespace DaxStudio.Controls
         }
 
         public static readonly DependencyProperty SelectedLineStrokeProperty =
-            DependencyProperty.Register(nameof(SelectedLineStroke), typeof(Brush), typeof(TreeLineControl),
+            DependencyProperty.Register(nameof(SelectedLineStroke), typeof(Brush), typeof(TreeLine),
                 new PropertyMetadata(Brushes.Red, OnSelectedLineStrokeChanged));
 
         public Brush SelectedLineStroke
@@ -126,32 +126,32 @@ namespace DaxStudio.Controls
 
         private static void OnLevelChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            ((TreeLineControl)d).ScheduleInvalidation();
+            ((TreeLine)d).ScheduleInvalidation();
         }
 
         private static void OnIndentWidthChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            ((TreeLineControl)d).ScheduleInvalidation();
+            ((TreeLine)d).ScheduleInvalidation();
         }
 
         private static void OnIsLastChildChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            ((TreeLineControl)d).ScheduleInvalidation();
+            ((TreeLine)d).ScheduleInvalidation();
         }
 
         private static void OnHasChildrenChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            ((TreeLineControl)d).ScheduleInvalidation();
+            ((TreeLine)d).ScheduleInvalidation();
         }
 
         private static void OnAncestorLevelsChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            ((TreeLineControl)d).ScheduleInvalidation();
+            ((TreeLine)d).ScheduleInvalidation();
         }
 
         private static void OnSelectedLineLevelsChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            var control = (TreeLineControl)d;
+            var control = (TreeLine)d;
 
             // Unsubscribe from old collection
             if (e.OldValue is INotifyCollectionChanged oldCollection)
@@ -166,17 +166,17 @@ namespace DaxStudio.Controls
 
         private static void OnLineStrokeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            ((TreeLineControl)d).ScheduleInvalidation();
+            ((TreeLine)d).ScheduleInvalidation();
         }
 
         private static void OnLineThicknessChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            ((TreeLineControl)d).ScheduleInvalidation();
+            ((TreeLine)d).ScheduleInvalidation();
         }
 
         private static void OnSelectedLineStrokeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            ((TreeLineControl)d).ScheduleInvalidation();
+            ((TreeLine)d).ScheduleInvalidation();
         }
 
         private void SelectedLineLevels_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)

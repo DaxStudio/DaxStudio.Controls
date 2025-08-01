@@ -46,18 +46,21 @@ Currently this libarary contains the following main components:
 
 ### TreeGridTreeColumn Properties
 
-| Property | Type | Default | Description |
-|---|---|---|---|
-| ExpanderTemplate | ControlTemplate | null | Custom template for the expand/collapse button |
-| Foreground | Brush | SystemColors.ControlText | Text color for the tree cell content | 
-| Icon | ImageSource | null | Icon to display in the tree cell |
-| IconTemplate | DataTemplate | null | Custom template for displaying icon content |
-| IndentWidth | double | 16.0 | The width in pixels for each level of indentation |
-| LineStroke | Brush | Gray (#AAAAAA) | Sets the color of the brush used to draw the tree lines |
-| LineThickness | double | 1.0 | Sets the thickness of the tree lines |
-| SelectedLineStroke | Brush | Gray (#AAAAAA) | Sets the color for the tree line to the children of the currently selected row |
-| ShowExpander | bool | true | Controls the visibility of the expander control in the tree |
-| ShowTreeLines | bool | true | Controls whether to display the tree lines |
-| TextPath | string | null | Path to the property for text content (e.g., "Data.Name") |
-| Text | string | null | Static text content for the tree cell |
-| TextTemplate | DataTemplate | null | Custom template for displaying text content |
+| Property            | Type              | Default                | Description                                                        |
+|---------------------|-------------------|------------------------|--------------------------------------------------------------------|
+| ExpanderTemplate    | ControlTemplate   | null                   | Custom template for the expand/collapse button                     |
+| ExpanderStyle       | Style             | null                   | Custom style for the expander toggle button                        |
+| Foreground          | Brush             | SystemColors.ControlText| Text color for the tree cell content                               |
+| Icon                | ImageSource       | null                   | Icon to display in the tree cell                                   |
+| IconTemplate        | DataTemplate      | null                   | Custom template for displaying icon content                        |
+| IndentWidth         | double            | 16.0                   | The width in pixels for each level of indentation                  |
+| LineStroke          | Brush             | Gray (#AAAAAA)         | Sets the color of the brush used to draw the tree lines            |
+| LineThickness       | double            | 1.0                    | Sets the thickness of the tree lines                               |
+| SelectedLineStroke  | Brush             | Transparent            | Sets the color for the tree line to the children of the selected row|
+| ShowExpander        | bool              | true                   | Controls the visibility of the expander control in the tree         |
+| ShowTreeLines       | bool              | true                   | Controls whether to display the tree lines                         |
+| TextPath            | string            | null                   | Path to the property for text content (e.g., "Data.Name")          |
+| Text                | string            | null                   | Static text content for the tree cell                              |
+| TextForeground      | Brush             | SystemColors.ControlText| Foreground brush for the text                                      |
+| TextTemplate        | DataTemplate      | null                   | Custom template for displaying text content                        |
+| TreeLineStyle       | Style             | null                   | Custom style for the tree lines                                    |
