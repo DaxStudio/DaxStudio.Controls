@@ -12,7 +12,6 @@ using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Input;
-using System.Threading;
 using System.Windows.Threading;
 using System.Windows.Media;
 
@@ -29,8 +28,15 @@ namespace DaxStudio.Controls
         // Fields for refresh management
         private bool _isUpdatingFlattenedRows = false;
         private readonly HashSet<TreeGridRow<object>> _visibleRowsSet = new HashSet<TreeGridRow<object>>();
-        private readonly Stopwatch _refreshTimer = new Stopwatch();
+        private readonly Stopwatch _refreshStopwatch = new Stopwatch();
         private readonly object _selectionChangeLock = new object();
+        
+        // Fields for thread-safe refresh management
+        private readonly object _refreshLock = new object();
+        private volatile bool _refreshPending = false;
+        private DispatcherTimer _refreshTimer;
+        private const int REFRESH_DEBOUNCE_MS = 50; // Debounce delay
+        
         public ICommand ExecuteCustomDescendantFilter { get; private set; }
         // Add these fields to track bound collections
         private INotifyCollectionChanged _rootItemsCollectionNotifier;
@@ -51,16 +57,17 @@ namespace DaxStudio.Controls
             this.SelectionUnit = DataGridSelectionUnit.FullRow;
             this.HeadersVisibility = DataGridHeadersVisibility.Column;
             this.GridLinesVisibility = DataGridGridLinesVisibility.None;
-            
+            this.IsReadOnly = true;
             // Use recycling mode for even better performance
-            //VirtualizingPanel.SetVirtualizationMode(this, VirtualizationMode.Recycling);
-            //VirtualizingPanel.SetScrollUnit(this, ScrollUnit.Item);
+            VirtualizingPanel.SetVirtualizationMode(this, VirtualizationMode.Recycling);
+            VirtualizingPanel.SetScrollUnit(this, ScrollUnit.Item);
 
             ExecuteCustomDescendantFilter = new RelayCommand(ExecuteCustomDescendantsFilterAction);
 
             Loaded += OnLoaded;
             Unloaded += OnUnloaded;
         }
+
 
         public static readonly DependencyProperty ChildrenBindingPathProperty =
             DependencyProperty.Register(nameof(ChildrenBindingPath), typeof(string), typeof(TreeGrid),
@@ -165,7 +172,6 @@ namespace DaxStudio.Controls
                 grid.RefreshData();
             }
         }
-
 
         private void OnLoaded(object sender, RoutedEventArgs e)
         {
@@ -329,65 +335,134 @@ namespace DaxStudio.Controls
             }
         }
 
-
         private void RefreshData()
         {
-            _refreshTimer.Reset();
-            _refreshTimer.Start();
-            Debug.WriteLine(">> RefreshData Started");
-            if (_rootRows == null || _rootRows.Count == 0 || _isUpdatingFlattenedRows)
-                return;
+            // Prevent excessive calls with debouncing
+            if (_refreshTimer == null)
+            {
+                _refreshTimer = new DispatcherTimer
+                {
+                    Interval = TimeSpan.FromMilliseconds(REFRESH_DEBOUNCE_MS)
+                };
+                _refreshTimer.Tick += (s, e) =>
+                {
+                    _refreshTimer.Stop();
+                    DoRefreshData();
+                };
+            }
 
-            // Store the currently selected item before refresh
-            var selectedRowBeforeRefresh = SelectedItem as TreeGridRow<object>;
-            
-            // Store the keyboard focus state
-            var focusedElement = Keyboard.FocusedElement;
-            var hasFocus = this.IsKeyboardFocusWithin;
-            
-            // Use a separate flag for the refresh operation
-            bool wasUpdatingRows = _isUpdatingFlattenedRows;
-            _isUpdatingFlattenedRows = true;
-            
+            if (!_refreshTimer.IsEnabled)
+            {
+                _refreshTimer.Start();
+            }
+            else
+            {
+                // Reset the timer to debounce rapid calls
+                _refreshTimer.Stop();
+                _refreshTimer.Start();
+            }
+        }
+
+        private void DoRefreshData()
+        {
+            // Ensure we're on the UI thread
+            //if (!Dispatcher.CheckAccess())
+            //{
+            //    Dispatcher.BeginInvoke(new Action(DoRefreshData), DispatcherPriority.Normal);
+            //    return;
+            //}
+
+            // Thread-safe check for pending refresh
+            lock (_refreshLock)
+            {
+                if (_refreshPending)
+                {
+                    Debug.WriteLine("RefreshData: Skipping - refresh already pending");
+                    return;
+                }
+                _refreshPending = true;
+            }
+
             try
             {
-                Debug.WriteLine($"RefreshData: Starting with selected item at level {selectedRowBeforeRefresh?.Level ?? -1}");
-
-                // Build the new flattened structure
-                var newFlattenedRows = new List<TreeGridRow<object>>();
-                _visibleRowsSet.Clear();
+                _refreshStopwatch.Reset();
+                _refreshStopwatch.Start();
+                Debug.WriteLine(">> RefreshData Started");
                 
-                foreach (var row in _rootRows)
+                if (_rootRows == null || _rootRows.Count == 0 || _isUpdatingFlattenedRows)
                 {
-                    BuildVisibleRowsListOptimized(row, newFlattenedRows);
+                    Debug.WriteLine("RefreshData: Early exit - no data or updating");
+                    return;
                 }
 
-                Debug.WriteLine($"RefreshData: Collection rebuilt with {newFlattenedRows.Count} rows ({_refreshTimer.ElapsedMilliseconds}ms)");
-
-                // Update collection efficiently with minimum changes
-                SynchronizeCollections(_flattenedRows, newFlattenedRows);
-                Debug.WriteLine($"RefreshData collections synchronized ({_refreshTimer.ElapsedMilliseconds}ms)");
-                Items.Refresh();
+                // Store the currently selected item before refresh
+                var selectedRowBeforeRefresh = SelectedItem as TreeGridRow<object>;
                 
-                // Restore selection immediately
-                if (selectedRowBeforeRefresh != null)
+                // Store the keyboard focus state
+                var focusedElement = Keyboard.FocusedElement;
+                var hasFocus = this.IsKeyboardFocusWithin;
+                
+                // Use a separate flag for the refresh operation
+                bool wasUpdatingRows = _isUpdatingFlattenedRows;
+                _isUpdatingFlattenedRows = true;
+                
+                try
                 {
-                    RestoreSelectionAfterRefresh(selectedRowBeforeRefresh);
+                    Debug.WriteLine($"RefreshData: Starting with selected item at level {selectedRowBeforeRefresh?.Level ?? -1}");
+
+                    // Build the new flattened structure in a thread-safe manner
+                    var newFlattenedRows = new List<TreeGridRow<object>>();
+                    _visibleRowsSet.Clear();
+                    
+                    // Create a snapshot of root rows to avoid collection modification issues
+                    List<TreeGridRow<object>> rootRowsSnapshot;
+                    lock (_refreshLock)
+                    {
+                        rootRowsSnapshot = new List<TreeGridRow<object>>(_rootRows);
+                    }
+                    
+                    foreach (var row in rootRowsSnapshot)
+                    {
+                        BuildVisibleRowsListOptimized(row, newFlattenedRows);
+                    }
+
+                    Debug.WriteLine($"RefreshData: Collection rebuilt with {newFlattenedRows.Count} rows ({_refreshStopwatch.ElapsedMilliseconds}ms)");
+
+                    // Update collection efficiently with minimum changes
+                    SynchronizeCollections(_flattenedRows, newFlattenedRows);
+                    Debug.WriteLine($"RefreshData collections synchronized ({_refreshStopwatch.ElapsedMilliseconds}ms)");
+                    
+                    // Refresh items on UI thread
+                    Items.Refresh();
+                    
+                    // Restore selection immediately
+                    if (selectedRowBeforeRefresh != null)
+                    {
+                        RestoreSelectionAfterRefresh(selectedRowBeforeRefresh);
+                    }
+                    
+                    // Restore keyboard focus
+                    RestoreKeyboardFocus(hasFocus, focusedElement);
                 }
-                
-                // Restore keyboard focus
-                RestoreKeyboardFocus(hasFocus, focusedElement);
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"Error in RefreshData: {ex.Message}");
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"Error in RefreshData: {ex.Message}");
+                }
+                finally
+                {
+                    // Ensure flag is always properly reset to its original state
+                    _isUpdatingFlattenedRows = wasUpdatingRows;
+                    Debug.WriteLine($">> RefreshData Stopped {_refreshStopwatch.ElapsedMilliseconds}ms");
+                    _refreshStopwatch.Stop();
+                }
             }
             finally
             {
-                // Ensure flag is always properly reset to its original state
-                _isUpdatingFlattenedRows = wasUpdatingRows;
-                Debug.WriteLine($">> RefreshData Stopped {_refreshTimer.ElapsedMilliseconds}ms");
-                _refreshTimer.Stop();
+                // Always reset the pending flag
+                lock (_refreshLock)
+                {
+                    _refreshPending = false;
+                }
             }
         }
 
@@ -513,7 +588,6 @@ namespace DaxStudio.Controls
             }
         }
 
-
         private void RestoreSelectionAfterRefresh(TreeGridRow<object> originalSelection)
         {
             Debug.WriteLine($"RestoreSelectionAfterRefresh: Restoring selection for row at level {originalSelection.Level}");
@@ -585,6 +659,32 @@ namespace DaxStudio.Controls
             }
         }
 
+        protected override void OnSelectionChanged(SelectionChangedEventArgs e)
+        {
+            if (e.AddedItems.Count > 0 && e.AddedItems[0] != DependencyProperty.UnsetValue)
+            {
+                base.OnSelectionChanged(e);
+            }
+        }
+
+        protected override void OnContextMenuOpening(ContextMenuEventArgs e)
+        {
+            try
+            {
+                if (e.OriginalSource != null)
+                    base.OnContextMenuOpening(e);
+                else
+                {
+                    e.Handled = true; // Prevent context menu from opening if OriginalSource is null
+                    Debug.WriteLine("OnContextMenuOpening: Prevented opening due to null OriginalSource");
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"ContextMenu crash: {ex.Message}");
+                //e.Handled = true; // Prevent further propagation
+            }
+        }
 
         private void OnSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -666,14 +766,11 @@ namespace DaxStudio.Controls
             }
         }
 
-
         public void ToggleItem(object item)
         {
             if (_itemToRowMap.TryGetValue(item, out var row))
             {
-
                 row.IsCollapsing = row.IsExpanded;
-
                 row.IsExpanded = !row.IsExpanded;
                 RefreshData();
 
@@ -849,7 +946,7 @@ namespace DaxStudio.Controls
 
                 ContextMenu.Opened += (s, e) =>
                 {
-                    var selectedRow = SelectedItem as TreeGridRow<object>;
+                    var selectedRow = SelectedValue as TreeGridRow<object>;
 
                     // Find our menu items by tag
                     foreach (var item in ContextMenu.Items)
@@ -949,8 +1046,6 @@ namespace DaxStudio.Controls
             e.Handled = true;
         }
 
-      
-
         protected override void OnPreviewKeyUp(KeyEventArgs e)
         {
             base.OnPreviewKeyUp(e);
@@ -1000,53 +1095,56 @@ namespace DaxStudio.Controls
             }
         }
 
-
         private void OnRootItemsCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
             Debug.WriteLine($"Root collection changed: {e.Action}");
 
-            // For UI thread safety
+            // For UI thread safety - use BeginInvoke for better responsiveness
             if (!Dispatcher.CheckAccess())
             {
-                Dispatcher.Invoke(() => OnRootItemsCollectionChanged(sender, e));
+                Dispatcher.BeginInvoke(DispatcherPriority.Normal, new Action(() => OnRootItemsCollectionChanged(sender, e)));
                 return;
             }
 
-            switch (e.Action)
+            // Prevent concurrent modifications
+            lock (_refreshLock)
             {
-                case NotifyCollectionChangedAction.Add:
-                    // Could optimize by only adding new items, but rebuild is safer
-                    RebuildHierarchy();
-                    RefreshData();
-                    break;
+                switch (e.Action)
+                {
+                    case NotifyCollectionChangedAction.Add:
+                        // Could optimize by only adding new items, but rebuild is safer
+                        RebuildHierarchy();
+                        break;
 
-                case NotifyCollectionChangedAction.Remove:
-                    // Remove items from internal structures
-                    if (e.OldItems != null)
-                    {
-                        foreach (var item in e.OldItems)
+                    case NotifyCollectionChangedAction.Remove:
+                        // Remove items from internal structures
+                        if (e.OldItems != null)
                         {
-                            RemoveItemAndDescendants(item);
+                            foreach (var item in e.OldItems)
+                            {
+                                RemoveItemAndDescendants(item);
+                            }
                         }
-                    }
-                    RebuildHierarchy();
-                    RefreshData();
-                    break;
+                        RebuildHierarchy();
+                        break;
 
-                case NotifyCollectionChangedAction.Replace:
-                    // Could optimize, but rebuild is safer for complex hierarchies
-                    RebuildHierarchy();
-                    RefreshData();
-                    break;
+                    case NotifyCollectionChangedAction.Replace:
+                        // Could optimize, but rebuild is safer for complex hierarchies
+                        RebuildHierarchy();
+                        break;
 
-                case NotifyCollectionChangedAction.Reset:
-                    // Collection was cleared or drastically changed
-                    _itemToRowMap.Clear();
-                    _rootRows.Clear();
-                    _flattenedRows.Clear();
-                    _visibleRowsSet.Clear();
-                    break;
+                    case NotifyCollectionChangedAction.Reset:
+                        // Collection was cleared or drastically changed
+                        _itemToRowMap.Clear();
+                        _rootRows.Clear();
+                        _flattenedRows.Clear();
+                        _visibleRowsSet.Clear();
+                        break;
+                }
             }
+
+            // Use debounced refresh
+            RefreshData();
         }
 
         private void RemoveItemAndDescendants(object item)
@@ -1056,7 +1154,7 @@ namespace DaxStudio.Controls
                 // Recursively unsubscribe from children collections
                 foreach (var child in row.Children)
                 {
-                    RemoveItemAndDescendants(child);
+                    RemoveItemAndDescendants(child.Data);
                 }
 
                 // Unsubscribe from any child collection change notifications
@@ -1071,44 +1169,53 @@ namespace DaxStudio.Controls
             }
         }
 
-
         private void OnChildCollectionChanged(object parentItem, NotifyCollectionChangedEventArgs e)
         {
             // For UI thread safety
             if (!Dispatcher.CheckAccess())
             {
-                Dispatcher.Invoke(() => OnChildCollectionChanged(parentItem, e));
+                Dispatcher.BeginInvoke(DispatcherPriority.Normal ,new Action(() => OnChildCollectionChanged(parentItem, e)));
                 return;
             }
 
-            if (_itemToRowMap.TryGetValue(parentItem, out var parentRow))
+            lock (_refreshLock)
             {
-                // Clear existing children
-                foreach (var child in parentRow.Children.ToList())
+                if (_itemToRowMap.TryGetValue(parentItem, out var parentRow))
                 {
-                    RemoveItemAndDescendants(child);
-                }
-
-                // Rebuild just this branch
-                var children = GetChildren(parentItem);
-                if (children != null)
-                {
-                    foreach (var child in children)
+                    // Clear existing children
+                    foreach (var child in parentRow.Children.ToList())
                     {
-                        BuildHierarchy(child, parentRow.Level + 1, parentRow);
+                        RemoveItemAndDescendants(child.Data);
                     }
+
+                    // Rebuild just this branch
+                    var children = GetChildren(parentItem);
+                    if (children != null)
+                    {
+                        foreach (var child in children)
+                        {
+                            BuildHierarchy(child, parentRow.Level + 1, parentRow);
+                        }
+                    }
+
+                    // Update ancestors
+                    UpdateAncestorsRecursive(parentRow);
                 }
-
-                // Update ancestors
-                UpdateAncestorsRecursive(parentRow);
-
-                // Refresh the UI
-                RefreshData();
             }
+
+            // Use debounced refresh
+            RefreshData();
         }
 
         public void Cleanup()
         {
+            // Stop and dispose refresh timer
+            if (_refreshTimer != null)
+            {
+                _refreshTimer.Stop();
+                _refreshTimer = null;
+            }
+
             // Unsubscribe from root collection changes
             if (_rootItemsCollectionNotifier != null)
             {
@@ -1130,7 +1237,6 @@ namespace DaxStudio.Controls
             Cleanup();
         }
 
-
         public void CustomTreeFilter(Func<object, object, bool> filterPredicate, object parameter)
         {
             if (filterPredicate == null)
@@ -1139,14 +1245,11 @@ namespace DaxStudio.Controls
             using (new OverrideCursor(Cursors.Wait))
             {
                 // Store the currently selected item before filtering
-
                 if (!(SelectedItem is TreeGridRow<object> selectedRowBeforeFilter))
                     return; // Nothing selected to filter against
 
                 // Apply filter to all rows (starting from the selected node)
                 ApplyCustomFilterRecursively(parameter, selectedRowBeforeFilter, filterPredicate);
-
-                    
 
                 // Rebuild display to reflect filter changes
                 RefreshData();
@@ -1157,7 +1260,6 @@ namespace DaxStudio.Controls
                     SelectedItem = selectedRowBeforeFilter;
                     ScrollIntoView(selectedRowBeforeFilter);
                 }
-
             }
         }
 
@@ -1176,12 +1278,10 @@ namespace DaxStudio.Controls
 
                 // If child is visible, we need to expand current item
                 currentItem.IsExpanded = childVisible;
-
             }
 
             // An item should be expanded if any of its children are visible
             currentItem.IsExpanded = anyChildVisible;
-            
 
             // Return whether this node or any of its descendants should be visible
             return currentItemVisible || anyChildVisible;
@@ -1198,13 +1298,39 @@ namespace DaxStudio.Controls
             set => SetValue(CustomDescendantFilterProperty, value);
         }
 
-        private void ExecuteCustomDescendantsFilterAction(object parameter)
+        private void ExecuteCustomDescendantsFilterAction(object param)
         {
             if (CustomDescendantFilter != null && SelectedItem is TreeGridRow<object> selectedRow)
             {
-                CustomTreeFilter(CustomDescendantFilter, parameter);
+                CustomTreeFilter(CustomDescendantFilter, selectedRow);
             }
         }
 
+        // This fixes a datagrid timing issue where the selected item does not get set
+        // before the context menu shows. Because some of the context menu items depend
+        // on the Selected item being set we are forcing this in this override.
+        protected override void OnPreviewMouseRightButtonDown(MouseButtonEventArgs e)
+        {
+            base.OnPreviewMouseRightButtonDown(e);
+
+            var row = FindVisualParent<DataGridRow>(e.OriginalSource as DependencyObject);
+            if (row != null)
+            {
+                this.SelectedItem = row.Item;
+                row.IsSelected = true;
+            }
+        }
+
+        private T FindVisualParent<T>(DependencyObject child) where T : DependencyObject
+        {
+            while (child != null)
+            {
+                if (child is T parent)
+                    return parent;
+
+                child = VisualTreeHelper.GetParent(child);
+            }
+            return null;
+        }
     }
 }

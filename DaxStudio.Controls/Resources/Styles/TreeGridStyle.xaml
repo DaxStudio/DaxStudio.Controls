@@ -174,18 +174,20 @@
                             </Border>
 
                             <!-- Expander -->
-                            <ToggleButton x:Name="PART_Expander"
+                            <CheckBox x:Name="PART_Expander"
                                       Width="16" Height="16"
                                       IsChecked="{Binding RowData.IsExpanded, RelativeSource={RelativeSource TemplatedParent}, Mode=OneWay}"
-                                      Foreground="{Binding Foreground, RelativeSource={RelativeSource TemplatedParent}}">
-                                <ToggleButton.Visibility>
+                                      Foreground="{Binding Foreground, RelativeSource={RelativeSource TemplatedParent}}"
+                                      ContextMenuService.IsEnabled="False">
+ 
+                                <CheckBox.Visibility>
                                     <MultiBinding Converter="{StaticResource HideOrCollapseBoolToVisibilityConverter}">
                                         <Binding Path="RowData.HasChildren" RelativeSource="{RelativeSource TemplatedParent}"/>
                                         <Binding Path="ShowExpander" RelativeSource="{RelativeSource TemplatedParent}"/>
                                     </MultiBinding>
-                                </ToggleButton.Visibility>
-                                <ToggleButton.Style>
-                                    <Style TargetType="ToggleButton" BasedOn="{StaticResource ExpanderToggleStyle}">
+                                </CheckBox.Visibility>
+                                <CheckBox.Style>
+                                    <Style TargetType="CheckBox" BasedOn="{StaticResource ExpanderToggleStyle}">
                                         <Style.Triggers>
                                             <DataTrigger Binding="{Binding ExpanderTemplate, RelativeSource={RelativeSource TemplatedParent}}" Value="{x:Null}">
                                                 <!-- Use default template when ExpanderTemplate is null -->
@@ -197,8 +199,8 @@
                                             <Setter Property="Template" Value="{Binding ExpanderTemplate, RelativeSource={RelativeSource TemplatedParent}}"/>
                                         </Style.Setters>
                                     </Style>
-                                </ToggleButton.Style>
-                            </ToggleButton>
+                                </CheckBox.Style>
+                            </CheckBox>
 
                             <!-- Icon -->
                             <ContentControl 

@@ -260,6 +260,7 @@ namespace DaxStudio.Controls
                 }
                 if (context.IsExpanded) context.IsCollapsing = true;
             }
+            e.Handled = true;
         }
 
         private void OnExpanderClick(object sender, RoutedEventArgs e)
