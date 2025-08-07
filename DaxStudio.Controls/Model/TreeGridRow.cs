@@ -67,6 +67,58 @@ namespace DaxStudio.Controls.Model
             }
         }
 
+        // Casting methods that work with the Data property directly (no new objects created)
+        /// <summary>
+        /// Safely casts the Data to the specified type. Returns default(TResult) if cast fails.
+        /// </summary>
+        public TResult GetDataAs<TResult>()
+        {
+            if (Data is TResult result)
+                return result;
+            return default;
+        }
+
+        /// <summary>
+        /// Tries to cast the Data to the specified type.
+        /// </summary>
+        public bool TryGetDataAs<TResult>(out TResult result)
+        {
+            if (Data is TResult castResult)
+            {
+                result = castResult;
+                return true;
+            }
+            result = default;
+            return false;
+        }
+
+        /// <summary>
+        /// Checks if the Data can be cast to the specified type.
+        /// </summary>
+        public bool IsDataOfType<TResult>()
+        {
+            return Data is TResult;
+        }
+
+        /// <summary>
+        /// Gets the actual runtime type of the Data.
+        /// </summary>
+        public Type GetDataType()
+        {
+            return Data?.GetType();
+        }
+
+        /// <summary>
+        /// Safely casts the Data to the specified type. Throws InvalidCastException if cast fails.
+        /// </summary>
+        public TResult CastDataTo<TResult>()
+        {
+            if (Data is TResult result)
+                return result;
+            
+            throw new InvalidCastException($"Cannot cast {Data?.GetType()?.Name ?? "null"} to {typeof(TResult).Name}");
+        }
+
         public event PropertyChangedEventHandler PropertyChanged;
 
         private void OnPropertyChanged(string propertyName)
@@ -126,5 +178,4 @@ namespace DaxStudio.Controls.Model
             }
         }
     }
-
 }
