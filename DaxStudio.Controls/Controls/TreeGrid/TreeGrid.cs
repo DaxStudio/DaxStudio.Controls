@@ -247,7 +247,9 @@ namespace DaxStudio.Controls
                 Level = level,
                 Parent = parent,
                 Children = new List<TreeGridRow<object>>(),
-                IsExpanded = ExpandOnLoad
+                IsExpanded = ExpandOnLoad,
+                OnRowIsExpandedChanged = OnRowIsExpandedChanged
+
             };
 
             _itemToRowMap[item] = row;
@@ -266,6 +268,18 @@ namespace DaxStudio.Controls
             }
 
             return row;
+        }
+
+        private void OnRowIsExpandedChanged(TreeGridRow<object> row)
+        {
+            Debug.WriteLine($"OnRowIsExpandedChanged: Row at level {row.Level} changed to expanded={row.IsExpanded}");
+            
+            // Refresh the data to update UI
+            RefreshData();
+            if (row.IsExpanded)
+            {
+                SetSelectedLineRecursive(row, row.Level, true);
+            }
         }
 
         // Add this method to handle child collection changes
@@ -766,7 +780,7 @@ namespace DaxStudio.Controls
             }
         }
 
-        public void ToggleItem(object item)
+        internal void ToggleItem(object item)
         {
             if (_itemToRowMap.TryGetValue(item, out var row))
             {

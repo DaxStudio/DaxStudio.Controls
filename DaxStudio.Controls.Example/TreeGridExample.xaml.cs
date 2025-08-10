@@ -27,13 +27,6 @@ namespace DaxStudio.Controls.Example
             HierarchicalGrid.CollapseAll();
         }
 
-        private void Expander_Click(object sender, RoutedEventArgs e)
-        {
-            if (sender is ToggleButton toggleButton && toggleButton.DataContext is TreeGridRow<object> row)
-            {
-                HierarchicalGrid.ToggleItem(row.Data);
-            }
-        }
 
         private void PruneTree_Click(object sender, RoutedEventArgs e)
         {

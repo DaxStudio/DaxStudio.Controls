@@ -169,6 +169,16 @@ namespace DaxStudio.Controls
             set => SetValue(ShowExpanderProperty, value);
         }
 
+        public static readonly DependencyProperty IsExpandedProperty =
+    DependencyProperty.Register(nameof(IsExpanded), typeof(bool), typeof(TreeCell),
+        new PropertyMetadata(true, RedrawCell));
+
+        public bool IsExpanded
+        {
+            get => (bool)GetValue(IsExpandedProperty);
+            set => SetValue(IsExpandedProperty, value);
+        }
+
         /// <summary>
         /// Template for the expander toggle button
         /// </summary>
@@ -256,6 +266,8 @@ namespace DaxStudio.Controls
             add => AddHandler(ExpanderClickEvent, value);
             remove => RemoveHandler(ExpanderClickEvent, value);
         }
+
+
 
         public static readonly RoutedEvent ExpanderPreviewMouseDownEvent = EventManager.RegisterRoutedEvent(
             nameof(ExpanderPreviewMouseDown), RoutingStrategy.Bubble, typeof(RoutedEventHandler), typeof(TreeCell));

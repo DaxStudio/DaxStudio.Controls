@@ -263,15 +263,15 @@ namespace DaxStudio.Controls
             e.Handled = true;
         }
 
-        private void OnExpanderClick(object sender, RoutedEventArgs e)
-        {
-            if (sender is TreeCell cell && cell.RowData is TreeGridRow<object> row)
-            {
-                // Find the parent TreeGrid and toggle the item
-                var treeGrid = TreeColumn.FindParentTreeGrid(cell);
-                treeGrid?.ToggleItem(row.Data);
-            }
-        }
+        //private void OnExpanderClick(object sender, RoutedEventArgs e)
+        //{
+        //    if (sender is TreeCell cell && cell.RowData is TreeGridRow<object> row)
+        //    {
+        //        // Find the parent TreeGrid and toggle the item
+        //        var treeGrid = TreeColumn.FindParentTreeGrid(cell);
+        //        treeGrid?.ToggleItem(row.Data);
+        //    }
+        //}
 
         private static TreeGrid FindParentTreeGrid(DependencyObject child)
         {
@@ -344,9 +344,9 @@ namespace DaxStudio.Controls
             {
                 treeCell.SetValue(TreeCell.StyleProperty, TreeLineStyle);
             }
-
+            
             // Attach event handlers if needed
-            treeCell.AddHandler(TreeCell.ExpanderClickEvent, new RoutedEventHandler(OnExpanderClick));
+            //treeCell.AddHandler(TreeCell.ExpanderClickEvent, new RoutedEventHandler(OnExpanderClick));
             treeCell.AddHandler(TreeCell.ExpanderPreviewMouseDownEvent, new RoutedEventHandler(OnExpanderPreviewMouseDownEvent));
 
             return treeCell;

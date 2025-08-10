@@ -63,9 +63,12 @@ namespace DaxStudio.Controls.Model
                     _isExpanded = value;
                     if (_isExpanded) IsCollapsing = false;
                     NotifyOfPropertyChange();
+                    OnRowIsExpandedChanged?.Invoke(this);
                 }
             }
         }
+
+        public Action<TreeGridRow<T>> OnRowIsExpandedChanged { get; set; }
 
         // Casting methods that work with the Data property directly (no new objects created)
         /// <summary>

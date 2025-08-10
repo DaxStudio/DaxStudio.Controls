@@ -24,13 +24,6 @@ namespace DaxStudio.Controls.Example
             TreeGrid.CollapseAll();
         }
 
-        private void Expander_Click(object sender, RoutedEventArgs e)
-        {
-            if (sender is ToggleButton toggleButton && toggleButton.DataContext is TreeGridRow<object> row)
-            {
-                TreeGrid.ToggleItem(row.Data);
-            }
-        }
 
         private void TreeGrid_Sorting(object sender, DataGridSortingEventArgs e)
         {

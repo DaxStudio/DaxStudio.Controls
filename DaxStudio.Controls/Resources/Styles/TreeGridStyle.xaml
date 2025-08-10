@@ -176,7 +176,7 @@
                             <!-- Expander -->
                             <CheckBox x:Name="PART_Expander"
                                       Width="16" Height="16"
-                                      IsChecked="{Binding RowData.IsExpanded, RelativeSource={RelativeSource TemplatedParent}, Mode=OneWay}"
+                                      IsChecked="{Binding RowData.IsExpanded, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"
                                       Foreground="{Binding Foreground, RelativeSource={RelativeSource TemplatedParent}}"
                                       ContextMenuService.IsEnabled="False">
  
