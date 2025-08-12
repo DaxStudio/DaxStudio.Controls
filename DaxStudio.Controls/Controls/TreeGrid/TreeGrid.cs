@@ -35,7 +35,7 @@ namespace DaxStudio.Controls
         private readonly object _refreshLock = new object();
         private volatile bool _refreshPending = false;
         private DispatcherTimer _refreshTimer;
-        private const int REFRESH_DEBOUNCE_MS = 50; // Debounce delay
+        private const int REFRESH_DEBOUNCE_MS = 20; // Debounce delay
         
         public ICommand ExecuteCustomDescendantFilter { get; private set; }
         // Add these fields to track bound collections
@@ -571,33 +571,35 @@ namespace DaxStudio.Controls
                                    List<TreeGridRow<object>> source)
         {
             // Using a direct synchronization approach to minimize UI updates
-            
-            int commonLength = Math.Min(target.Count, source.Count);
-            
-            // Step 1: Update existing items that match positions
-            for (int i = 0; i < commonLength; i++)
+            using (new DeferRefresh(target))
             {
-                if (!ReferenceEquals(target[i], source[i]))
+                int commonLength = Math.Min(target.Count, source.Count);
+
+                // Step 1: Update existing items that match positions
+                for (int i = 0; i < commonLength; i++)
                 {
-                    target[i] = source[i];
+                    if (!ReferenceEquals(target[i], source[i]))
+                    {
+                        target[i] = source[i];
+                    }
                 }
-            }
-            
-            // Step 2: Remove extra items from end of target
-            if (target.Count > source.Count)
-            {
-                for (int i = target.Count - 1; i >= source.Count; i--)
+
+                // Step 2: Remove extra items from end of target
+                if (target.Count > source.Count)
                 {
-                    target.RemoveAt(i);
+                    for (int i = target.Count - 1; i >= source.Count; i--)
+                    {
+                        target.RemoveAt(i);
+                    }
                 }
-            }
-            
-            // Step 3: Add missing items to target
-            if (source.Count > target.Count)
-            {
-                for (int i = target.Count; i < source.Count; i++)
+
+                // Step 3: Add missing items to target
+                if (source.Count > target.Count)
                 {
-                    target.Add(source[i]);
+                    for (int i = target.Count; i < source.Count; i++)
+                    {
+                        target.Add(source[i]);
+                    }
                 }
             }
         }
@@ -970,10 +972,10 @@ namespace DaxStudio.Controls
                             switch (menuItem.Header.ToString())
                             {
                                 case "Expand Selected":
-                                    menuItem.IsEnabled = selectedRow?.HasChildren == true && !selectedRow.IsExpanded;
+                                    menuItem.IsEnabled = selectedRow?.HasChildren == true;// && !selectedRow.IsExpanded;
                                     break;
                                 case "Collapse Selected":
-                                    menuItem.IsEnabled = selectedRow?.HasChildren == true && selectedRow.IsExpanded;
+                                    menuItem.IsEnabled = selectedRow?.HasChildren == true;// && selectedRow.IsExpanded;
                                     break;
                                 case "Expand All":
                                     menuItem.IsEnabled = _itemToRowMap.Values.Any(r => r.HasChildren && !r.IsExpanded);
@@ -1186,11 +1188,11 @@ namespace DaxStudio.Controls
         private void OnChildCollectionChanged(object parentItem, NotifyCollectionChangedEventArgs e)
         {
             // For UI thread safety
-            if (!Dispatcher.CheckAccess())
-            {
-                Dispatcher.BeginInvoke(DispatcherPriority.Normal ,new Action(() => OnChildCollectionChanged(parentItem, e)));
-                return;
-            }
+            //if (!Dispatcher.CheckAccess())
+            //{
+            //    Dispatcher.BeginInvoke(DispatcherPriority.Normal ,new Action(() => OnChildCollectionChanged(parentItem, e)));
+            //    return;
+            //}
 
             lock (_refreshLock)
             {

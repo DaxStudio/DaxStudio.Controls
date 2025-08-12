@@ -29,5 +29,23 @@ namespace DaxStudio.Controls.Example
         {
             
         }
+
+        private void DrillIn_Click(object sender, RoutedEventArgs e)
+        {
+            System.Diagnostics.Debug.WriteLine("Custom Command");
+            //((QueryPlanTreeExampleViewModel)TreeGrid.DataContext).TestContextMenuCommand()
+            var selectedRow = ((TreeGridRow<object>)TreeGrid.SelectedValue).GetDataAs<QPTreeItem>();
+            ((QueryPlanTreeExampleViewModel)TreeGrid.DataContext).RootItems.Clear();
+            ((QueryPlanTreeExampleViewModel)TreeGrid.DataContext).RootItems.Add(selectedRow);
+        }
+
+        private void DrillOut_Click(object sender, RoutedEventArgs e)
+        {
+            System.Diagnostics.Debug.WriteLine("Custom Command");
+            //((QueryPlanTreeExampleViewModel)TreeGrid.DataContext).TestContextMenuCommand()
+            var selectedRow = ((TreeGridRow<object>)TreeGrid.SelectedValue).GetDataAs<QPTreeItem>();
+            ((QueryPlanTreeExampleViewModel)TreeGrid.DataContext).ResetTree();
+            //((QueryPlanTreeExampleViewModel)TreeGrid.DataContext).RootItems.Add(selectedRow);
+        }
     }
 }

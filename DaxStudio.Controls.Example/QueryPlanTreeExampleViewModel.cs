@@ -11,17 +11,19 @@ namespace DaxStudio.Controls.Example
 {
     public class QueryPlanTreeExampleViewModel : PropertyChangedBase
     {
+
+        QueryPlan loadedItems;
         public QueryPlanTreeExampleViewModel()
         {
             var filePath = @"..\..\..\data\QueryPlan.json";
-            //filePath = @"c:\temp\QueryPlan.json";
+            filePath = @"c:\temp\QueryPlan.json";
             if (File.Exists(filePath))
             {
                 try
                 {
                     var json = File.ReadAllText(filePath);
 
-                    var loadedItems = JsonConvert.DeserializeObject<QueryPlan>(json);
+                    loadedItems = JsonConvert.DeserializeObject<QueryPlan>(json);
 
                     if (loadedItems != null)
                     {
@@ -37,7 +39,15 @@ namespace DaxStudio.Controls.Example
 
         }
 
-
+        public void ResetTree()
+        {
+            RootItems.Clear();
+            var tempItems = LoadItemsRecursively(loadedItems.PhysicalQueryPlanRows);
+            foreach (var item in tempItems)
+            { 
+                RootItems.Add(item);
+            }
+        }
 
         private ObservableCollection<QPTreeItem> LoadItemsRecursively(List<QPTreeItem> loadedItems)
         {
@@ -113,6 +123,13 @@ namespace DaxStudio.Controls.Example
             }
 
             return false;
+        }
+
+        public void TestContextMenuCommand(object parameter)
+        {
+            // This is just a test command to show how to handle context menu commands
+            // You can implement your logic here
+            System.Diagnostics.Debug.WriteLine($"Context menu command executed with parameter: {parameter}");
         }
 
     }
