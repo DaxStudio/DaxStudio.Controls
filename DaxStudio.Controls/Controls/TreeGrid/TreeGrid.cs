@@ -99,6 +99,22 @@ namespace DaxStudio.Controls
             set => SetValue(ExpandOnLoadProperty, value);
         }
 
+        /// <summary>
+        /// This property indicates whether the TreeGrid is in read-only mode.
+        /// If we are in read-only mode, we will not allow any editing of the rows.
+        /// And we don't subscribe to child collection change events.
+        /// </summary>
+        public static readonly DependencyProperty ReadOnlyProperty =
+            DependencyProperty.Register(nameof(ReadOnly), typeof(bool), typeof(TreeGrid),
+                new PropertyMetadata(false));
+
+        public bool ReadOnly
+        {
+            get => (bool)GetValue(ReadOnlyProperty);
+            set => SetValue(ReadOnlyProperty, value);
+        }
+
+
         public static readonly DependencyProperty AddCustomMenusAtBottomProperty =
             DependencyProperty.Register(nameof(AddCustomMenusAtBottom), typeof(bool), typeof(TreeGrid),
                 new PropertyMetadata(true));
@@ -256,7 +272,11 @@ namespace DaxStudio.Controls
             parent?.AddChild(row);
 
             // Subscribe to child collection changes if available
-            SubscribeToChildCollectionChanges(item);
+            if (!ReadOnly)
+            {
+                SubscribeToChildCollectionChanges(item);
+            }
+
 
             var children = GetChildren(item);
             if (children != null)
@@ -687,8 +707,46 @@ namespace DaxStudio.Controls
         {
             try
             {
+
                 if (e.OriginalSource != null)
-                    base.OnContextMenuOpening(e);
+                {
+                    //base.OnContextMenuOpening(e);
+
+                    // Ensure the context menu is only opened if the source is a valid row
+                    //if (!(e.OriginalSource is DataGridCell) && !(e.OriginalSource is DataGridRow))
+                    //{
+                    //    e.Handled = true; // Prevent opening context menu if not on a valid row
+                    //    Debug.WriteLine("OnContextMenuOpening: Prevented opening due to invalid source");
+                    //    return;
+                    //}
+                    var grid = e.Source as TreeGrid;
+                    var treeColumn = grid.Columns.OfType<TreeColumn>().FirstOrDefault();
+                    var selectedRow = SelectedValue as TreeGridRow<object>;
+
+                    // Find our menu items by tag
+                    foreach (var item in ContextMenu.Items)
+                    {
+                        if (item is MenuItem menuItem && menuItem.Tag as string == "TreeGridDefaultItem")
+                        {
+                            switch (menuItem.Header.ToString())
+                            {
+                                case "Expand Selected":
+                                    menuItem.IsEnabled = selectedRow?.HasChildren == true && (treeColumn?.ShowExpander??false) ;// && !selectedRow.IsExpanded;
+                                    break;
+                                case "Collapse Selected":
+                                    menuItem.IsEnabled = selectedRow?.HasChildren == true && (treeColumn?.ShowExpander ?? false);// && selectedRow.IsExpanded;
+                                    break;
+                                case "Expand All":
+                                    menuItem.IsEnabled = _itemToRowMap.Values.Any(r => r.HasChildren && !r.IsExpanded) && (treeColumn?.ShowExpander ?? false);
+                                    break;
+                                case "Collapse All":
+                                    menuItem.IsEnabled = _itemToRowMap.Values.Any(r => r.HasChildren && r.IsExpanded) && (treeColumn?.ShowExpander ?? false);
+                                    break;
+                            }
+                        }
+                    }
+
+                }
                 else
                 {
                     e.Handled = true; // Prevent context menu from opening if OriginalSource is null
@@ -960,33 +1018,10 @@ namespace DaxStudio.Controls
                 };
                 AddMenuItem(4,collapseSelectedItem);
 
-                ContextMenu.Opened += (s, e) =>
-                {
-                    var selectedRow = SelectedValue as TreeGridRow<object>;
-
-                    // Find our menu items by tag
-                    foreach (var item in ContextMenu.Items)
-                    {
-                        if (item is MenuItem menuItem && menuItem.Tag as string == "TreeGridDefaultItem")
-                        {
-                            switch (menuItem.Header.ToString())
-                            {
-                                case "Expand Selected":
-                                    menuItem.IsEnabled = selectedRow?.HasChildren == true;// && !selectedRow.IsExpanded;
-                                    break;
-                                case "Collapse Selected":
-                                    menuItem.IsEnabled = selectedRow?.HasChildren == true;// && selectedRow.IsExpanded;
-                                    break;
-                                case "Expand All":
-                                    menuItem.IsEnabled = _itemToRowMap.Values.Any(r => r.HasChildren && !r.IsExpanded);
-                                    break;
-                                case "Collapse All":
-                                    menuItem.IsEnabled = _itemToRowMap.Values.Any(r => r.HasChildren && r.IsExpanded);
-                                    break;
-                            }
-                        }
-                    }
-                };
+                //ContextMenu.Opened += (s, e) =>
+                //{
+                    
+                //};
             }
         }
 
@@ -1025,6 +1060,43 @@ namespace DaxStudio.Controls
 
             Columns.Insert(0, expanderColumn);
         }
+
+        
+        //public override void OnContextMenuOpening(object sender, ContextMenuEventArgs e)
+        //{
+        //    // Ensure the context menu is only opened if the source is a valid row
+        //    if (!(e.OriginalSource is DataGridCell) && !(e.OriginalSource is DataGridRow))
+        //    {
+        //        e.Handled = true; // Prevent opening context menu if not on a valid row
+        //        Debug.WriteLine("OnContextMenuOpening: Prevented opening due to invalid source");
+        //        return;
+        //    }
+
+        //    var selectedRow = SelectedValue as TreeGridRow<object>;
+
+        //    // Find our menu items by tag
+        //    foreach (var item in ContextMenu.Items)
+        //    {
+        //        if (item is MenuItem menuItem && menuItem.Tag as string == "TreeGridDefaultItem")
+        //        {
+        //            switch (menuItem.Header.ToString())
+        //            {
+        //                case "Expand Selected":
+        //                    menuItem.IsEnabled = selectedRow?.HasChildren == true;// && !selectedRow.IsExpanded;
+        //                    break;
+        //                case "Collapse Selected":
+        //                    menuItem.IsEnabled = selectedRow?.HasChildren == true;// && selectedRow.IsExpanded;
+        //                    break;
+        //                case "Expand All":
+        //                    menuItem.IsEnabled = _itemToRowMap.Values.Any(r => r.HasChildren && !r.IsExpanded);
+        //                    break;
+        //                case "Collapse All":
+        //                    menuItem.IsEnabled = _itemToRowMap.Values.Any(r => r.HasChildren && r.IsExpanded);
+        //                    break;
+        //            }
+        //        }
+        //    }
+        //}
 
         private DataTemplate CreateDefaultCellTemplate()
         {
@@ -1129,7 +1201,7 @@ namespace DaxStudio.Controls
                 {
                     case NotifyCollectionChangedAction.Add:
                         // Could optimize by only adding new items, but rebuild is safer
-                        RebuildHierarchy();
+                        //RebuildHierarchy();
                         break;
 
                     case NotifyCollectionChangedAction.Remove:
@@ -1141,22 +1213,24 @@ namespace DaxStudio.Controls
                                 RemoveItemAndDescendants(item);
                             }
                         }
-                        RebuildHierarchy();
+                        //RebuildHierarchy();
                         break;
 
                     case NotifyCollectionChangedAction.Replace:
                         // Could optimize, but rebuild is safer for complex hierarchies
-                        RebuildHierarchy();
+                        //RebuildHierarchy();
                         break;
 
                     case NotifyCollectionChangedAction.Reset:
                         // Collection was cleared or drastically changed
-                        _itemToRowMap.Clear();
-                        _rootRows.Clear();
-                        _flattenedRows.Clear();
-                        _visibleRowsSet.Clear();
+                        //_itemToRowMap.Clear();
+                        //_rootRows.Clear();
+                        //_flattenedRows.Clear();
+                        //_visibleRowsSet.Clear();
                         break;
                 }
+                // Always rebuild the hierarchy after changes
+                RebuildHierarchy();
             }
 
             // Use debounced refresh

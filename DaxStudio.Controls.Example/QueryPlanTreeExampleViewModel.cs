@@ -27,7 +27,7 @@ namespace DaxStudio.Controls.Example
 
                     if (loadedItems != null)
                     {
-                        RootItems = LoadItemsRecursively(loadedItems.PhysicalQueryPlanRows);
+                        RootItems = LoadItemsRecursively(loadedItems.PhysicalQueryPlanRows) as BindableCollection<QPTreeItem>;
                     }
                 }
                 catch (Exception ex)
@@ -47,11 +47,12 @@ namespace DaxStudio.Controls.Example
             { 
                 RootItems.Add(item);
             }
+            RootItems.Refresh();
         }
 
-        private ObservableCollection<QPTreeItem> LoadItemsRecursively(List<QPTreeItem> loadedItems)
+        private IObservableCollection<QPTreeItem> LoadItemsRecursively(List<QPTreeItem> loadedItems)
         {
-            ObservableCollection<QPTreeItem> items = new ObservableCollection<QPTreeItem>();
+            BindableCollection<QPTreeItem> items = new BindableCollection<QPTreeItem>();
             Stack<QPTreeItem> parents = new Stack<QPTreeItem>();
             var prevItem = default(QPTreeItem);
             foreach (var item in loadedItems)
@@ -66,7 +67,7 @@ namespace DaxStudio.Controls.Example
                     else if (item.Level > (prevItem?.Level ?? 0))
                     {
                         parents.Push(prevItem);
-                        prevItem.Children = new ObservableCollection<QPTreeItem>() { item };
+                        prevItem.Children = new BindableCollection<QPTreeItem>() { item };
 
                     }
                     else if (item.Level < (prevItem?.Level ?? 0))
@@ -83,7 +84,7 @@ namespace DaxStudio.Controls.Example
             return items;
         }
 
-        public ObservableCollection<QPTreeItem> RootItems { get; }
+        public BindableCollection<QPTreeItem> RootItems { get; }
 
         public Func<object,object,bool> FindDescendantsWithHigherRecordCountsFunc => FindDescendantsWithHigherRecordCounts;
 
