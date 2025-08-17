@@ -103,6 +103,7 @@
                                    Grid.Row="1"
                                    RootItems="{Binding RootItems}"
                                    ChildrenBindingPath="Children"
+                       IsReadOnly="False"
                                    Margin="5">
 
             <!-- Define columns -->

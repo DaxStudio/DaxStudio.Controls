@@ -263,27 +263,7 @@ namespace DaxStudio.Controls
             e.Handled = true;
         }
 
-        //private void OnExpanderClick(object sender, RoutedEventArgs e)
-        //{
-        //    if (sender is TreeCell cell && cell.RowData is TreeGridRow<object> row)
-        //    {
-        //        // Find the parent TreeGrid and toggle the item
-        //        var treeGrid = TreeColumn.FindParentTreeGrid(cell);
-        //        treeGrid?.ToggleItem(row.Data);
-        //    }
-        //}
 
-        private static TreeGrid FindParentTreeGrid(DependencyObject child)
-        {
-            var parent = VisualTreeHelper.GetParent(child);
-            while (parent != null)
-            {
-                if (parent is TreeGrid treeGrid)
-                    return treeGrid;
-                parent = VisualTreeHelper.GetParent(parent);
-            }
-            return null;
-        }
 
         /// <summary>
         /// The style for the tree lines

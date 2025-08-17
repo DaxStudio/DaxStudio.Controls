@@ -7,20 +7,20 @@ using System.ComponentModel;
 namespace DaxStudio.Controls.Utils
 {
     // Helper class for deferring ObservableCollection notifications
-    internal class DeferRefresh : IDisposable
+    internal class DeferRefresh<T> : IDisposable
     {
-        private readonly ObservableCollection<TreeGridRow<object>> _collection;
+        private readonly ObservableCollection<TreeGridRow<T>> _collection;
         private readonly PropertyChangedEventHandler _propertyChangedHandler;
         private readonly NotifyCollectionChangedEventHandler _collectionChangedHandler;
 
-        public DeferRefresh(ObservableCollection<TreeGridRow<object>> collection)
+        public DeferRefresh(ObservableCollection<TreeGridRow<T>> collection)
         {
 
             _collection = collection;
             // Store original handlers and temporarily remove them
-            var collectionChangedField = typeof(ObservableCollection<TreeGridRow<object>>)
+            var collectionChangedField = typeof(ObservableCollection<TreeGridRow<T>>)
                 .GetField("CollectionChanged", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
-            var propertyChangedField = typeof(ObservableCollection<TreeGridRow<object>>)
+            var propertyChangedField = typeof(ObservableCollection<TreeGridRow<T>>)
                 .GetField("PropertyChanged", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
 
             _collectionChangedHandler = (NotifyCollectionChangedEventHandler)collectionChangedField?.GetValue(_collection);

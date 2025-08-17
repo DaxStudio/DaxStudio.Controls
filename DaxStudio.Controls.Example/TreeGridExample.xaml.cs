@@ -45,31 +45,16 @@ namespace DaxStudio.Controls.Example
 
         private void ToggleBrush_Click(object sender, RoutedEventArgs e)
         {
-            var oldBrush = Application.Current.Resources["TextBrush"] as SolidColorBrush;
-            System.Diagnostics.Debug.WriteLine($"Old brush color: {oldBrush?.Color}");
-            
-            if (oldBrush?.Color == Colors.Green)
+            var model = (TreeGridExampleViewModel)DataContext;
+            if (model.RootItems[0].Children[0].Children.Count > 5)
             {
-                Application.Current.Resources["TextBrush"] = new SolidColorBrush(Colors.Orange);
+                model.RootItems[0].Children[0].Children.RemoveAt(4);
             }
             else
             {
-                Application.Current.Resources["TextBrush"] = new SolidColorBrush(Colors.Green);
+                model.RootItems[0].Children[0].Children.Add(new TreeItem { Name = "Level 2", Type = "Level", Description = "sub-level" });
             }
-            
-            var newBrush = Application.Current.Resources["TextBrush"] as SolidColorBrush;
-            System.Diagnostics.Debug.WriteLine($"New brush color: {newBrush?.Color}");
-            
-            // Force update on the column
-            var column = HierarchicalGrid.Columns.OfType<TreeColumn>().FirstOrDefault();
-            if (column != null)
-            {
-                var currentForeground = column.TextForeground as SolidColorBrush;
-                System.Diagnostics.Debug.WriteLine($"Column TextForeground after resource change: {currentForeground?.Color}");
-                
-                // Force the column to re-evaluate its dynamic resource
-                column.InvalidateProperty(TreeColumn.TextForegroundProperty);
-            }
+
         }
     }
 }
