@@ -63,6 +63,14 @@ namespace DaxStudio.Controls
             // Use recycling mode for even better performance
             VirtualizingPanel.SetVirtualizationMode(this, VirtualizationMode.Recycling);
             VirtualizingPanel.SetScrollUnit(this, ScrollUnit.Item);
+            VirtualizingPanel.SetIsVirtualizing(this, true);
+            VirtualizingPanel.SetCacheLengthUnit(this, VirtualizationCacheLengthUnit.Page);
+            VirtualizingPanel.SetCacheLength(this, new VirtualizationCacheLength(1, 1));
+            EnableRowVirtualization = true;
+
+            // Optimize layout performance
+            SnapsToDevicePixels = true;
+            UseLayoutRounding = true;
 
             ExecuteCustomDescendantFilter = new RelayCommand(ExecuteCustomDescendantsFilterAction);
 
@@ -1609,6 +1617,30 @@ namespace DaxStudio.Controls
                 child = VisualTreeHelper.GetParent(child);
             }
             return null;
+        }
+
+        // Override MeasureOverride for better performance
+        protected override Size MeasureOverride(Size constraint)
+        {
+            // Skip unnecessary measurement during toggle operations
+            if (_refreshPending)
+            {
+                return new Size(constraint.Width, constraint.Height);
+            }
+    
+            return base.MeasureOverride(constraint);
+        }
+
+        // Override ArrangeOverride for better performance
+        protected override Size ArrangeOverride(Size arrangeSize)
+        {
+            // Skip unnecessary arrangement during toggle operations
+            if (_refreshPending)
+            {
+                return arrangeSize;
+            }
+    
+            return base.ArrangeOverride(arrangeSize);
         }
     }
 }
