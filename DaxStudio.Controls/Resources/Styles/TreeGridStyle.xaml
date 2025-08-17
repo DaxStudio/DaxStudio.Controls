@@ -124,6 +124,7 @@
 
      <!--Row Style--> 
     <Style TargetType="DataGridRow" x:Key="TreeGridRowStyle">
+        <Setter Property="Focusable" Value="False"/>
         <Setter Property="Background" Value="Transparent"/>
         <!--<Setter Property="Foreground" Value="{DynamicResource Theme.Brush.Default.Fore}"/>-->
         <Style.Triggers>
@@ -138,6 +139,7 @@
 
     <!-- TreeGridNameCell Style -->
     <Style TargetType="ctrl:TreeCell">
+        <Setter Property="Focusable" Value="False" />
         <Setter Property="Foreground" Value="{Binding TextForeground, RelativeSource={RelativeSource Self}}"/>
         <Setter Property="TextForeground" Value="{Binding TextForeground, RelativeSource={RelativeSource Self}}"/>
         <Setter Property="RowData" Value="{Binding .}"/>
@@ -158,6 +160,7 @@
                                          Visibility="{Binding ShowTreeLines, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource BooleanToVisibilityConverter}}"
                                          ClipToBounds="True" 
                                          Margin="0,-1,0,-1"
+                                         Focusable="False"
                                          Background="Transparent"
                                          IsHitTestVisible="False"/>
 
@@ -178,7 +181,8 @@
                                       Width="16" Height="16"
                                       IsChecked="{Binding RowData.IsExpanded, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"
                                       Foreground="{Binding Foreground, RelativeSource={RelativeSource TemplatedParent}}"
-                                      ContextMenuService.IsEnabled="False">
+                                      ContextMenuService.IsEnabled="False"
+                                      Focusable="False">
  
                                 <CheckBox.Visibility>
                                     <MultiBinding Converter="{StaticResource HideOrCollapseBoolToVisibilityConverter}">
@@ -206,7 +210,7 @@
                             <ContentControl 
                                   x:Name="PART_Icon"
                                   Content="{Binding Icon, RelativeSource={RelativeSource TemplatedParent}}"
-                                  
+                                  Focusable="False"
                                   Margin="2,0,0,0"
                                   VerticalAlignment="Center">
                                 <ContentControl.Style>
@@ -235,7 +239,7 @@
                                           ContentTemplate="{Binding TextTemplate, RelativeSource={RelativeSource TemplatedParent}}"
                                           Margin="2,0,0,0"
                                           DataContext="{Binding .}"
-                                          
+                                          Focusable="False"
                                           VerticalAlignment="Center">
                                 <ContentControl.Style>
                                     <Style TargetType="ContentControl">

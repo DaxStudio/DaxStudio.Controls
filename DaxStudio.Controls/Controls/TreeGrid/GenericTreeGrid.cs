@@ -292,18 +292,6 @@ namespace DaxStudio.Controls
             return row;
         }
 
-        private void OnRowIsExpandedChanged(TreeGridRow<T> row)
-        {
-            Debug.WriteLine($"OnRowIsExpandedChanged: Row at level {row.Level} changed to expanded={row.IsExpanded}");
-            
-            // Refresh the data to update UI
-            RefreshData();
-            if (row.IsExpanded)
-            {
-                SetSelectedLineRecursive(row, row.Level, true);
-            }
-        }
-
         // Add this method to handle child collection changes
         private void SubscribeToChildCollectionChanges(T item, TreeGridRow<T> row)
         {
@@ -327,6 +315,7 @@ namespace DaxStudio.Controls
             catch (Exception ex)
             {
                 Debug.WriteLine($"Error subscribing to child collection changes: {ex.Message}");
+
             }
         }
 
@@ -371,6 +360,256 @@ namespace DaxStudio.Controls
             }
         }
 
+        // Add a flag to prevent re-entry during bulk operations
+        private bool _isInBulkOperation = false;
+
+        // Optimized version of ExpandItemRecursively with proper hierarchical sorting
+        private void ExpandItemRecursively(TreeGridRow<T> row)
+        {
+            if (row == null) return;
+            
+            using (new OverrideCursor(Cursors.Wait))
+            {
+                _isInBulkOperation = true;
+                _isUpdatingFlattenedRows = true;
+                
+                try
+                {
+                    using (new TreeGridFocusManager<T>(this))
+                    {
+                        Debug.WriteLine($"ExpandItemRecursively: Expanding row at level {row.Level}");
+
+                        // Skip if already expanded
+                        if (row.IsExpanded) return;
+
+                        // Set the expanded state directly to avoid triggering change notifications
+                        row.IsExpanded = true;
+
+                        // If the row has no children, nothing to expand
+                        if (!row.HasChildren) return;
+                        
+                        // Find the index of the selected row in the flattened list
+                        int insertIndex = _flattenedRows.IndexOf(row) + 1;
+                        if (insertIndex <= 0) return;
+
+                        // Get all descendants in the correct hierarchical order
+                        var rowsToAdd = new List<TreeGridRow<T>>();
+                        
+                        // Recursively expand all nodes and collect them
+                        ExpandAllDescendantsRecursively(row, rowsToAdd);
+                        
+                        // Process the flattened view in a single batch operation
+                        if (rowsToAdd.Count > 0)
+                        {
+                            // Now batch insert the rows in proper hierarchical order
+                            using (new DeferRefresh<T>(_flattenedRows))
+                            {
+                                foreach (var rowToAdd in rowsToAdd)
+                                {
+                                    // Only add if not already in the flattened view
+                                    if (!_visibleRowsSet.Contains(rowToAdd))
+                                    {
+                                        _flattenedRows.Insert(insertIndex++, rowToAdd);
+                                        _visibleRowsSet.Add(rowToAdd);
+                                    }
+                                }
+                            }
+                        }
+
+                // Force UI update
+                Items.Refresh();
+
+                // Update selection lines
+                SetSelectedLineRecursive(row, row.Level, true);
+            }
+        }
+        finally
+        {
+            _isUpdatingFlattenedRows = false;
+            _isInBulkOperation = false;
+        }
+    }
+}
+
+// New method to expand all descendants recursively
+private void ExpandAllDescendantsRecursively(TreeGridRow<T> parent, List<TreeGridRow<T>> result)
+{
+    if (parent == null || !parent.HasChildren)
+        return;
+    
+    // Process each child and its descendants in order
+    foreach (var child in parent.Children)
+    {
+        // Add the child to the result list
+        result.Add(child);
+        
+        // Mark the child as expanded
+        child.IsExpanded = true;
+        
+        // Recursively process this child's descendants
+        if (child.HasChildren)
+        {
+            ExpandAllDescendantsRecursively(child, result);
+        }
+    }
+}
+
+        // Optimized version of CollapseItemRecursively with batched updates
+        private void CollapseItemRecursively(TreeGridRow<T> row)
+        {
+            if (row == null) return;
+            
+            using (new OverrideCursor(Cursors.Wait))
+            {
+                _isInBulkOperation = true;
+                _isUpdatingFlattenedRows = true;
+                
+                try
+                {
+                    using (new TreeGridFocusManager<T>(this))
+                    {
+                        // First collect all rows that will be affected
+                        var rowsToCollapse = new HashSet<TreeGridRow<T>>();
+                        CollectRowsToCollapseRecursively(row, rowsToCollapse);
+
+                        // Now collect all visible descendants that need to be removed from flattened rows
+                        var rowsToRemove = new List<TreeGridRow<T>>();
+
+                        // Collect all visible descendants
+                        foreach (var rowToCollapse in rowsToCollapse)
+                        {
+                            // Only process visible rows
+                            if (_visibleRowsSet.Contains(rowToCollapse) && rowToCollapse != row)
+                            {
+                                rowsToRemove.Add(rowToCollapse);
+                            }
+
+                            // Set the collapsed state directly to avoid triggering change notifications
+                            rowToCollapse.IsExpanded = false;
+                        }
+
+                        // Process the flattened view in a single batch operation
+                        if (rowsToRemove.Count > 0)
+                        {
+                            using (new DeferRefresh<T>(_flattenedRows))
+                            {
+                                foreach (var rowToRemove in rowsToRemove)
+                                {
+                                    _flattenedRows.Remove(rowToRemove);
+                                    _visibleRowsSet.Remove(rowToRemove);
+                                }
+                            }
+                        }
+
+                        // Force UI update
+                        Items.Refresh();
+                    }
+                }
+                finally
+                {
+                    _isUpdatingFlattenedRows = false;
+                    _isInBulkOperation = false;
+                }
+            }
+        }
+
+        // Helper method to collect rows to collapse
+        private void CollectRowsToCollapseRecursively(TreeGridRow<T> row, HashSet<TreeGridRow<T>> rowsToCollapse)
+        {
+            if (row == null) return;
+            
+            // Process children first (depth-first)
+            if (row.HasChildren)
+            {
+                foreach (var child in row.Children)
+                {
+                    CollectRowsToCollapseRecursively(child, rowsToCollapse);
+                }
+            }
+            
+            // Add this row after processing children (ensures bottom-up processing)
+            rowsToCollapse.Add(row);
+        }
+
+        // Modify the OnRowIsExpandedChanged method to handle recursive operations
+        private void OnRowIsExpandedChanged(TreeGridRow<T> row)
+        {
+            Debug.WriteLine($"OnRowIsExpandedChanged: Row at level {row.Level} changed to expanded={row.IsExpanded}");
+            
+            // Skip during bulk operations to avoid triggering multiple refreshes
+            if (_isInBulkOperation)
+                return;
+            
+            // Refresh the data to update UI
+            RefreshData();
+            
+            if (row.IsExpanded)
+            {
+                SetSelectedLineRecursive(row, row.Level, true);
+            }
+        }
+
+        // Update ExpandRowRecursivelyImpl to be more efficient (no longer used directly)
+        private static void ExpandRowRecursivelyImpl(TreeGridRow<T> row)
+        {
+            if (row == null) return;
+
+            // Use a queue for breadth-first expansion to improve perceived performance
+            var queue = new Queue<TreeGridRow<T>>();
+            queue.Enqueue(row);
+            
+            while (queue.Count > 0)
+            {
+                var current = queue.Dequeue();
+                
+                if (current.HasChildren)
+                {
+                    current.IsExpanded = true;
+                    
+                    foreach (var child in current.Children)
+                    {
+                        queue.Enqueue(child);
+                    }
+                }
+            }
+        }
+
+        // Update CollapseRowRecursivelyImpl to be more efficient (no longer used directly)
+        private static void CollapseRowRecursivelyImpl(TreeGridRow<T> row)
+        {
+            if (row == null) return;
+
+            // Use a stack for depth-first traversal in reverse (bottom-up)
+            var stack = new Stack<TreeGridRow<T>>();
+            var toProcess = new Stack<TreeGridRow<T>>();
+            toProcess.Push(row);
+            
+            // First collect all nodes in a depth-first manner
+            while (toProcess.Count > 0)
+            {
+                var current = toProcess.Pop();
+                stack.Push(current);
+                
+                if (current.HasChildren)
+                {
+                    foreach (var child in current.Children)
+                    {
+                        toProcess.Push(child);
+                    }
+                }
+            }
+            
+            // Now process them in reverse order (bottom-up)
+            while (stack.Count > 0)
+            {
+                var current = stack.Pop();
+                if (current.HasChildren)
+                {
+                    current.IsExpanded = false;
+                }
+            }
+        }
+
         private void RefreshData()
         {
             // Prevent excessive calls with debouncing
@@ -398,6 +637,30 @@ namespace DaxStudio.Controls
                 _refreshTimer.Start();
             }
         }
+
+        // Add an object pooling system for list reuse
+        private class ListPool<TItem>
+        {
+            private readonly Stack<List<TItem>> _pool = new Stack<List<TItem>>();
+            
+            public List<TItem> Get()
+            {
+                if (_pool.Count > 0)
+                {
+                    return _pool.Pop();
+                }
+                return new List<TItem>();
+            }
+            
+            public void Return(List<TItem> list)
+            {
+                list.Clear();
+                _pool.Push(list);
+            }
+        }
+
+        // Add a pool for list reuse
+        private readonly ListPool<TreeGridRow<T>> _listPool = new ListPool<TreeGridRow<T>>();
 
         private void DoRefreshData()
         {
@@ -446,39 +709,51 @@ namespace DaxStudio.Controls
                 {
                     Debug.WriteLine($"RefreshData: Starting with selected item at level {selectedRowBeforeRefresh?.Level ?? -1}");
 
-                    // Build the new flattened structure in a thread-safe manner
-                    var newFlattenedRows = new List<TreeGridRow<T>>();
-                    _visibleRowsSet.Clear();
-                    
-                    // Create a snapshot of root rows to avoid collection modification issues
-                    List<TreeGridRow<T>> rootRowsSnapshot;
-                    lock (_refreshLock)
+                    // Get a list from the pool instead of creating a new one
+                    var newFlattenedRows = _listPool.Get();
+                    try
                     {
-                        rootRowsSnapshot = new List<TreeGridRow<T>>(_rootRows);
-                    }
-                    
-                    foreach (var row in rootRowsSnapshot)
-                    {
-                        BuildVisibleRowsListOptimized(row, newFlattenedRows);
-                    }
+                        _visibleRowsSet.Clear();
+                        
+                        // Create a snapshot of root rows to avoid collection modification issues
+                        List<TreeGridRow<T>> rootRowsSnapshot;
+                        lock (_refreshLock)
+                        {
+                            rootRowsSnapshot = new List<TreeGridRow<T>>(_rootRows);
+                        }
+                        
+                        foreach (var row in rootRowsSnapshot)
+                        {
+                            BuildVisibleRowsListOptimized(row, newFlattenedRows);
+                        }
 
-                    Debug.WriteLine($"RefreshData: Collection rebuilt with {newFlattenedRows.Count} rows ({_refreshStopwatch.ElapsedMilliseconds}ms)");
+                        Debug.WriteLine($"RefreshData: Collection rebuilt with {newFlattenedRows.Count} rows ({_refreshStopwatch.ElapsedMilliseconds}ms)");
 
-                    // Update collection efficiently with minimum changes
-                    SynchronizeCollections(_flattenedRows, newFlattenedRows);
-                    Debug.WriteLine($"RefreshData collections synchronized ({_refreshStopwatch.ElapsedMilliseconds}ms)");
-                    
-                    // Refresh items on UI thread
-                    Items.Refresh();
-                    
-                    // Restore selection immediately
-                    if (selectedRowBeforeRefresh != null)
-                    {
-                        RestoreSelectionAfterRefresh(selectedRowBeforeRefresh);
+                        // Update collection efficiently with minimum changes
+                        SynchronizeCollections(_flattenedRows, newFlattenedRows);
+                        Debug.WriteLine($"RefreshData collections synchronized ({_refreshStopwatch.ElapsedMilliseconds}ms)");
+                        
+                        // Refresh items on UI thread
+                        Items.Refresh();
+                        
+                        // Restore selection immediately
+                        if (selectedRowBeforeRefresh != null)
+                        {
+                            RestoreSelectionAfterRefresh(selectedRowBeforeRefresh);
+                        }
+                        
+                        // Restore keyboard focus
+                        RestoreKeyboardFocus(hasFocus, focusedElement);
                     }
-                    
-                    // Restore keyboard focus
-                    RestoreKeyboardFocus(hasFocus, focusedElement);
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine($"Error in RefreshData: {ex.Message}");
+                    }
+                    finally
+                    {
+                        // Return the list to the pool
+                        _listPool.Return(newFlattenedRows);
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -503,13 +778,14 @@ namespace DaxStudio.Controls
         }
 
         // Add this helper method for restoring keyboard focus
-        private void RestoreKeyboardFocus(bool hadFocus, IInputElement previousFocusedElement)
+        internal void RestoreKeyboardFocus(bool hadFocus, IInputElement previousFocusedElement)
         {
             if (!hadFocus)
                 return;
                 
             try
             {
+                
                 if (SelectedItem != null)
                 {
                     // First try to focus the DataGridCell if we can find it
@@ -626,7 +902,7 @@ namespace DaxStudio.Controls
             }
         }
 
-        private void RestoreSelectionAfterRefresh(TreeGridRow<T> originalSelection)
+        internal void RestoreSelectionAfterRefresh(TreeGridRow<T> originalSelection)
         {
             Debug.WriteLine($"RestoreSelectionAfterRefresh: Restoring selection for row at level {originalSelection.Level}");
             
@@ -681,6 +957,19 @@ namespace DaxStudio.Controls
             {
                 Debug.WriteLine($"RestoreSelectionAfterRefresh failed: {ex.Message}");
             }
+        }
+
+        // Add a helper method to get the hierarchy path as a list of objects
+        private List<object> GetHierarchyPath(TreeGridRow<T> row)
+        {
+            var path = new List<object>();
+            while (row != null)
+            {
+                path.Add(row.Data);
+                row = row.Parent;
+            }
+            path.Reverse();
+            return path;
         }
 
         private void BuildVisibleRowsListOptimized(TreeGridRow<T> row, List<TreeGridRow<T>> visibleRows)
@@ -861,19 +1150,50 @@ namespace DaxStudio.Controls
         {
             using (new OverrideCursor(Cursors.Wait))
             {
+                _isInBulkOperation = true;
                 _isUpdatingFlattenedRows = true;
+                
                 try
                 {
+                    // First mark all rows as expanded
                     foreach (var row in _itemToRowMap.Values)
                     {
                         row.IsExpanded = true;
                     }
+                    
+                    // Now rebuild the flattened rows in one operation
+                    var allRows = new List<TreeGridRow<T>>();
+                    foreach (var rootRow in _rootRows)
+                    {
+                        allRows.Add(rootRow);
+                        CollectAllDescendants(rootRow, allRows);
+                    }
+                    
+                    // Update visible rows set
+                    _visibleRowsSet.Clear();
+                    foreach (var row in allRows)
+                    {
+                        _visibleRowsSet.Add(row);
+                    }
+                    
+                    // Batch update the flattened rows
+                    using (new DeferRefresh<T>(_flattenedRows))
+                    {
+                        _flattenedRows.Clear();
+                        foreach (var row in allRows)
+                        {
+                            _flattenedRows.Add(row);
+                        }
+                    }
+                    
+                    // Force UI update
+                    Items.Refresh();
                 }
                 finally
                 {
                     _isUpdatingFlattenedRows = false;
+                    _isInBulkOperation = false;
                 }
-                RefreshData();
             }
         }
 
@@ -881,84 +1201,56 @@ namespace DaxStudio.Controls
         {
             using (new OverrideCursor(Cursors.Wait))
             {
+                _isInBulkOperation = true;
                 _isUpdatingFlattenedRows = true;
+                
                 try
                 {
+                    // Mark all rows as collapsed
                     foreach (var row in _itemToRowMap.Values)
                     {
                         row.IsExpanded = false;
                     }
+                    
+                    // Just show root rows
+                    _visibleRowsSet.Clear();
+                    foreach (var rootRow in _rootRows)
+                    {
+                        _visibleRowsSet.Add(rootRow);
+                    }
+                    
+                    // Batch update the flattened rows
+                    using (new DeferRefresh<T>(_flattenedRows))
+                    {
+                        _flattenedRows.Clear();
+                        foreach (var rootRow in _rootRows)
+                        {
+                            _flattenedRows.Add(rootRow);
+                        }
+                    }
+                    
+                    // Force UI update
+                    Items.Refresh();
                 }
                 finally
                 {
                     _isUpdatingFlattenedRows = false;
+                    _isInBulkOperation = false;
                 }
-                RefreshData();
             }
         }
 
-        private void ExpandItemRecursively(TreeGridRow<T> row)
+        // Helper method to collect all descendants
+        private void CollectAllDescendants(TreeGridRow<T> parent, List<TreeGridRow<T>> result)
         {
-            _isUpdatingFlattenedRows = true;
-            try
+            foreach (var child in parent.Children)
             {
-                ExpandRowRecursivelyImpl(row);
-            }
-            finally
-            {
-                _isUpdatingFlattenedRows = false;
-            }
-            
-            RefreshData();
-        }
-
-        private static void ExpandRowRecursivelyImpl(TreeGridRow<T> row)
-        {
-            if (row == null)
-                return;
-
-            if (row.HasChildren)
-            {
-                row.IsExpanded = true;
-            }
-
-            foreach (var child in row.Children)
-            {
-                ExpandRowRecursivelyImpl(child);
+                result.Add(child);
+                CollectAllDescendants(child, result);
             }
         }
 
-        private void CollapseItemRecursively(TreeGridRow<T> row)
-        {
-            _isUpdatingFlattenedRows = true;
-            try
-            {
-                CollapseRowRecursivelyImpl(row);
-            }
-            finally
-            {
-                _isUpdatingFlattenedRows = false;
-            }
-            
-            RefreshData();
-        }
-
-        private static void CollapseRowRecursivelyImpl(TreeGridRow<T> row)
-        {
-            if (row == null)
-                return;
-
-            foreach (var child in row.Children)
-            {
-                CollapseRowRecursivelyImpl(child);
-            }
-
-            if (row.HasChildren)
-            {
-                row.IsExpanded = false;
-            }
-        }
-
+        // Add a method to optimize expand/collapse menu actions
         private void SetupDefaultContextMenu()
         {
             if (ShowDefaultContextMenu)
@@ -1003,22 +1295,24 @@ namespace DaxStudio.Controls
                 var expandSelectedItem = new MenuItem { Header = "Expand Selected", Tag = "TreeGridDefaultItem" };
                 expandSelectedItem.Click += (s, e) =>
                 {
-                    if (SelectedItem is TreeGridRow<T> row && row.HasChildren && !row.IsExpanded)
+                    if (SelectedItem is TreeGridRow<T> row && row.HasChildren)
                     {
+                        // Use optimized version
                         ExpandItemRecursively(row);
                     }
                 };
-                AddMenuItem(3,expandSelectedItem);
+                AddMenuItem(3, expandSelectedItem);
 
                 var collapseSelectedItem = new MenuItem { Header = "Collapse Selected", Tag = "TreeGridDefaultItem" };
                 collapseSelectedItem.Click += (s, e) =>
                 {
-                    if (SelectedItem is TreeGridRow<T> row && row.HasChildren && row.IsExpanded)
+                    if (SelectedItem is TreeGridRow<T> row && row.HasChildren)
                     {
+                        // Use optimized version
                         CollapseItemRecursively(row);
                     }
                 };
-                AddMenuItem(4,collapseSelectedItem);
+                AddMenuItem(4, collapseSelectedItem);
 
                 //ContextMenu.Opened += (s, e) =>
                 //{
@@ -1641,6 +1935,43 @@ namespace DaxStudio.Controls
             }
     
             return base.ArrangeOverride(arrangeSize);
+        }
+
+        // Add container cache
+        private Dictionary<object, DataGridRow> _containerCache = new Dictionary<object, DataGridRow>();
+
+        // Override PrepareContainerForItemOverride to cache containers
+        protected override void PrepareContainerForItemOverride(DependencyObject element, object item)
+        {
+            base.PrepareContainerForItemOverride(element, item);
+    
+            if (element is DataGridRow container && item != null)
+            {
+                _containerCache[item] = container;
+            }
+        }
+
+        // Override ClearContainerForItemOverride to remove from cache
+        protected override void ClearContainerForItemOverride(DependencyObject element, object item)
+        {
+            base.ClearContainerForItemOverride(element, item);
+    
+            if (item != null && _containerCache.ContainsKey(item))
+            {
+                _containerCache.Remove(item);
+            }
+        }
+
+        // Add a helper method to get container without triggering container generation
+        private DataGridRow GetCachedContainer(object item)
+        {
+            if (item == null)
+                return null;
+        
+            if (_containerCache.TryGetValue(item, out var container))
+                return container;
+        
+            return null;
         }
     }
 }
