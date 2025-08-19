@@ -3,11 +3,16 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"  
              xmlns:ctrl="clr-namespace:DaxStudio.Controls;assembly=DaxStudio.Controls"  
              xmlns:conv="clr-namespace:DaxStudio.Controls.Converters;assembly=DaxStudio.Controls"
-             xmlns:cal="clr-namespace:Caliburn.Micro;assembly=Caliburn.Micro.Platform">  
+             xmlns:cal="clr-namespace:Caliburn.Micro;assembly=Caliburn.Micro.Platform" xmlns:ctrl2="clr-namespace:DaxStudio.TreeGrid.Example">  
   
     <UserControl.Resources>  
-        <ResourceDictionary>  
-  
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/DaxStudio.Controls;component/Resources/Styles/TreeGridStyle.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+            
+            <Style TargetType="ctrl2:QueryPlanTreeGrid" BasedOn="{StaticResource GenericTreeGridDefaultStyle}"/>
+
             <SolidColorBrush x:Key="Theme.Brush.Default.Fore" Color="Black"/>  
             <SolidColorBrush x:Key="Theme.Brush.Control.Border" Color="#CCCCCC"/>  
             <SolidColorBrush x:Key="Theme.Brush.Control.Hover" Color="#F0F0F0"/>  
@@ -64,7 +69,7 @@
         </StackPanel>  
   
         <!-- Tree Grid -->  
-        <ctrl:TreeGrid x:Name="TreeGrid"   
+        <ctrl2:QueryPlanTreeGrid x:Name="TreeGrid"   
                        EnableRowVirtualization="True"  
                        Grid.Row="1"  
                        AlternatingRowBackground="#eeeeee"  
@@ -75,7 +80,7 @@
                        CustomDescendantFilter="{Binding FindDescendantsWithHigherRecordCountsFunc}"  
                        ShowDefaultContextMenu="True"
                        Margin="5">  
-            <ctrl:TreeGrid.ContextMenu>  
+            <ctrl2:QueryPlanTreeGrid.ContextMenu>  
                 <ContextMenu>  
                     <Separator/>  
                     <MenuItem Header="Show Descendants with Higher Record Counts" 
@@ -89,9 +94,9 @@
                     <!--cal:Action.TargetWithoutContext="{Binding Source={StaticResource Proxy}, Path=DataContext}"
              cal:Message.Attach="[Event Click] = [Action TestContextMenuCommand($dataContext)]"-->
                 </ContextMenu>  
-            </ctrl:TreeGrid.ContextMenu>  
+            </ctrl2:QueryPlanTreeGrid.ContextMenu>  
             <!-- Define columns -->  
-            <ctrl:TreeGrid.Columns>  
+            <ctrl2:QueryPlanTreeGrid.Columns>  
   
                 <!-- Additional columns -->  
                 <DataGridTextColumn Header="RowNumber"   
@@ -120,7 +125,7 @@
                     LineThickness="0.8">  
                 </ctrl:TreeColumn>  
   
-            </ctrl:TreeGrid.Columns>  
-        </ctrl:TreeGrid>  
+            </ctrl2:QueryPlanTreeGrid.Columns>  
+        </ctrl2:QueryPlanTreeGrid>  
     </Grid>  
 </UserControl>

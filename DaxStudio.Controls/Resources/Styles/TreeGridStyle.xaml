@@ -105,6 +105,7 @@
     </Style>
 
      <!--TreeGrid Style--> 
+    <!-- Original TreeGrid style - Keep for backward compatibility -->
     <Style TargetType="ctrl:TreeGrid" BasedOn="{StaticResource {x:Type DataGrid}}">
         <Setter Property="Background" Value="{DynamicResource Theme.Brush.Content.Back}"/>
         <!--<Setter Property="Foreground" Value="{DynamicResource Theme.Brush.Default.Fore}"/>-->
@@ -113,6 +114,21 @@
         <Setter Property="GridLinesVisibility" Value="None"/>
         <!--<Setter Property="AlternatingRowBackground" Value="{DynamicResource Theme.Brush.Table.Alternate}"/>
         <Setter Property="RowBackground" Value="Transparent"/>-->
+        <Setter Property="HeadersVisibility" Value="Column"/>
+        <Setter Property="SelectionMode" Value="Single"/>
+        <Setter Property="SelectionUnit" Value="FullRow"/>
+        <Setter Property="CanUserAddRows" Value="False"/>
+        <Setter Property="CanUserDeleteRows" Value="False"/>
+        <Setter Property="CanUserReorderColumns" Value="False"/>
+        <Setter Property="CanUserSortColumns" Value="False"/>
+    </Style>
+
+    <!-- New style for GenericTreeGrid - with a key that the control can reference -->
+    <Style x:Key="GenericTreeGridDefaultStyle" TargetType="DataGrid" BasedOn="{StaticResource {x:Type DataGrid}}">
+        <Setter Property="Background" Value="{DynamicResource Theme.Brush.Content.Back}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource Theme.Brush.Control.Border}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="GridLinesVisibility" Value="None"/>
         <Setter Property="HeadersVisibility" Value="Column"/>
         <Setter Property="SelectionMode" Value="Single"/>
         <Setter Property="SelectionUnit" Value="FullRow"/>
@@ -150,7 +166,7 @@
                         <!-- Tree Lines -->
                         <ctrl:TreeLine Level="{Binding RowData.Level, RelativeSource={RelativeSource TemplatedParent}}"
                                          IndentWidth="{Binding IndentWidth, RelativeSource={RelativeSource TemplatedParent}}"
-                                         IsLastChild="{Binding RowData, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource IsLastChildConverter}}"
+                                         IsLastChild="{Binding RowData.IsLastChild, RelativeSource={RelativeSource TemplatedParent}}"
                                          HasChildren="{Binding RowData.HasChildren, RelativeSource={RelativeSource TemplatedParent}}"
                                          AncestorLevels="{Binding RowData.Ancestors, RelativeSource={RelativeSource TemplatedParent}}"
                                          SelectedLineLevels="{Binding RowData.SelectedLineLevels, RelativeSource={RelativeSource TemplatedParent}}"

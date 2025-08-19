@@ -9,7 +9,7 @@ namespace DaxStudio.Controls.Model
     /// <summary>
     /// Represents a row in the hierarchical data grid
     /// </summary>
-    public class TreeGridRow<T> : INotifyPropertyChanged
+    public class TreeGridRow<T> : INotifyPropertyChanged, ITreeGridRow
     {
         private bool _isExpanded;
         private bool _hasChildren;
@@ -31,7 +31,7 @@ namespace DaxStudio.Controls.Model
         }
         private List<TreeGridRow<T>> _children = new List<TreeGridRow<T>>();
 
-        public bool IsCollapsing { get; set; }
+        internal bool _isCollapsing;
         /// <summary>
         /// Array indicating whether each ancestor level is the last child of its parent
         /// Used for drawing tree lines efficiently without runtime calculations
@@ -61,7 +61,7 @@ namespace DaxStudio.Controls.Model
                 if (_isExpanded != value)
                 {
                     _isExpanded = value;
-                    if (_isExpanded) IsCollapsing = false;
+                    if (_isExpanded) _isCollapsing = false;
                     NotifyOfPropertyChange();
                     OnRowIsExpandedChanged?.Invoke(this);
                 }
@@ -69,6 +69,8 @@ namespace DaxStudio.Controls.Model
         }
 
         public Action<TreeGridRow<T>> OnRowIsExpandedChanged { get; set; }
+
+        public bool IsLastChild => this == Parent?.Children.LastOrDefault();
 
         // Casting methods that work with the Data property directly (no new objects created)
         /// <summary>
@@ -157,7 +159,7 @@ namespace DaxStudio.Controls.Model
         // Add this method to properly reset selection state
         public void ClearSelectionState()
         {
-            IsCollapsing = false;
+            _isCollapsing = false;
             if (SelectedLineLevels != null)
             {
                 for (int i = 0; i < SelectedLineLevels.Count; i++)

@@ -6,8 +6,8 @@ namespace DaxStudio.Controls
     {
         public TreeGrid()
         {
-            //DefaultStyleKeyProperty.OverrideMetadata(typeof(TreeGrid),
-            //    new FrameworkPropertyMetadata(typeof(TreeGrid)));
+            DefaultStyleKeyProperty.OverrideMetadata(typeof(TreeGrid),
+                new FrameworkPropertyMetadata(typeof(TreeGrid)));
         }
 }
 }

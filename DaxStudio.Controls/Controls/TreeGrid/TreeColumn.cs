@@ -258,7 +258,7 @@ namespace DaxStudio.Controls
                 {
                     return;
                 }
-                if (context.IsExpanded) context.IsCollapsing = true;
+                if (context.IsExpanded) context._isCollapsing = true;
             }
             e.Handled = true;
         }

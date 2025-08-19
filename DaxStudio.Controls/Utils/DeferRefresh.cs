@@ -34,13 +34,14 @@ namespace DaxStudio.Controls.Utils
         public void Dispose()
         {
             // Restore handlers and fire a reset notification
-            var collectionChangedField = typeof(ObservableCollection<TreeGridRow<object>>)
+            var collectionChangedField = _collection.GetType()
                 .GetField("CollectionChanged", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
-            var propertyChangedField = typeof(ObservableCollection<TreeGridRow<object>>)
+            var propertyChangedField = _collection.GetType()
                 .GetField("PropertyChanged", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
-
-            collectionChangedField?.SetValue(_collection, _collectionChangedHandler);
-            propertyChangedField?.SetValue(_collection, _propertyChangedHandler);
+            if(_collectionChangedHandler != null)
+                collectionChangedField?.SetValue(_collection, _collectionChangedHandler);
+            if (_propertyChangedHandler != null)
+                propertyChangedField?.SetValue(_collection, _propertyChangedHandler);
 
             // Fire a reset notification
             _collectionChangedHandler?.Invoke(_collection, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));

@@ -24,12 +24,12 @@ namespace DaxStudio.Controls
         /// The TreeGridRow data context
         /// </summary>
         public static readonly DependencyProperty RowDataProperty =
-            DependencyProperty.Register(nameof(RowData), typeof(TreeGridRow<object>), typeof(TreeCell),
+            DependencyProperty.Register(nameof(RowData), typeof(ITreeGridRow), typeof(TreeCell),
                 new PropertyMetadata(null, OnRowDataChanged));
 
-        public TreeGridRow<object> RowData
+        public ITreeGridRow RowData
         {
-            get => (TreeGridRow<object>)GetValue(RowDataProperty);
+            get => (ITreeGridRow)GetValue(RowDataProperty);
             set => SetValue(RowDataProperty, value);
         }
 
@@ -283,7 +283,7 @@ namespace DaxStudio.Controls
             base.OnPropertyChanged(e);
             if (e.Property == DataContextProperty)
             {
-                RowData = DataContext as TreeGridRow<object>;
+                RowData = DataContext as ITreeGridRow;
             }
         }
 

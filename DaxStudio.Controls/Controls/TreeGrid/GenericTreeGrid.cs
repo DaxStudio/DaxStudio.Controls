@@ -1,7 +1,6 @@
 ﻿using DaxStudio.Controls.Model;
 using DaxStudio.Controls.Utils;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
@@ -14,6 +13,7 @@ using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Threading;
 using System.Windows.Media;
+using DaxStudio.Controls.Services;
 
 namespace DaxStudio.Controls
 {
@@ -46,8 +46,9 @@ namespace DaxStudio.Controls
 
         static GenericTreeGrid()
         {
-            DefaultStyleKeyProperty.OverrideMetadata(typeof(TreeGrid),
-                new FrameworkPropertyMetadata(typeof(TreeGrid)));
+            DefaultStyleKeyProperty.OverrideMetadata(typeof(GenericTreeGrid<T>),
+                new FrameworkPropertyMetadata(typeof(GenericTreeGrid<T>))
+            );
         }
 
         public GenericTreeGrid()
@@ -78,6 +79,7 @@ namespace DaxStudio.Controls
             Unloaded += OnUnloaded;
         }
 
+        public IDebounceService DebounceService { get; set; } = new DebounceService();
 
         public static readonly DependencyProperty ChildrenBindingPathProperty =
             DependencyProperty.Register(nameof(ChildrenBindingPath), typeof(string), typeof(GenericTreeGrid<T>),
@@ -416,43 +418,43 @@ namespace DaxStudio.Controls
                             }
                         }
 
-                // Force UI update
-                Items.Refresh();
+                    // Force UI update
+                    Items.Refresh();
 
-                // Update selection lines
-                SetSelectedLineRecursive(row, row.Level, true);
+                    // Update selection lines
+                    SetSelectedLineRecursive(row, row.Level, true);
+                    }
+                }
+                finally
+                {
+                    _isUpdatingFlattenedRows = false;
+                    _isInBulkOperation = false;
+                }
             }
         }
-        finally
-        {
-            _isUpdatingFlattenedRows = false;
-            _isInBulkOperation = false;
-        }
-    }
-}
 
-// New method to expand all descendants recursively
-private void ExpandAllDescendantsRecursively(TreeGridRow<T> parent, List<TreeGridRow<T>> result)
-{
-    if (parent == null || !parent.HasChildren)
-        return;
-    
-    // Process each child and its descendants in order
-    foreach (var child in parent.Children)
-    {
-        // Add the child to the result list
-        result.Add(child);
-        
-        // Mark the child as expanded
-        child.IsExpanded = true;
-        
-        // Recursively process this child's descendants
-        if (child.HasChildren)
+        // New method to expand all descendants recursively
+        private void ExpandAllDescendantsRecursively(TreeGridRow<T> parent, List<TreeGridRow<T>> result)
         {
-            ExpandAllDescendantsRecursively(child, result);
+            if (parent == null || !parent.HasChildren)
+                return;
+    
+            // Process each child and its descendants in order
+            foreach (var child in parent.Children)
+            {
+                // Add the child to the result list
+                result.Add(child);
+        
+                // Mark the child as expanded
+                child.IsExpanded = true;
+        
+                // Recursively process this child's descendants
+                if (child.HasChildren)
+                {
+                    ExpandAllDescendantsRecursively(child, result);
+                }
+            }
         }
-    }
-}
 
         // Optimized version of CollapseItemRecursively with batched updates
         private void CollapseItemRecursively(TreeGridRow<T> row)
@@ -534,12 +536,14 @@ private void ExpandAllDescendantsRecursively(TreeGridRow<T> parent, List<TreeGri
         // Modify the OnRowIsExpandedChanged method to handle recursive operations
         private void OnRowIsExpandedChanged(TreeGridRow<T> row)
         {
-            Debug.WriteLine($"OnRowIsExpandedChanged: Row at level {row.Level} changed to expanded={row.IsExpanded}");
+
             
             // Skip during bulk operations to avoid triggering multiple refreshes
             if (_isInBulkOperation)
                 return;
-            
+
+            Debug.WriteLine($"OnRowIsExpandedChanged: Row at level {row.Level} changed to expanded={row.IsExpanded}");
+
             // Refresh the data to update UI
             RefreshData();
             
@@ -549,93 +553,10 @@ private void ExpandAllDescendantsRecursively(TreeGridRow<T> parent, List<TreeGri
             }
         }
 
-        // Update ExpandRowRecursivelyImpl to be more efficient (no longer used directly)
-        private static void ExpandRowRecursivelyImpl(TreeGridRow<T> row)
-        {
-            if (row == null) return;
-
-            // Use a queue for breadth-first expansion to improve perceived performance
-            var queue = new Queue<TreeGridRow<T>>();
-            queue.Enqueue(row);
-            
-            while (queue.Count > 0)
-            {
-                var current = queue.Dequeue();
-                
-                if (current.HasChildren)
-                {
-                    current.IsExpanded = true;
-                    
-                    foreach (var child in current.Children)
-                    {
-                        queue.Enqueue(child);
-                    }
-                }
-            }
-        }
-
-        // Update CollapseRowRecursivelyImpl to be more efficient (no longer used directly)
-        private static void CollapseRowRecursivelyImpl(TreeGridRow<T> row)
-        {
-            if (row == null) return;
-
-            // Use a stack for depth-first traversal in reverse (bottom-up)
-            var stack = new Stack<TreeGridRow<T>>();
-            var toProcess = new Stack<TreeGridRow<T>>();
-            toProcess.Push(row);
-            
-            // First collect all nodes in a depth-first manner
-            while (toProcess.Count > 0)
-            {
-                var current = toProcess.Pop();
-                stack.Push(current);
-                
-                if (current.HasChildren)
-                {
-                    foreach (var child in current.Children)
-                    {
-                        toProcess.Push(child);
-                    }
-                }
-            }
-            
-            // Now process them in reverse order (bottom-up)
-            while (stack.Count > 0)
-            {
-                var current = stack.Pop();
-                if (current.HasChildren)
-                {
-                    current.IsExpanded = false;
-                }
-            }
-        }
-
         private void RefreshData()
         {
             // Prevent excessive calls with debouncing
-            if (_refreshTimer == null)
-            {
-                _refreshTimer = new DispatcherTimer
-                {
-                    Interval = TimeSpan.FromMilliseconds(REFRESH_DEBOUNCE_MS)
-                };
-                _refreshTimer.Tick += (s, e) =>
-                {
-                    _refreshTimer.Stop();
-                    DoRefreshData();
-                };
-            }
-
-            if (!_refreshTimer.IsEnabled)
-            {
-                _refreshTimer.Start();
-            }
-            else
-            {
-                // Reset the timer to debounce rapid calls
-                _refreshTimer.Stop();
-                _refreshTimer.Start();
-            }
+           DebounceService.Debounce(DoRefreshData, TimeSpan.FromMilliseconds(REFRESH_DEBOUNCE_MS));
         }
 
         // Add an object pooling system for list reuse
@@ -1076,13 +997,13 @@ private void ExpandAllDescendantsRecursively(TreeGridRow<T> parent, List<TreeGri
             
                     foreach (TreeGridRow<T> row in e.AddedItems)
                     {
-                        if (!row.IsCollapsing) // Skip if collapsing to avoid visual artifacts
+                        if (!row._isCollapsing) // Skip if collapsing to avoid visual artifacts
                         {
                             SetSelectedLineRecursive(row, row.Level, true);
                         }
                         else
                         {
-                            row.IsCollapsing = false; // Reset flag
+                            row._isCollapsing = false; // Reset flag
                         }
                     }
                 }
@@ -1135,7 +1056,7 @@ private void ExpandAllDescendantsRecursively(TreeGridRow<T> parent, List<TreeGri
         {
             if (_itemToRowMap.TryGetValue(item, out var row))
             {
-                row.IsCollapsing = row.IsExpanded;
+                row._isCollapsing = row.IsExpanded;
                 row.IsExpanded = !row.IsExpanded;
                 RefreshData();
 
@@ -1357,42 +1278,6 @@ private void ExpandAllDescendantsRecursively(TreeGridRow<T> parent, List<TreeGri
             Columns.Insert(0, expanderColumn);
         }
 
-        
-        //public override void OnContextMenuOpening(object sender, ContextMenuEventArgs e)
-        //{
-        //    // Ensure the context menu is only opened if the source is a valid row
-        //    if (!(e.OriginalSource is DataGridCell) && !(e.OriginalSource is DataGridRow))
-        //    {
-        //        e.Handled = true; // Prevent opening context menu if not on a valid row
-        //        Debug.WriteLine("OnContextMenuOpening: Prevented opening due to invalid source");
-        //        return;
-        //    }
-
-        //    var selectedRow = SelectedValue as TreeGridRow<object>;
-
-        //    // Find our menu items by tag
-        //    foreach (var item in ContextMenu.Items)
-        //    {
-        //        if (item is MenuItem menuItem && menuItem.Tag as string == "TreeGridDefaultItem")
-        //        {
-        //            switch (menuItem.Header.ToString())
-        //            {
-        //                case "Expand Selected":
-        //                    menuItem.IsEnabled = selectedRow?.HasChildren == true;// && !selectedRow.IsExpanded;
-        //                    break;
-        //                case "Collapse Selected":
-        //                    menuItem.IsEnabled = selectedRow?.HasChildren == true;// && selectedRow.IsExpanded;
-        //                    break;
-        //                case "Expand All":
-        //                    menuItem.IsEnabled = _itemToRowMap.Values.Any(r => r.HasChildren && !r.IsExpanded);
-        //                    break;
-        //                case "Collapse All":
-        //                    menuItem.IsEnabled = _itemToRowMap.Values.Any(r => r.HasChildren && r.IsExpanded);
-        //                    break;
-        //            }
-        //        }
-        //    }
-        //}
 
         private DataTemplate CreateDefaultCellTemplate()
         {
@@ -1402,12 +1287,13 @@ private void ExpandAllDescendantsRecursively(TreeGridRow<T> parent, List<TreeGri
             stackPanelFactory.SetValue(StackPanel.OrientationProperty, Orientation.Horizontal);
             stackPanelFactory.SetValue(StackPanel.VerticalAlignmentProperty, VerticalAlignment.Center);
 
-            var expanderFactory = new FrameworkElementFactory(typeof(ToggleButton));
-            expanderFactory.SetValue(ToggleButton.WidthProperty, 16.0);
-            expanderFactory.SetValue(ToggleButton.HeightProperty, 16.0);
-            expanderFactory.SetValue(ToggleButton.StyleProperty, FindResource("ExpanderControlTemplate"));
-            expanderFactory.SetBinding(ToggleButton.IsCheckedProperty, new Binding("IsExpanded"));
-            expanderFactory.SetBinding(ToggleButton.VisibilityProperty, new Binding("HasChildren")
+            var expanderFactory = new FrameworkElementFactory(typeof(CheckBox));
+            expanderFactory.SetValue(CheckBox.WidthProperty, 16.0);
+            expanderFactory.SetValue(CheckBox.HeightProperty, 16.0);
+            if (FindResource("PlusMinusExpanderTemplate") is ControlTemplate expanderTemplate)
+                expanderFactory.SetValue(CheckBox.TemplateProperty, expanderTemplate);
+            expanderFactory.SetBinding(CheckBox.IsCheckedProperty, new Binding("IsExpanded"));
+            expanderFactory.SetBinding(CheckBox.VisibilityProperty, new Binding("HasChildren")
             {
                 Converter = new BooleanToVisibilityConverter()
             });
