@@ -15,5 +15,6 @@ namespace DaxStudio.Controls.Model
         bool IsExpanded { get; set; }
         bool HasChildren { get; }
         bool IsLastChild { get; }
+        bool IsCollapsing { get; set; }
     }
 }

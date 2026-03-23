@@ -39,6 +39,9 @@ namespace DaxStudio.Controls
         private DispatcherTimer _refreshTimer;
         private const int REFRESH_DEBOUNCE_MS = 20; // Debounce delay
         
+        // Flag to suppress selection changed events during collapse
+        private bool _suppressSelectionChanged = false;
+        
         public ICommand ExecuteCustomDescendantFilter { get; private set; }
         // Add these fields to track bound collections
         private INotifyCollectionChanged _rootItemsCollectionNotifier;
@@ -61,6 +64,11 @@ namespace DaxStudio.Controls
             this.HeadersVisibility = DataGridHeadersVisibility.Column;
             this.GridLinesVisibility = DataGridGridLinesVisibility.None;
             this.IsReadOnly = true;
+            
+            // Explicitly set scroll bar visibility
+            this.HorizontalScrollBarVisibility = ScrollBarVisibility.Auto;
+            this.VerticalScrollBarVisibility = ScrollBarVisibility.Auto;
+            
             // Use recycling mode for even better performance
             VirtualizingPanel.SetVirtualizationMode(this, VirtualizationMode.Recycling);
             VirtualizingPanel.SetScrollUnit(this, ScrollUnit.Item);
@@ -463,13 +471,23 @@ namespace DaxStudio.Controls
             
             using (new OverrideCursor(Cursors.Wait))
             {
+                // Suppress TreeLine redraws FIRST before any other operations
+                TreeLine.SuppressRedraws(true);
+                
                 _isInBulkOperation = true;
                 _isUpdatingFlattenedRows = true;
+                _suppressSelectionChanged = true; // Suppress selection changed during collapse
                 
                 try
                 {
                     using (new TreeGridFocusManager<T>(this))
                     {
+                        // Clear all selection line highlights before collapse to prevent unnecessary redraws
+                        if (SelectedItem is TreeGridRow<T> selectedRow)
+                        {
+                            ClearSelectedLineRecursive(selectedRow);
+                        }
+                        
                         // First collect all rows that will be affected
                         var rowsToCollapse = new HashSet<TreeGridRow<T>>();
                         CollectRowsToCollapseRecursively(row, rowsToCollapse);
@@ -509,8 +527,12 @@ namespace DaxStudio.Controls
                 }
                 finally
                 {
+                    // Re-enable TreeLine redraws
+                    TreeLine.SuppressRedraws(false);
+                    
                     _isUpdatingFlattenedRows = false;
                     _isInBulkOperation = false;
+                    _suppressSelectionChanged = false; // Re-enable selection changed
                 }
             }
         }
@@ -536,20 +558,41 @@ namespace DaxStudio.Controls
         // Modify the OnRowIsExpandedChanged method to handle recursive operations
         private void OnRowIsExpandedChanged(TreeGridRow<T> row)
         {
-
-            
             // Skip during bulk operations to avoid triggering multiple refreshes
             if (_isInBulkOperation)
                 return;
 
             Debug.WriteLine($"OnRowIsExpandedChanged: Row at level {row.Level} changed to expanded={row.IsExpanded}");
 
-            // Refresh the data to update UI
-            RefreshData();
+            // If this is a user-initiated collapse, suppress redraws during the operation
+            bool isUserCollapse = row._isCollapsing;
             
-            if (row.IsExpanded)
+            if (isUserCollapse)
             {
-                SetSelectedLineRecursive(row, row.Level, true);
+                Debug.WriteLine($"OnRowIsExpandedChanged: SUPPRESSING redraws for user-initiated collapse at Level={row.Level}");
+                TreeLine.SuppressRedraws(true);
+            }
+            
+            try
+            {
+                // Refresh the data to update UI (this is debounced)
+                DebounceService.Debounce(DoRefreshData, TimeSpan.FromMilliseconds(REFRESH_DEBOUNCE_MS));
+                
+                if (row.IsExpanded)
+                {
+                    SetSelectedLineRecursive(row, row.Level, true);
+                }
+            }
+            finally
+            {
+                // IMPORTANT: Re-enable redraws IMMEDIATELY after scheduling the debounced refresh
+                // This ensures suppression doesn't stay on if multiple rapid operations occur
+                if (isUserCollapse)
+                {
+                    Debug.WriteLine("OnRowIsExpandedChanged: Re-enabling redraws after scheduling refresh");
+                    TreeLine.SuppressRedraws(false);
+                    row._isCollapsing = false;
+                }
             }
         }
 
@@ -975,12 +1018,12 @@ namespace DaxStudio.Controls
         private void OnSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             Debug.WriteLine($"OnSelectionChanged: Entry - Added={e.AddedItems.Count}, Removed={e.RemovedItems.Count}");
-            Debug.WriteLine($"OnSelectionChanged: _isUpdatingFlattenedRows={_isUpdatingFlattenedRows}");
+            Debug.WriteLine($"OnSelectionChanged: _isUpdatingFlattenedRows={_isUpdatingFlattenedRows}, _suppressSelectionChanged={_suppressSelectionChanged}");
     
-            // Skip if called during collection update
-            if (_isUpdatingFlattenedRows)
+            // Skip if called during collection update or if suppressed
+            if (_isUpdatingFlattenedRows || _suppressSelectionChanged)
             {
-                Debug.WriteLine("OnSelectionChanged: Skipping during collection update");
+                Debug.WriteLine("OnSelectionChanged: Skipping during collection update or suppressed");
                 return;
             }
     
@@ -1017,10 +1060,16 @@ namespace DaxStudio.Controls
 
         private static void ClearSelectedLineRecursive(TreeGridRow<T> row)
         {
+            Debug.WriteLine($"[GenericTreeGrid] ClearSelectedLineRecursive: Level={row.Level}, Suppressed={TreeGridRenderSuppressionHelper.IsRenderingSuppressed}");
+            
             if (row.SelectedLineLevels != null)
             {
                 for (int i = 0; i < row.SelectedLineLevels.Count; i++)
                 {
+                    if (row.SelectedLineLevels[i]) // Only log actual changes
+                    {
+                        Debug.WriteLine($"[GenericTreeGrid] ClearSelectedLineRecursive: Clearing level {i}");
+                    }
                     row.SelectedLineLevels[i] = false;
                 }
             }
@@ -1056,7 +1105,14 @@ namespace DaxStudio.Controls
         {
             if (_itemToRowMap.TryGetValue(item, out var row))
             {
-                row._isCollapsing = row.IsExpanded;
+                // If collapsing, suppress redraws immediately
+                if (row.IsExpanded)
+                {
+                    Debug.WriteLine("ToggleItem: Suppressing redraws for collapse");
+                    TreeLine.SuppressRedraws(true);
+                    row._isCollapsing = true;
+                }
+                
                 row.IsExpanded = !row.IsExpanded;
                 RefreshData();
 
@@ -1122,11 +1178,21 @@ namespace DaxStudio.Controls
         {
             using (new OverrideCursor(Cursors.Wait))
             {
+                // Suppress TreeLine redraws FIRST before any other operations
+                TreeLine.SuppressRedraws(true);
+                
                 _isInBulkOperation = true;
                 _isUpdatingFlattenedRows = true;
+                _suppressSelectionChanged = true; // Suppress selection changed during collapse all
                 
                 try
                 {
+                    // Clear all selection line highlights before collapse to prevent unnecessary redraws
+                    if (SelectedItem is TreeGridRow<T> selectedRow)
+                    {
+                        ClearSelectedLineRecursive(selectedRow);
+                    }
+                    
                     // Mark all rows as collapsed
                     foreach (var row in _itemToRowMap.Values)
                     {
@@ -1155,8 +1221,12 @@ namespace DaxStudio.Controls
                 }
                 finally
                 {
+                    // Re-enable TreeLine redraws
+                    TreeLine.SuppressRedraws(false);
+                    
                     _isUpdatingFlattenedRows = false;
                     _isInBulkOperation = false;
+                    _suppressSelectionChanged = false; // Re-enable selection changed
                 }
             }
         }
@@ -1313,6 +1383,21 @@ namespace DaxStudio.Controls
 
         private void Expander_PreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
+            // Check if this is a collapse operation and suppress redraws
+            if (sender is CheckBox checkBox && checkBox.DataContext is TreeGridRow<T> row)
+            {
+                if (row.IsExpanded)
+                {
+                    Debug.WriteLine($"[GenericTreeGrid] Expander_PreviewMouseDown: SUPPRESSING redraws for collapse at Level={row.Level}");
+                    TreeLine.SuppressRedraws(true);
+                    row._isCollapsing = true;
+                }
+                else
+                {
+                    Debug.WriteLine($"[GenericTreeGrid] Expander_PreviewMouseDown: Expanding at Level={row.Level}");
+                }
+            }
+            
             e.Handled = true;
         }
 

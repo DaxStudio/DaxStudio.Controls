@@ -116,7 +116,8 @@
                   
                 <!-- Tree Column using custom control -->  
                 <ctrl:TreeColumn Header="Operation"   
-                    Width="*"  
+                    Width="Auto"
+                                 MinWidth="900"
                     TextPath="Data.Operation"  
                     IndentWidth="16"  
                     ExpanderTemplate="{StaticResource SnoopExpanderTemplate}"                                          

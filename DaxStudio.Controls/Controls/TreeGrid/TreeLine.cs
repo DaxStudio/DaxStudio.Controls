@@ -1,4 +1,5 @@
 using DaxStudio.Controls.Model;
+using DaxStudio.Controls.Utils;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
@@ -81,7 +82,7 @@ namespace DaxStudio.Controls
 
         public static readonly DependencyProperty LineStrokeProperty =
             DependencyProperty.Register(nameof(LineStroke), typeof(Brush), typeof(TreeLine),
-                new PropertyMetadata(new SolidColorBrush(Colors.Gray), OnLineStrokeChanged));
+                new FrameworkPropertyMetadata(new SolidColorBrush(Colors.Gray), FrameworkPropertyMetadataOptions.AffectsRender | FrameworkPropertyMetadataOptions.Inherits,  OnLineStrokeChanged));
 
         public Brush LineStroke
         {
@@ -112,15 +113,83 @@ namespace DaxStudio.Controls
         // Add this field to batch invalidation calls
         private bool _invalidationScheduled = false;
         
+        // Add a static flag to suppress all TreeLine redraws during bulk operations
+        private static bool _suppressRedraws = false;
+        
+        // Track all TreeLine instances that need redraw when suppression ends
+        private static readonly List<WeakReference<TreeLine>> _pendingRedraws = new List<WeakReference<TreeLine>>();
+        
+        // Track the dispatcher operation so we can cancel it
+        private DispatcherOperation _pendingInvalidation;
+        
+        public static void SuppressRedraws(bool suppress)
+        {
+            _suppressRedraws = suppress;
+            TreeGridRenderSuppressionHelper.IsRenderingSuppressed = suppress;
+            Debug.WriteLine($"[TreeLine] SuppressRedraws: Setting suppression to {suppress}");
+            
+            // When suppression ends, trigger redraws for all pending TreeLines
+            if (!suppress)
+            {
+                Debug.WriteLine($"[TreeLine] SuppressRedraws: Triggering {_pendingRedraws.Count} pending redraws");
+                
+                // Create a copy to avoid modification during iteration
+                var pending = _pendingRedraws.ToArray();
+                _pendingRedraws.Clear();
+                
+                foreach (var weakRef in pending)
+                {
+                    if (weakRef.TryGetTarget(out var treeLine))
+                    {
+                        treeLine.InvalidateVisual();
+                    }
+                }
+            }
+        }
+        
         private void ScheduleInvalidation()
         {
-            if (_invalidationScheduled) return;
+            // Skip scheduling if already scheduled
+            if (_invalidationScheduled)
+            {
+                Debug.WriteLine($"[TreeLine] ScheduleInvalidation: SKIPPED (already scheduled)");
+                return;
+            }
+            
+            // If redraws are suppressed, add to pending list instead
+            if (_suppressRedraws)
+            {
+                Debug.WriteLine($"[TreeLine] ScheduleInvalidation: DEFERRED (suppressRedraws=true)");
+                
+                // Add to pending list if not already there
+                if (!_pendingRedraws.Any(wr => wr.TryGetTarget(out var tl) && tl == this))
+                {
+                    _pendingRedraws.Add(new WeakReference<TreeLine>(this));
+                }
+                return;
+            }
+            
+            // Add diagnostic logging
+            Debug.WriteLine($"[TreeLine] ScheduleInvalidation: SCHEDULING redraw");
             
             _invalidationScheduled = true;
-            Dispatcher.BeginInvoke(new Action(() =>
+            
+            // Store the operation so we can cancel it if needed
+            _pendingInvalidation = Dispatcher.BeginInvoke(new Action(() =>
             {
                 _invalidationScheduled = false;
-                InvalidateVisual();
+                _pendingInvalidation = null;
+                
+                // Double-check suppression flag before actually redrawing
+                if (!_suppressRedraws)
+                {
+                    Debug.WriteLine("[TreeLine] ScheduleInvalidation: EXECUTING InvalidateVisual");
+                    InvalidateVisual();
+                }
+                else
+                {
+                    Debug.WriteLine("[TreeLine] ScheduleInvalidation: SKIPPING InvalidateVisual (suppressed)");
+                }
             }), DispatcherPriority.Render);
         }
 
@@ -166,32 +235,58 @@ namespace DaxStudio.Controls
 
         private static void OnLineStrokeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
+            ClearCachedBrushes();
             ((TreeLine)d).ScheduleInvalidation();
         }
 
         private static void OnLineThicknessChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
+            ClearCachedBrushes();
             ((TreeLine)d).ScheduleInvalidation();
         }
 
+
+
         private static void OnSelectedLineStrokeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
+            ClearCachedBrushes();
             ((TreeLine)d).ScheduleInvalidation();
         }
 
         private void SelectedLineLevels_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
-            InvalidateVisual();
+            var stackTrace = new System.Diagnostics.StackTrace(1, true);
+            var callingMethod = stackTrace.GetFrame(0)?.GetMethod();
+            Debug.WriteLine($"[TreeLine] SelectedLineLevels_CollectionChanged: Action={e.Action}, Suppressed={_suppressRedraws}, CalledFrom={callingMethod?.DeclaringType?.Name}.{callingMethod?.Name}");
+            
+            // Use scheduled invalidation instead of direct call
+            // This allows the suppression flag to be checked at render time
+            ScheduleInvalidation();
         }
 
         // Add these fields for caching
-        private Pen _cachedPen;
-        private Pen _cachedSelectedPen;
+        private static Pen _cachedPen;
+        private static Pen _cachedSelectedPen;
+
+        private static void ClearCachedBrushes()
+        {
+            _cachedPen = null;
+            _cachedSelectedPen = null;
+        }
 
         protected override void OnRender(DrawingContext drawingContext)
         {
             base.OnRender(drawingContext);
+            
+            // CRITICAL: Check suppression flag at the very start of render
+            if (_suppressRedraws)
+            {
+                Debug.WriteLine("[TreeLine] OnRender: SKIPPED (suppressed)");
+                return;
+            }
 
+            Debug.WriteLine($"[TreeLine] OnRender: RENDERING Level={Level}");
+            
             if (Level == 0) return;
 
             // Cache frequently used objects

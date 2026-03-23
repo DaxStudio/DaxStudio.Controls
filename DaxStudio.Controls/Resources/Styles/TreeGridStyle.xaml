@@ -15,6 +15,7 @@
     <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
     <conv:NullToVisibilityConverter x:Key="NullToVisibilityConverter"/>
     <conv:HideOrCollapseBoolToVisibilityConverter x:Key="HideOrCollapseBoolToVisibilityConverter"/>
+    <conv:FallbackValueConverter x:Key="FallbackValueConverter"/>
 
     <ControlTemplate x:Key="ExpanderControlTemplate" TargetType="ToggleButton">
         <Border Background="Transparent" 
@@ -136,6 +137,8 @@
         <Setter Property="CanUserDeleteRows" Value="False"/>
         <Setter Property="CanUserReorderColumns" Value="False"/>
         <Setter Property="CanUserSortColumns" Value="False"/>
+        <Setter Property="HorizontalScrollBarVisibility" Value="Auto"/>
+        <Setter Property="VerticalScrollBarVisibility" Value="Auto"/>
     </Style>
 
      <!--Row Style--> 
@@ -156,8 +159,12 @@
     <!-- TreeGridNameCell Style -->
     <Style TargetType="ctrl:TreeCell">
         <Setter Property="Focusable" Value="False" />
+        <Setter Property="HorizontalContentAlignment" Value="Left" />
         <Setter Property="Foreground" Value="{Binding TextForeground, RelativeSource={RelativeSource Self}}"/>
         <Setter Property="TextForeground" Value="{Binding TextForeground, RelativeSource={RelativeSource Self}}"/>
+        <Setter Property="TextStyle" Value="{Binding TextStyle, RelativeSource={RelativeSource Self}}"/>
+        <!--<Setter Property="TreeLineStyle" Value="{Binding TreeLineStyle, RelativeSource={RelativeSource Self}}"/>
+        <Setter Property="LineStroke" Value="{Binding LineStroke, RelativeSource={RelativeSource Self}}"/>-->
         <Setter Property="RowData" Value="{Binding .}"/>
         <Setter Property="Template">
             <Setter.Value>
@@ -170,18 +177,20 @@
                                          HasChildren="{Binding RowData.HasChildren, RelativeSource={RelativeSource TemplatedParent}}"
                                          AncestorLevels="{Binding RowData.Ancestors, RelativeSource={RelativeSource TemplatedParent}}"
                                          SelectedLineLevels="{Binding RowData.SelectedLineLevels, RelativeSource={RelativeSource TemplatedParent}}"
-                                         LineStroke="{Binding LineStroke, RelativeSource={RelativeSource AncestorType={x:Type ctrl:TreeCell}}}"
-                                         SelectedLineStroke="{Binding SelectedLineStroke, RelativeSource={RelativeSource TemplatedParent}}"
                                          LineThickness="{Binding LineThickness, RelativeSource={RelativeSource TemplatedParent}}"
                                          Visibility="{Binding ShowTreeLines, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                         LineStroke="{Binding LineStroke, RelativeSource={RelativeSource TemplatedParent}}"
+                                         SelectedLineStroke="{Binding SelectedLineStroke, RelativeSource={RelativeSource TemplatedParent}}"
                                          ClipToBounds="True" 
                                          Margin="0,-1,0,-1"
                                          Focusable="False"
                                          Background="Transparent"
-                                         IsHitTestVisible="False"/>
+                                         IsHitTestVisible="False">
+                            
+                        </ctrl:TreeLine>
 
                         <!-- Content -->
-                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Left">
                             <!-- Indentation -->
                             <Border x:Name="IndentBorder">
                                 <Border.Width>
@@ -265,10 +274,12 @@
                                                     <Setter.Value>
                                                         <DataTemplate>
                                                             <TextBlock Text="{Binding Text, RelativeSource={RelativeSource AncestorType=ctrl:TreeCell}}" 
-                                                                       Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=ctrl:TreeCell}}"/>
+                                                                       Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=ctrl:TreeCell}}"
+                                                                       Style="{Binding TextStyle, RelativeSource={RelativeSource AncestorType=ctrl:TreeCell}}" />
                                                         </DataTemplate>
                                                     </Setter.Value>
                                                 </Setter>
+                                                
                                             </DataTrigger>
                                         </Style.Triggers>
 

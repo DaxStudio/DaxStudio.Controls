@@ -7,7 +7,7 @@
     <UserControl.Resources>
         <ResourceDictionary>
             <SolidColorBrush x:Key="TextBrush" Color="Blue"/>
-            <SolidColorBrush x:Key="LineBrush" Color="HotPink"/>
+            <SolidColorBrush x:Key="LineBrush" Color="LimeGreen"/>
             
             <ControlTemplate x:Key="Expander2" TargetType="ToggleButton">
                 <Border Background="Transparent" 
@@ -66,16 +66,26 @@
                 </ControlTemplate.Triggers>
             </ControlTemplate>
 
-            <Style x:Key="LineStyle"  TargetType="{x:Type ctrl:TreeCell}">
-                <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
+            <Style x:Key="MyCellStyle" TargetType="{x:Type ctrl:TreeCell}" BasedOn="{StaticResource {x:Type ctrl:TreeCell}}">
+                <Setter Property="Foreground" Value="Navy"/>
                 <Setter Property="TextForeground" Value="{DynamicResource LineBrush}"/>
                 <Setter Property="LineStroke" Value="{DynamicResource LineBrush}"/>
-                <Setter Property="SelectedLineStroke" Value="Cyan"/>
+                <Setter Property="SelectedLineStroke" Value="HotPink"/>
+                <Setter Property="IndentWidth" Value="20"/>
+                <Setter Property="LineThickness" Value="1"/>
+                <!--<Setter Property="FontWeight" Value="Bold"/>-->
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding Data.Name}" Value="ProductID">
+                        <Setter Property="FontWeight" Value="Black"/>
+                    </DataTrigger>
+                </Style.Triggers>
             </Style>
 
-            <Style TargetType="{x:Type ctrl:TreeLine}">
-                
+            <Style x:Key="MyTextStyle" TargetType="TextBlock">
+                <Setter Property="FontWeight" Value="Bold"/>
+                <Setter Property="FontStyle" Value="Italic"/>
             </Style>
+
             <!--<Color x:Key="DaxStudio.TreeGrid.Colors.ExpanderPath">#FF00FF00</Color>
             <SolidColorBrush x:Key="DaxStudio.TreeGrid.Brushes.ExpanderPath" Color="{StaticResource DaxStudio.TreeGrid.Colors.ExpanderPath}"/>-->
         </ResourceDictionary>
@@ -100,11 +110,11 @@
 
         <!-- Hierarchical Data Grid -->
         <ctrl:TreeGrid x:Name="HierarchicalGrid" 
-                                   Grid.Row="1"
-                                   RootItems="{Binding RootItems}"
-                                   ChildrenBindingPath="Children"
+                       Grid.Row="1"
+                       RootItems="{Binding RootItems}"
+                       ChildrenBindingPath="Children"
                        IsReadOnly="False"
-                                   Margin="5">
+                       Margin="5">
 
             <!-- Define columns -->
             <ctrl:TreeGrid.Columns>
@@ -124,16 +134,23 @@
                 </DataGridTextColumn>
                 <!-- Tree Column using custom control -->
                 <ctrl:TreeColumn Header="Name" 
-                                        Width="300"
-                                        TextPath ="Data.Name"
-                                        IndentWidth="16"
-                                        TreeLineStyle="{StaticResource LineStyle}"
-                                        LineThickness="1"
-    
-                                         ShowTreeLines="{Binding DataContext.ShowExpanders, RelativeSource={RelativeSource AncestorType={x:Type ctrl:TreeGrid}}}"
-                                         ShowExpander="{Binding DataContext.ShowExpanders, RelativeSource={RelativeSource AncestorType={x:Type ctrl:TreeGrid}}}"
-                                         >
+                                 Width="300"
+                                 TextPath ="Data.Name"
+                                 IndentWidth="16"
+                                 TextStyle="{StaticResource MyTextStyle}"       
+                                 TreeCellStyle="{StaticResource MyCellStyle}"
+                                 ShowTreeLines="{Binding DataContext.ShowExpanders, RelativeSource={RelativeSource AncestorType={x:Type ctrl:TreeGrid}}}"
+                                 ShowExpander="{Binding DataContext.ShowExpanders, RelativeSource={RelativeSource AncestorType={x:Type ctrl:TreeGrid}}}"
+                                 >
 
+                    <!--<ctrl:TreeColumn.TextTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding .}" 
+                                       Foreground="{DynamicResource TextBrush}"
+                                       FontStyle="Italic"
+                                       />
+                        </DataTemplate>
+                    </ctrl:TreeColumn.TextTemplate>-->
                 </ctrl:TreeColumn>
 
                 <DataGridTextColumn Header="Description" 

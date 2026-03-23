@@ -1,4 +1,5 @@
 using DaxStudio.Controls.Model;
+using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -108,7 +109,7 @@ namespace DaxStudio.Controls
         /// </summary>
         public static readonly DependencyProperty LineStrokeProperty =
             DependencyProperty.Register(nameof(LineStroke), typeof(Brush), typeof(TreeCell),
-                new PropertyMetadata(null));
+                new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.AffectsRender | FrameworkPropertyMetadataOptions.Inherits));
 
         public Brush LineStroke
         {
@@ -169,16 +170,6 @@ namespace DaxStudio.Controls
             set => SetValue(ShowExpanderProperty, value);
         }
 
-        public static readonly DependencyProperty IsExpandedProperty =
-    DependencyProperty.Register(nameof(IsExpanded), typeof(bool), typeof(TreeCell),
-        new PropertyMetadata(true, RedrawCell));
-
-        public bool IsExpanded
-        {
-            get => (bool)GetValue(IsExpandedProperty);
-            set => SetValue(IsExpandedProperty, value);
-        }
-
         /// <summary>
         /// Template for the expander toggle button
         /// </summary>
@@ -190,19 +181,6 @@ namespace DaxStudio.Controls
         {
             get => (ControlTemplate)GetValue(ExpanderTemplateProperty);
             set => SetValue(ExpanderTemplateProperty, value);
-        }
-
-        /// <summary>
-        /// Style for the expander toggle button
-        /// </summary>
-        public static readonly DependencyProperty ExpanderStyleProperty =
-            DependencyProperty.Register(nameof(ExpanderStyle), typeof(Style), typeof(TreeCell),
-                new PropertyMetadata(null));
-
-        public Style ExpanderStyle
-        {
-            get => (Style)GetValue(ExpanderStyleProperty);
-            set => SetValue(ExpanderStyleProperty, value);
         }
 
         /// <summary>
@@ -231,20 +209,21 @@ namespace DaxStudio.Controls
             set => SetValue(IconTemplateProperty, value);
         }
 
+
         /// <summary>
         /// The style for the tree lines
         /// </summary>
-        public static readonly DependencyProperty TreeLineStyleProperty =
+        public static readonly DependencyProperty TextStyleProperty =
             DependencyProperty.Register(
-                nameof(TreeLineStyle),
+                nameof(TextStyle),
                 typeof(Style),
                 typeof(TreeCell),
                 new PropertyMetadata(null));
 
-        public Style TreeLineStyle
+        public Style TextStyle
         {
-            get => (Style)GetValue(TreeLineStyleProperty);
-            set => SetValue(TreeLineStyleProperty, value);
+            get => (Style)GetValue(TextStyleProperty);
+            set => SetValue(TextStyleProperty, value);
         }
 
         private static void RedrawCell(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -281,6 +260,10 @@ namespace DaxStudio.Controls
         protected override void OnPropertyChanged(DependencyPropertyChangedEventArgs e)
         {
             base.OnPropertyChanged(e);
+            if (e.Property == LineThicknessProperty)
+            {
+                Debug.WriteLine("LineThicknessProperty Changed");
+            }
             if (e.Property == DataContextProperty)
             {
                 RowData = DataContext as ITreeGridRow;
@@ -331,13 +314,33 @@ namespace DaxStudio.Controls
             // Find the expander button in the template and wire up the click event
             if (GetTemplateChild("PART_Expander") is ToggleButton expander)
             {
+                Debug.WriteLine($"[TreeCell] OnApplyTemplate: Attaching handlers to PART_Expander");
                 expander.Click += OnExpanderButtonClick;
-                expander.PreviewMouseDown += OnExpanderPreviewMouseDown;
+                
+                // Use PreviewMouseLeftButtonDown tunneling event which fires BEFORE the CheckBox handles MouseDown
+                expander.PreviewMouseLeftButtonDown += OnExpanderPreviewMouseDown;
+            }
+            else
+            {
+                Debug.WriteLine($"[TreeCell] OnApplyTemplate: PART_Expander NOT FOUND!");
             }
         }
 
         private void OnExpanderPreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
+            Debug.WriteLine($"[TreeCell] OnExpanderPreviewMouseDown: sender={sender?.GetType().Name}, Button={e.ChangedButton}");
+            
+            // Only handle left mouse button
+            if (e.ChangedButton != MouseButton.Left)
+                return;
+            
+            // Mark as collapsing if this is a collapse operation
+            if (DataContext is ITreeGridRow row && row.IsExpanded)
+            {
+                Debug.WriteLine($"[TreeCell] OnExpanderPreviewMouseDown: Marking row for collapse at Level={row.Level}");
+                row.IsCollapsing = true;
+            }
+            
             RaiseEvent(new RoutedEventArgs(ExpanderPreviewMouseDownEvent, this));
         }
 

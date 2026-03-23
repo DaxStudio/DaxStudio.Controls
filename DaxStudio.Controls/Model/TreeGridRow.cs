@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
+using DaxStudio.Controls.Utils;
 
 namespace DaxStudio.Controls.Model
 {
@@ -32,6 +33,9 @@ namespace DaxStudio.Controls.Model
         private List<TreeGridRow<T>> _children = new List<TreeGridRow<T>>();
 
         internal bool _isCollapsing;
+        public bool IsCollapsing { get => _isCollapsing;
+                    set => _isCollapsing = value; 
+        }
         /// <summary>
         /// Array indicating whether each ancestor level is the last child of its parent
         /// Used for drawing tree lines efficiently without runtime calculations
@@ -60,8 +64,10 @@ namespace DaxStudio.Controls.Model
             {
                 if (_isExpanded != value)
                 {
+                    System.Diagnostics.Debug.WriteLine($"[TreeGridRow] IsExpanded changing: Level={Level}, OldValue={_isExpanded}, NewValue={value}, Suppressed={TreeGridRenderSuppressionHelper.IsRenderingSuppressed}");
                     _isExpanded = value;
                     if (_isExpanded) _isCollapsing = false;
+
                     NotifyOfPropertyChange();
                     OnRowIsExpandedChanged?.Invoke(this);
                 }
@@ -141,6 +147,7 @@ namespace DaxStudio.Controls.Model
 
         protected void NotifyOfPropertyChange([System.Runtime.CompilerServices.CallerMemberName] string propertyName = null)
         {
+            System.Diagnostics.Debug.WriteLine($"[TreeGridRow] NotifyOfPropertyChange: Property={propertyName}, Level={Level}, Suppressed={TreeGridRenderSuppressionHelper.IsRenderingSuppressed}");
             OnPropertyChanged(propertyName);
         }
 

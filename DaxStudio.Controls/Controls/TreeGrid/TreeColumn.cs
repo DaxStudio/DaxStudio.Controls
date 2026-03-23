@@ -1,4 +1,5 @@
 using DaxStudio.Controls.Model;
+using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -9,10 +10,31 @@ using System.Windows.Threading;
 namespace DaxStudio.Controls
 {
     /// <summary>
-    /// A custom DataGridTemplateColumn that uses TreeGridNameCell for display
+    /// A custom DataGrid column for displaying hierarchical tree structures with expander, icon, and text.
+    /// 
+    /// Default Width Behavior:
+    /// This column defaults to Width="Auto" to enable proper horizontal scrollbar functionality.
+    /// When Width="Auto", the column sizes itself based on content, allowing the horizontal scrollbar
+    /// to appear when content exceeds the viewport width.
+    /// 
+    /// If you explicitly set Width="*" (star-sizing), the column will stretch to fill available space,
+    /// which prevents the horizontal scrollbar from appearing since the content is forced to fit the viewport.
+    /// 
+    /// Use Width="Auto" (default) for proper horizontal scrolling.
+    /// Use Width="*" only if you want the column to always fill the available space without scrolling.
     /// </summary>
     public class TreeColumn : DataGridColumn
     {
+        public TreeColumn()
+        {
+            // Set default width to Auto with reasonable constraints
+            // This prevents DataGrid from forcing cells to stretch to viewport width
+            Width = new DataGridLength(1, DataGridLengthUnitType.Auto);
+            MinWidth = 50; // Minimum reasonable width for tree content
+            
+            // Don't set MaxWidth - let content grow as needed for scrollbar to work
+        }
+        
         /// <summary>
         /// The indent width for each level
         /// </summary>
@@ -57,7 +79,7 @@ namespace DaxStudio.Controls
         /// </summary>
         public static readonly DependencyProperty LineThicknessProperty =
             DependencyProperty.Register(nameof(LineThickness), typeof(double), typeof(TreeColumn),
-                new PropertyMetadata(1.0));
+                new FrameworkPropertyMetadata(1.0, FrameworkPropertyMetadataOptions.AffectsRender | FrameworkPropertyMetadataOptions.Inherits, OnTemplateChanged));
 
         public double LineThickness
         {
@@ -252,13 +274,20 @@ namespace DaxStudio.Controls
 
         private void OnExpanderPreviewMouseDownEvent(object sender, RoutedEventArgs e)
         {
-            if (e.Source is TreeCell cell)
+            // The sender is the TreeCell that raised the event
+            if (sender is TreeCell cell && cell.DataContext is TreeGridRow<object> context)
             {
-                if (!(cell.DataContext is TreeGridRow<object> context))
+                // If collapsing, suppress redraws IMMEDIATELY before any bindings update
+                if (context.IsExpanded)
                 {
-                    return;
+                    Debug.WriteLine($"[TreeColumn] OnExpanderPreviewMouseDownEvent: SUPPRESSING redraws for collapse at Level={context.Level}");
+                    TreeLine.SuppressRedraws(true);
+                    context._isCollapsing = true;
                 }
-                if (context.IsExpanded) context._isCollapsing = true;
+                else
+                {
+                    Debug.WriteLine($"[TreeColumn] OnExpanderPreviewMouseDownEvent: Expanding at Level={context.Level}");
+                }
             }
             e.Handled = true;
         }
@@ -268,19 +297,34 @@ namespace DaxStudio.Controls
         /// <summary>
         /// The style for the tree lines
         /// </summary>
-        public static readonly DependencyProperty TreeLineStyleProperty =
+        public static readonly DependencyProperty TreeCellStyleProperty =
             DependencyProperty.Register(
-                nameof(TreeLineStyle),
+                nameof(TreeCellStyle),
+                typeof(Style),
+                typeof(TreeColumn),
+                new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.AffectsRender | FrameworkPropertyMetadataOptions.Inherits, OnTemplateChanged));
+
+        public Style TreeCellStyle
+        {
+            get => (Style)GetValue(TreeCellStyleProperty);
+            set => SetValue(TreeCellStyleProperty, value);
+        }
+
+        /// <summary>
+        /// The style for the tree text
+        /// </summary>
+        public static readonly DependencyProperty TextStyleProperty =
+            DependencyProperty.Register(
+                nameof(TextStyle),
                 typeof(Style),
                 typeof(TreeColumn),
                 new PropertyMetadata(null, OnTemplateChanged));
 
-        public Style TreeLineStyle
+        public Style TextStyle
         {
-            get => (Style)GetValue(TreeLineStyleProperty);
-            set => SetValue(TreeLineStyleProperty, value);
+            get => (Style)GetValue(TextStyleProperty);
+            set => SetValue(TextStyleProperty, value);
         }
-
 
         protected override FrameworkElement GenerateElement(DataGridCell cell, object dataItem)
         {
@@ -319,12 +363,18 @@ namespace DaxStudio.Controls
             treeCell.SetBinding(TreeCell.IconTemplateProperty, new Binding(nameof(IconTemplate)) { Source = this });
             treeCell.SetBinding(TreeCell.ExpanderTemplateProperty, new Binding(nameof(ExpanderTemplate)) { Source = this });
 
-            // TreeLineStyle
-            if (TreeLineStyle != null)
+            // TreeCellStyle
+            if (TreeCellStyle != null)
             {
-                treeCell.SetValue(TreeCell.StyleProperty, TreeLineStyle);
+                treeCell.SetValue(TreeCell.StyleProperty, TreeCellStyle);
             }
-            
+
+            // TreeTextStyle
+            if (TextStyle != null)
+            {
+                treeCell.SetValue(TreeCell.TextStyleProperty, TextStyle);
+            }
+
             // Attach event handlers if needed
             //treeCell.AddHandler(TreeCell.ExpanderClickEvent, new RoutedEventHandler(OnExpanderClick));
             treeCell.AddHandler(TreeCell.ExpanderPreviewMouseDownEvent, new RoutedEventHandler(OnExpanderPreviewMouseDownEvent));

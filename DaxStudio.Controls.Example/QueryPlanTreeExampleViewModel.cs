@@ -16,7 +16,7 @@ namespace DaxStudio.Controls.Example
         public QueryPlanTreeExampleViewModel()
         {
             var filePath = @"..\..\..\data\QueryPlan.json";
-            filePath = @"c:\temp\QueryPlan.json";
+            //filePath = @"c:\temp\QueryPlan.json";
             if (File.Exists(filePath))
             {
                 try
