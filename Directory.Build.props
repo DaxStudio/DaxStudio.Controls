@@ -4,7 +4,7 @@
 		<Version>0.1.8</Version>
 		<AssemblyVersion>$(Version).0</AssemblyVersion>
         <FileVersion>$(Version).0</FileVersion>
-		<InformationalVersion>$(Version)</InformationalVersion
+		<InformationalVersion>$(Version)</InformationalVersion>
         <IsTestProject>$(MSBuildProjectName.Contains('Test'))</IsTestProject>
     </PropertyGroup>
     
