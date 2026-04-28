@@ -35,7 +35,7 @@
     <Description>Contains control developed for use in DAX Studio which have been made available in this package so that others may use them if they wish</Description>
     <Copyright>Copyright $([System.DateTime]::Now.Year) $(Company)</Copyright>
     <RepositoryUrl>https://github.com/DaxStudio/DaxStudio.Controls</RepositoryUrl>
-    <Version>0.1.7.0</Version>
+    <Version>$(AssemblyVersion)</Version>
   </PropertyGroup>
 
   <ItemGroup>
