@@ -22,6 +22,7 @@ namespace DaxStudio.Controls.Example
         public void Clear()
         {
             RootItems.Clear();
+            NotifyOfPropertyChange(nameof(RootItems));
 
         }
 

@@ -652,9 +652,25 @@ namespace DaxStudio.Controls
                 _refreshStopwatch.Start();
                 Debug.WriteLine(">> RefreshData Started");
                 
-                if (_rootRows == null || _rootRows.Count == 0 || _isUpdatingFlattenedRows)
+                if (_isUpdatingFlattenedRows)
                 {
-                    Debug.WriteLine("RefreshData: Early exit - no data or updating");
+                    Debug.WriteLine("RefreshData: Early exit - refresh already in progress");
+                    return;
+                }
+
+                if (_rootRows == null || _rootRows.Count == 0)
+                {
+                    // No root rows: ensure the visible/flattened collection is emptied
+                    // so the UI reflects a cleared data source.
+                    if (_flattenedRows != null && _flattenedRows.Count > 0)
+                    {
+                        using (new DeferRefresh<T>(_flattenedRows))
+                        {
+                            _flattenedRows.Clear();
+                        }
+                    }
+                    _visibleRowsSet.Clear();
+                    Debug.WriteLine("RefreshData: No root rows - cleared flattened rows");
                     return;
                 }
 
