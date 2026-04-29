@@ -235,6 +235,28 @@ namespace DaxStudio.Controls
             Debug.WriteLine($"OnLoaded: Setting ItemsSource");
             ItemsSource = _flattenedRows;
             SetupDefaultContextMenu();
+
+            // Re-attach to the source collections after a previous Unloaded/Cleanup
+            // cycle. This happens, for example, when the grid is hosted inside an
+            // AvalonDock LayoutAnchorable that gets toggled into auto-hide: the
+            // Unloaded handler tears down all CollectionChanged subscriptions via
+            // Cleanup(), and without this re-subscription any subsequent mutations
+            // of the bound RootItems (or any child collection) would never be
+            // reflected in the grid - leaving stale content visible and making
+            // operations like Clear appear to do nothing.
+            if (_rootItemsCollectionNotifier == null && RootItems is INotifyCollectionChanged rootNotifier)
+            {
+                _rootItemsCollectionNotifier = rootNotifier;
+                rootNotifier.CollectionChanged += OnRootItemsCollectionChanged;
+
+                // Rebuild the hierarchy so child-collection notifiers are also
+                // re-subscribed (BuildHierarchy calls SubscribeToChildCollectionChanges)
+                // and the visible rows reflect any changes that happened while the
+                // grid was unloaded.
+                RebuildHierarchy();
+                RefreshData();
+            }
+
             Debug.WriteLine($"OnLoaded: Complete");
         }
 
