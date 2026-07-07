@@ -79,6 +79,8 @@
                        ExpandOnLoad="True"  
                        CustomDescendantFilter="{Binding FindDescendantsWithHigherRecordCountsFunc}"  
                        ShowDefaultContextMenu="True"
+                       SelectionMode="Extended"
+                       CopyingRowClipboardContent="TreeGrid_CopyingRowClipboardContent"          
                        Margin="5">  
             <ctrl2:QueryPlanTreeGrid.ContextMenu>  
                 <ContextMenu>  

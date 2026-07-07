@@ -47,5 +47,10 @@ namespace DaxStudio.Controls.Example
             ((QueryPlanTreeExampleViewModel)TreeGrid.DataContext).ResetTree();
             //((QueryPlanTreeExampleViewModel)TreeGrid.DataContext).RootItems.Add(selectedRow);
         }
+
+        private void TreeGrid_CopyingRowClipboardContent(object sender, DataGridRowClipboardEventArgs e)
+        {
+            System.Diagnostics.Debug.WriteLine("CopyingRowClipboardContent");
+        }
     }
 }
