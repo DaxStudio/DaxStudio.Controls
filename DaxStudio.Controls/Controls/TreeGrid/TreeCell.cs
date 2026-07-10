@@ -171,6 +171,21 @@ namespace DaxStudio.Controls
         }
 
         /// <summary>
+        /// When a node has no children, controls whether the expander is collapsed (space reclaimed)
+        /// or hidden (space reserved so text stays aligned with expandable rows).
+        /// When true the empty expander keeps its whitespace; when false the space is reclaimed.
+        /// </summary>
+        public static readonly DependencyProperty ReserveExpanderSpaceProperty =
+            DependencyProperty.Register(nameof(ReserveExpanderSpace), typeof(bool), typeof(TreeCell),
+                new PropertyMetadata(false, RedrawCell));
+
+        public bool ReserveExpanderSpace
+        {
+            get => (bool)GetValue(ReserveExpanderSpaceProperty);
+            set => SetValue(ReserveExpanderSpaceProperty, value);
+        }
+
+        /// <summary>
         /// Template for the expander toggle button
         /// </summary>
         public static readonly DependencyProperty ExpanderTemplateProperty =

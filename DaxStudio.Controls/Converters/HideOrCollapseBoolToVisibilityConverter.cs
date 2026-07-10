@@ -11,11 +11,12 @@ namespace DaxStudio.Controls.Converters
         {
             bool dontHide = (values[0] as bool?)??false;
             bool dontCollapse = (values[1] as bool?)??false;
+            bool reserveSpace = values.Length > 2 && ((values[2] as bool?) ?? false);
 
             if (!dontCollapse) return Visibility.Collapsed;
-            // Collapse (rather than merely hide) the expander for nodes with no children
-            // so the reserved space is reclaimed and the icon/text align with the tree line.
-            if (!dontHide) return Visibility.Collapsed;
+            // For nodes with no children, either reserve the space (Hidden) so text stays aligned
+            // with expandable rows, or reclaim the space (Collapsed) for a more compact layout.
+            if (!dontHide) return reserveSpace ? Visibility.Hidden : Visibility.Collapsed;
             return Visibility.Visible;
 
         }

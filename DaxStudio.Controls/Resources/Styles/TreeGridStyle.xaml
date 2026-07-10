@@ -213,6 +213,7 @@
                                     <MultiBinding Converter="{StaticResource HideOrCollapseBoolToVisibilityConverter}">
                                         <Binding Path="RowData.HasChildren" RelativeSource="{RelativeSource TemplatedParent}"/>
                                         <Binding Path="ShowExpander" RelativeSource="{RelativeSource TemplatedParent}"/>
+                                        <Binding Path="ReserveExpanderSpace" RelativeSource="{RelativeSource TemplatedParent}"/>
                                     </MultiBinding>
                                 </CheckBox.Visibility>
                                 <CheckBox.Style>

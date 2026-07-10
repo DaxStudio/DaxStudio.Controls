@@ -122,6 +122,7 @@
                                  MinWidth="900"
                     TextPath="Data.Operation"  
                     IndentWidth="16"  
+                                 ReserveExpanderSpace="False"
                     ExpanderTemplate="{StaticResource SnoopExpanderTemplate}"                                          
                     LineStroke="#AAAAAA"  
                     SelectedLineStroke="Red"  

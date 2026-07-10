@@ -233,6 +233,21 @@ namespace DaxStudio.Controls
             set => SetValue(ShowExpanderProperty, value);
         }
 
+        /// <summary>
+        /// When a node has no children, controls whether the expander is collapsed (space reclaimed)
+        /// or hidden (space reserved so text stays aligned with expandable rows).
+        /// When true the empty expander keeps its whitespace; when false the space is reclaimed.
+        /// </summary>
+        public static readonly DependencyProperty ReserveExpanderSpaceProperty =
+            DependencyProperty.Register(nameof(ReserveExpanderSpace), typeof(bool), typeof(TreeColumn),
+                new PropertyMetadata(false));
+
+        public bool ReserveExpanderSpace
+        {
+            get => (bool)GetValue(ReserveExpanderSpaceProperty);
+            set => SetValue(ReserveExpanderSpaceProperty, value);
+        }
+
         private static void OnTemplateChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             if (d is TreeColumn column)
@@ -339,6 +354,7 @@ namespace DaxStudio.Controls
             MapColumnPropertyToCell(treeCell, LineStrokeProperty, TreeCell.LineStrokeProperty, LineStroke);
             MapColumnPropertyToCell(treeCell, ShowTreeLinesProperty, TreeCell.ShowTreeLinesProperty, ShowTreeLines);
             MapColumnPropertyToCell(treeCell, ShowExpanderProperty, TreeCell.ShowExpanderProperty, ShowExpander);
+            MapColumnPropertyToCell(treeCell, ReserveExpanderSpaceProperty, TreeCell.ReserveExpanderSpaceProperty, ReserveExpanderSpace);
             MapColumnPropertyToCell(treeCell, IndentWidthProperty, TreeCell.IndentWidthProperty, IndentWidth);
             MapColumnPropertyToCell(treeCell, LineThicknessProperty, TreeCell.LineThicknessProperty, LineThickness);
             MapColumnPropertyToCell(treeCell, TextForegroundProperty, TreeCell.TextForegroundProperty, TextForeground);
