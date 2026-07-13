@@ -235,13 +235,11 @@ namespace DaxStudio.Controls
 
         private static void OnLineStrokeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            ClearCachedBrushes();
             ((TreeLine)d).ScheduleInvalidation();
         }
 
         private static void OnLineThicknessChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            ClearCachedBrushes();
             ((TreeLine)d).ScheduleInvalidation();
         }
 
@@ -249,7 +247,6 @@ namespace DaxStudio.Controls
 
         private static void OnSelectedLineStrokeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            ClearCachedBrushes();
             ((TreeLine)d).ScheduleInvalidation();
         }
 
@@ -262,16 +259,6 @@ namespace DaxStudio.Controls
             // Use scheduled invalidation instead of direct call
             // This allows the suppression flag to be checked at render time
             ScheduleInvalidation();
-        }
-
-        // Add these fields for caching
-        private static Pen _cachedPen;
-        private static Pen _cachedSelectedPen;
-
-        private static void ClearCachedBrushes()
-        {
-            _cachedPen = null;
-            _cachedSelectedPen = null;
         }
 
         protected override void OnRender(DrawingContext drawingContext)
@@ -289,22 +276,15 @@ namespace DaxStudio.Controls
             
             if (Level == 0) return;
 
-            // Cache frequently used objects
-            if (_cachedPen == null )
-            {
-                _cachedPen = new Pen(LineStroke, LineThickness);
-                //_cachedPen.DashStyle = new DashStyle(new double[] { 2, 1 }, 2);
-                _cachedPen.Freeze(); // Freeze for better performance
-            }
+            // Build the pens fresh each render from the current brush values.
+            // The brushes come from theme-aware DynamicResources; a cached/frozen
+            // Pen would capture a stale color snapshot and never update on a
+            // dark<->light theme switch (see git history for the theming bug).
+            var _cachedPen = new Pen(LineStroke, LineThickness);
+            _cachedPen.Freeze();
 
-            if (_cachedSelectedPen == null)
-            {
-
-                _cachedSelectedPen = new Pen(SelectedLineStroke, LineThickness);
-                //_cachedPen.DashStyle = new DashStyle(new double[] { 2, 1 }, 2);
-                _cachedSelectedPen.Freeze(); // Freeze for better performance
-
-            }
+            var _cachedSelectedPen = new Pen(SelectedLineStroke, LineThickness);
+            _cachedSelectedPen.Freeze();
 
             var selectedLevels = SelectedLineLevels?.ToArray();
 
@@ -331,7 +311,7 @@ namespace DaxStudio.Controls
             // Draw lines for current level
             var centerY = ActualHeight / 2;
             var currentX = Level * IndentWidth - IndentWidth / 2;
-            bool isSelected = selectedLevels[Level-1];
+            bool isSelected = selectedLevels != null && Level - 1 < selectedLevels.Length && selectedLevels[Level - 1];
             var linePen = isSelected ? _cachedSelectedPen : _cachedPen;
 
             // Vertical line (up to center or full height)

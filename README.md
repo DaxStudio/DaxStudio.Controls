@@ -57,7 +57,7 @@ The TreeGrid control is a DataGrid with a hierarchical column that supports expa
 | IndentWidth         | double            | 16.0                   | The width in pixels for each level of indentation                  |
 | LineStroke          | Brush             | Gray (#AAAAAA)         | Sets the color of the brush used to draw the tree lines            |
 | LineThickness       | double            | 1.0                    | Sets the thickness of the tree lines                               |
-| ReserveExpanderSpace| bool              | false                  | For childless nodes, keeps the expander's whitespace (Hidden) so text stays aligned with expandable rows; when false the space is reclaimed (Collapsed) |
+| ReserveExpanderSpace| bool              | true                   | For childless nodes, keeps the expander's whitespace (Hidden) so text stays aligned with expandable rows; when false the space is reclaimed (Collapsed) |
 | SelectedLineStroke  | Brush             | Transparent            | Sets the color for the tree line to the children of the selected row|
 | ShowExpander        | bool              | true                   | Controls the visibility of the expander control in the tree         |
 | ShowTreeLines       | bool              | true                   | Controls whether to display the tree lines                         |
