@@ -240,7 +240,7 @@ namespace DaxStudio.Controls
         /// </summary>
         public static readonly DependencyProperty ReserveExpanderSpaceProperty =
             DependencyProperty.Register(nameof(ReserveExpanderSpace), typeof(bool), typeof(TreeColumn),
-                new PropertyMetadata(false));
+                new PropertyMetadata(true));
 
         public bool ReserveExpanderSpace
         {
